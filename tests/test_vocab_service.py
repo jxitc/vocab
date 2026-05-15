@@ -1,5 +1,6 @@
 """
-Unit tests for vocab_service.py (Iteration 1).
+Unit tests for vocab_service.py (Iteration 5).
+Tests updated vocabulary format with levels and level-based filtering.
 """
 
 import sys
@@ -13,32 +14,120 @@ from vocab_service import (
     VOCAB_DIFFICULTY,
     is_difficult,
     get_definition,
+    get_full_entry,
+    is_difficult_for_level,
+    get_levels_for_user,
+    get_max_highlights,
+    filter_vocab_by_level,
     tokenize,
     find_difficult_words,
     find_difficult_words_sorted,
+    count_vocab_by_level,
+    LEVEL_NAMES,
+    MAX_HIGHLIGHTS,
+    LEVEL_HIGHLIGHT_RANGES,
 )
 
 
 class TestVocabDictionary:
     """Tests for the hardcoded vocabulary database."""
 
-    def test_vocab_has_at_least_180_words(self):
-        """Ensure we have roughly the target number of difficult words."""
-        assert len(VOCAB_DIFFICULTY) >= 180
+    def test_vocab_has_at_least_200_words(self):
+        """Ensure we have the target number of words across all levels."""
+        assert len(VOCAB_DIFFICULTY) >= 200
 
-    def test_vocab_entries_have_definition_and_pos(self):
-        """Every entry should be a (definition, pos) tuple of two strings."""
+    def test_vocab_entries_have_definition_pos_and_level(self):
+        """Every entry should be a (definition, pos, level) tuple of three items."""
         for word, entry in VOCAB_DIFFICULTY.items():
             assert isinstance(entry, tuple), f"Expected tuple for '{word}', got {type(entry)}"
-            assert len(entry) == 2, f"Expected 2 items for '{word}', got {len(entry)}"
+            assert len(entry) == 3, f"Expected 3 items for '{word}', got {len(entry)}"
             assert isinstance(entry[0], str), f"Definition for '{word}' must be str"
             assert isinstance(entry[1], str), f"POS for '{word}' must be str"
+            assert isinstance(entry[2], int), f"Level for '{word}' must be int"
+            assert entry[2] in (1, 2, 3, 4), f"Level for '{word}' must be 1-4, got {entry[2]}"
             assert len(entry[0]) > 0, f"Definition for '{word}' must not be empty"
 
     def test_all_keys_are_lowercase(self):
         """All vocabulary keys should be lowercase for case-insensitive matching."""
         for word in VOCAB_DIFFICULTY:
             assert word == word.lower(), f"Key '{word}' is not lowercase"
+
+    def test_level_counts_reasonable(self):
+        """Each level should have a reasonable number of words."""
+        counts = count_vocab_by_level()
+        assert 35 <= counts[1] <= 55, f"Level 1 (小学) should have ~40-45 words, got {counts[1]}"
+        assert 80 <= counts[2] <= 130, f"Level 2 (初中) should have ~80-120 words, got {counts[2]}"
+        assert 55 <= counts[3] <= 105, f"Level 3 (高中) should have ~60-95 words, got {counts[3]}"
+        assert 25 <= counts[4] <= 45, f"Level 4 (大学) should have ~30 words, got {counts[4]}"
+
+    def test_known_level_4_words(self):
+        """Verify some specific academic words exist at level 4."""
+        assert "hypothesis" in VOCAB_DIFFICULTY
+        assert VOCAB_DIFFICULTY["hypothesis"][2] == 4
+        assert "paradigm" in VOCAB_DIFFICULTY
+        assert VOCAB_DIFFICULTY["paradigm"][2] == 4
+        assert "sustainable" in VOCAB_DIFFICULTY
+        assert VOCAB_DIFFICULTY["sustainable"][2] == 4
+
+    def test_level_names(self):
+        """Verify level name mapping."""
+        assert LEVEL_NAMES[1] == "小学"
+        assert LEVEL_NAMES[2] == "初中"
+        assert LEVEL_NAMES[3] == "高中"
+        assert LEVEL_NAMES[4] == "大学"
+
+
+class TestLevelConfiguration:
+    """Tests for level configuration constants and helpers."""
+
+    def test_get_levels_for_user(self):
+        """Test cumulative level ranges for each user level."""
+        assert get_levels_for_user(1) == {1}
+        assert get_levels_for_user(2) == {1, 2}
+        assert get_levels_for_user(3) == {1, 2, 3}
+        assert get_levels_for_user(4) == {1, 2, 3, 4}
+        # Invalid levels should default to {1, 2}
+        assert get_levels_for_user(99) == {1, 2}
+
+    def test_get_max_highlights(self):
+        """Test max highlights per level."""
+        assert get_max_highlights(1) == 3
+        assert get_max_highlights(2) == 6
+        assert get_max_highlights(3) == 8
+        assert get_max_highlights(4) == 10
+        # Invalid levels default to 6
+        assert get_max_highlights(99) == 6
+
+    def test_max_highlights_constants(self):
+        """Verify the MAX_HIGHLIGHTS dict."""
+        assert MAX_HIGHLIGHTS[1] == 3
+        assert MAX_HIGHLIGHTS[2] == 6
+        assert MAX_HIGHLIGHTS[3] == 8
+        assert MAX_HIGHLIGHTS[4] == 10
+
+    def test_level_highlight_ranges(self):
+        """Verify cumulative highlight ranges."""
+        assert LEVEL_HIGHLIGHT_RANGES[1] == {1}
+        assert LEVEL_HIGHLIGHT_RANGES[2] == {1, 2}
+        assert LEVEL_HIGHLIGHT_RANGES[3] == {1, 2, 3}
+        assert LEVEL_HIGHLIGHT_RANGES[4] == {1, 2, 3, 4}
+
+    def test_filter_vocab_by_level(self):
+        """Test filtering vocab to a specific user level."""
+        # 小学: only level 1 words
+        l1 = filter_vocab_by_level(1)
+        for entry in l1.values():
+            assert entry[2] == 1
+
+        # 初中: levels 1+2
+        l2 = filter_vocab_by_level(2)
+        for entry in l2.values():
+            assert entry[2] in (1, 2)
+        assert len(l2) >= len(l1)
+
+        # 大学: all levels
+        l4 = filter_vocab_by_level(4)
+        assert len(l4) == len(VOCAB_DIFFICULTY)
 
 
 class TestIsDifficult:
@@ -48,6 +137,7 @@ class TestIsDifficult:
         assert is_difficult("evidence") is True
         assert is_difficult("atmosphere") is True
         assert is_difficult("telescope") is True
+        assert is_difficult("hypothesis") is True
 
     def test_case_insensitive(self):
         assert is_difficult("Evidence") is True
@@ -62,6 +152,36 @@ class TestIsDifficult:
 
     def test_whitespace_handling(self):
         assert is_difficult("  evidence  ") is True
+
+
+class TestIsDifficultForLevel:
+    """Tests for level-aware difficulty checking."""
+
+    def test_level1_word_only_for_elementary(self):
+        """A level 1 word should be difficult for all user levels."""
+        assert is_difficult_for_level("planet", 1) is True   # Planet is L1
+        assert is_difficult_for_level("planet", 2) is True
+        assert is_difficult_for_level("planet", 3) is True
+        assert is_difficult_for_level("planet", 4) is True
+
+    def test_level2_word_not_for_elementary(self):
+        """A level 2 word should NOT be highlighted for 小学 users."""
+        assert is_difficult_for_level("evidence", 2) is True   # evidence is L2, 初中 user
+        assert is_difficult_for_level("evidence", 3) is True   # 高中 user sees it
+        assert is_difficult_for_level("evidence", 4) is True   # 大学 user sees it
+        # 小学 user should NOT see level 2 words
+        assert is_difficult_for_level("evidence", 1) is False
+
+    def test_level4_word_only_for_college(self):
+        """A level 4 word should only be highlighted for 大学 users."""
+        assert is_difficult_for_level("hypothesis", 4) is True
+        assert is_difficult_for_level("hypothesis", 3) is False
+        assert is_difficult_for_level("hypothesis", 2) is False
+        assert is_difficult_for_level("hypothesis", 1) is False
+
+    def test_unknown_word_never_difficult(self):
+        assert is_difficult_for_level("pizza", 1) is False
+        assert is_difficult_for_level("pizza", 4) is False
 
 
 class TestGetDefinition:
@@ -86,12 +206,35 @@ class TestGetDefinition:
         assert get_definition("   ") is None
 
 
+class TestGetFullEntry:
+    """Tests for get_full_entry() which includes level."""
+
+    def test_returns_triple_for_known_word(self):
+        result = get_full_entry("evidence")
+        assert result is not None
+        assert len(result) == 3
+        assert result[0] == "证据"
+        assert result[1] == "n."
+        assert isinstance(result[2], int)
+
+    def test_returns_level_for_word(self):
+        result = get_full_entry("planet")
+        assert result is not None
+        assert result[2] == 1  # planet is level 1
+
+        result = get_full_entry("hypothesis")
+        assert result is not None
+        assert result[2] == 4  # hypothesis is level 4
+
+    def test_returns_none_for_unknown(self):
+        assert get_full_entry("pizza") is None
+
+
 class TestTokenize:
     """Tests for tokenize()."""
 
     def test_simple_sentence(self):
         tokens = tokenize("The cat sat.")
-        # Should be: "The", " ", "cat", " ", "sat", "."
         texts = [t["text"] for t in tokens]
         assert texts == ["The", " ", "cat", " ", "sat", "."]
 
@@ -105,8 +248,7 @@ class TestTokenize:
         assert tokens[2]["word"] == "world"
 
     def test_difficult_word_detection(self):
-        tokens = tokenize("The evidence is clear.")
-        # Find the evidence token
+        tokens = tokenize("The evidence is clear.", user_level=2)
         evidence_tokens = [t for t in tokens if t["word"] == "evidence"]
         assert len(evidence_tokens) == 1
         t = evidence_tokens[0]
@@ -143,21 +285,50 @@ class TestTokenize:
         assert "can't" in words
 
     def test_numbers_are_word_tokens(self):
-        """Numbers should be preserved as word tokens (fixes Iter 1 bug)."""
+        """Numbers should be preserved as word tokens."""
         tokens = tokenize("I have 3 cats and 42 dogs.")
         word_texts = [t["text"] for t in tokens if t["is_word"]]
-        assert "3" in word_texts   # numbers are rendered as words
+        assert "3" in word_texts
         assert "42" in word_texts
-        # Numbers should NOT be marked as difficult
         num_tokens = [t for t in tokens if t["text"] == "3"]
         assert num_tokens[0]["is_difficult"] is False
 
     def test_hyphenated_number_words(self):
-        """'17-year-old' and '1,000' must be single tokens (Iter 2 fix)."""
+        """'17-year-old' and '1,000' must be single tokens."""
         tokens = tokenize("A 17-year-old student found 1,000 stars.")
         word_texts = [t["text"] for t in tokens if t["is_word"]]
         assert "17-year-old" in word_texts
         assert "1,000" in word_texts
+
+    def test_level_filtering_in_tokenize(self):
+        """Tokenize with level 1 should only mark level 1 words as difficult."""
+        text = "The planet has an extraordinary atmosphere."
+        # planet=L1, extraordinary=L3, atmosphere=L2
+        tokens = tokenize(text, user_level=1)
+        difficult = [t for t in tokens if t["is_difficult"]]
+        assert len(difficult) == 1
+        assert difficult[0]["word"] == "planet"
+
+    def test_level_filtering_in_tokenize_level3(self):
+        """Tokenize with level 3 should mark L1+L2+L3 words as difficult but not L4."""
+        text = "The discovery of the planet was significant."
+        # discovery=L1, planet=L1, significant=L3
+        tokens = tokenize(text, user_level=3)
+        difficult = [t for t in tokens if t["is_difficult"]]
+        difficult_words = [t["word"] for t in difficult]
+        assert "planet" in difficult_words
+        assert "discovery" in difficult_words
+        assert "significant" in difficult_words
+
+    def test_token_includes_level_field(self):
+        """Difficult tokens should include the 'level' field."""
+        tokens = tokenize("The planet has an atmosphere.", user_level=4)
+        planet_tokens = [t for t in tokens if t["word"] == "planet"]
+        assert len(planet_tokens) == 1
+        assert planet_tokens[0]["level"] == 1
+        atmosphere_tokens = [t for t in tokens if t["word"] == "atmosphere"]
+        assert len(atmosphere_tokens) == 1
+        assert atmosphere_tokens[0]["level"] == 2
 
 
 class TestFindDifficultWords:
@@ -195,7 +366,27 @@ class TestFindDifficultWords:
             assert "lower" in r
             assert "definition" in r
             assert "pos" in r
+            assert "level" in r
             assert r["lower"] == r["word"].lower()
+
+    def test_level_filtering(self):
+        """find_difficult_words with level 1 should only return level 1 words."""
+        text = "The planet was an extraordinary discovery with a telescope."
+        result = find_difficult_words(text, user_level=1)
+        words_found = {r["lower"] for r in result}
+        # planet and discovery are L1, extraordinary is L3, telescope is L3
+        assert "planet" in words_found
+        assert "discovery" in words_found
+        assert "extraordinary" not in words_found
+        assert "telescope" not in words_found
+
+    def test_level_filtering_all(self):
+        """find_difficult_words with level 4 should return all levels."""
+        text = "The sustainable development requires innovation."
+        result = find_difficult_words(text, user_level=4)
+        words_found = {r["lower"] for r in result}
+        assert "sustainable" in words_found  # L4
+        assert "innovation" in words_found   # L4
 
 
 class TestFindDifficultWordsSorted:
@@ -204,7 +395,6 @@ class TestFindDifficultWordsSorted:
     def test_sorted_by_appearance(self):
         text = "The telescope found evidence of a planet."
         result = find_difficult_words_sorted(text)
-        # "telescope" appears before "evidence" which is before "planet"
         assert result[0]["lower"] == "telescope"
         assert result[1]["lower"] == "evidence"
         assert result[2]["lower"] == "planet"
@@ -214,17 +404,24 @@ class TestFindDifficultWordsSorted:
         unsorted = find_difficult_words(text)
         sorted_result = find_difficult_words_sorted(text)
         assert len(sorted_result) == len(unsorted)
-        # Same words (order may differ)
         unsorted_lowers = {r["lower"] for r in unsorted}
         sorted_lowers = {r["lower"] for r in sorted_result}
         assert unsorted_lowers == sorted_lowers
+
+    def test_level_filtering_sorted(self):
+        text = "The planet was an extraordinary discovery with a telescope."
+        result = find_difficult_words_sorted(text, user_level=1)
+        words = [r["lower"] for r in result]
+        assert "planet" in words
+        assert "discovery" in words
+        assert "extraordinary" not in words
 
 
 class TestIntegrationWithArticle:
     """Integration tests using actual article content."""
 
     def test_article_has_reasonable_difficult_count(self):
-        """The article should have 5-10 difficult words (not 40-50 like Iter 0)."""
+        """The planet article should have 5-15 difficult words at level 4 (all)."""
         text = (
             "A 17-year-old student from New York made an amazing discovery last week. "
             "While working on a school science project with a small telescope, "
@@ -244,14 +441,48 @@ class TestIntegrationWithArticle:
             "astronomers and learn more about how to explore the universe. "
             "Jack said he plans to study physics in college and hopes to discover more planets in the future."
         )
-        result = find_difficult_words(text)
+        result = find_difficult_words(text, user_level=4)
         count = len(result)
-        # Should be between 5 and 14 difficult words for a ~220 word article
-        # (stemming may match inflected forms like "planets"->"planet", "extremely"->"extreme")
-        assert 5 <= count <= 15, (
-            f"Expected 5-15 difficult words, got {count}. "
+        assert 5 <= count <= 18, (
+            f"Expected 5-18 difficult words, got {count}. "
             f"Words: {[r['word'] for r in result]}"
         )
+
+    def test_level1_article_has_fewer_words(self):
+        """At level 1, the article should have fewer difficult words."""
+        text = (
+            "A 17-year-old student from New York made an amazing discovery last week. "
+            "While working on a school science project with a small telescope, "
+            "he found a new planet outside our solar system. "
+            "Scientists at NASA later confirmed his finding. "
+            "The planet is about six times bigger than Earth. "
+            "But the planet's atmosphere is still very interesting to study. "
+            "The discovery is still very important. "
+            "He said he almost missed the evidence because the signal was very weak. "
+            "NASA has invited Jack to visit their space center this summer. "
+            "Jack said he plans to study physics in college and hopes to discover more planets in the future."
+        )
+        all_result = find_difficult_words(text, user_level=4)
+        l1_result = find_difficult_words(text, user_level=1)
+        # Level 1 should have fewer or equal words than all levels
+        assert len(l1_result) <= len(all_result)
+        # Level 1 should have at least 1 word (planet, discovery, explore, etc.)
+        assert len(l1_result) >= 1, f"Expected at least 1 L1 word, got: {[r['word'] for r in l1_result]}"
+
+    def test_level_progression_has_increasing_words(self):
+        """As user level increases, more words should be found (non-strict)."""
+        text = (
+            "The planet discovery was confirmed with a telescope and the atmosphere "
+            "study was an extraordinary achievement for the scientific community. "
+            "The hypothesis was validated by empirical evidence."
+        )
+        l1 = len(find_difficult_words(text, user_level=1))
+        l2 = len(find_difficult_words(text, user_level=2))
+        l3 = len(find_difficult_words(text, user_level=3))
+        l4 = len(find_difficult_words(text, user_level=4))
+        assert l1 <= l2, f"L1({l1}) should be <= L2({l2})"
+        assert l2 <= l3, f"L2({l2}) should be <= L3({l3})"
+        assert l3 <= l4, f"L3({l3}) should be <= L4({l4})"
 
 
 if __name__ == "__main__":

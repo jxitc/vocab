@@ -1,0 +1,52 @@
+[
+  {
+    "id": 0,
+    "title": "A Teenager Discovered a New Planet While Doing a School Project",
+    "source": "科技日报",
+    "url": "",
+    "date": "2026-05-15",
+    "paragraphs": [
+      {
+        "text": "A 17-year-old student from New York made an amazing discovery last week. While working on a school science project with a small telescope, he found a new planet outside our solar system. Scientists at NASA later confirmed his finding. The news quickly spread across the internet, and many people called him a young genius.",
+        "translation": "上周，一名来自纽约的17岁学生在学校科学项目中取得了惊人的发现。他用一台小型望远镜发现了一颗太阳系外的新行星。美国宇航局的科学家后来确认了他的发现。这个消息迅速在网上传开，很多人称他为少年天才。"
+      },
+      {
+        "text": "The planet is about six times bigger than Earth. It is very far away — more than 1,000 light-years from us. The planet goes around a star that looks a lot like our sun. Scientists say the surface of the planet is extremely hot, over 800 degrees, so there is probably no life there. But the planet's atmosphere is still very interesting to study.",
+        "translation": "这颗行星大约是地球的六倍大。它离我们非常远——超过一千光年。这颗行星围绕着一颗看起来很像太阳的恒星运行。科学家说这颗行星的表面极其炎热，超过800度，所以那里可能没有生命。但这颗行星的大气层仍然非常值得研究。"
+      },
+      {
+        "text": "The discovery is still very important. It shows that young people can do real science, not just read about it in textbooks. The student, named Jack Chen, spent three months looking at data from his school's small telescope. He said he almost missed the evidence because the signal was very weak. 'You need a lot of patience,' Jack said. 'But when you find something, it feels amazing.'",
+        "translation": "这个发现仍然非常重要。它表明年轻人也可以做真正的科学研究，而不仅仅是在课本上读到它。这位名叫Jack Chen的学生花了三个月时间查看学校小型望远镜的数据。他说他差点错过了这个证据，因为信号非常微弱。Jack说：\"你需要很多耐心，但当你发现什么东西的时候，感觉太棒了。\""
+      },
+      {
+        "text": "NASA has invited Jack to visit their space center this summer. He will meet real astronomers and learn more about how to explore the universe. Jack said he plans to study physics in college and hopes to discover more planets in the future. 'I just wanted to finish my school project,' he said with a smile. 'I never thought I would find a whole new world.'",
+        "translation": "美国宇航局已邀请Jack今年夏天参观他们的航天中心。他将见到真正的天文学家，并学习更多关于如何探索宇宙的知识。Jack说他计划在大学学习物理学，希望将来能发现更多的行星。他笑着说：\"我只是想完成学校项目，从没想过会发现一个全新的世界。\""
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "title": "Giant Pandas Are No Longer Endangered, but Their Survival Still Needs Help",
+    "source": "中国日报",
+    "url": "",
+    "date": "2026-05-10",
+    "paragraphs": [
+      {
+        "text": "China announced great news for animal lovers around the world last month. The giant panda, one of the most famous animals on the planet, has been moved from 'endangered' to 'vulnerable' on the global species list. This achievement is the result of more than 50 years of hard work by scientists, local communities, and the Chinese government.",
+        "translation": "上个月，中国向全世界的动物爱好者宣布了一个好消息。大熊猫——地球上最著名的动物之一——已经从全球物种名单中的\"濒危\"级别降至\"易危\"级别。这一成就得益于科学家、当地社区和中国政府50多年的辛勤努力。"
+      },
+      {
+        "text": "The key reason for this success was protecting the pandas' natural habitat. Over the past few decades, China has created more than 60 panda nature reserves. These protected areas now cover nearly 2.6 million hectares of bamboo forest. Pandas depend almost completely on bamboo for food — an adult panda eats about 12 to 38 kilograms of bamboo every single day.",
+        "translation": "这一成功的关键原因是保护了大熊猫的自然栖息地。在过去的几十年里，中国建立了60多个大熊猫自然保护区。这些保护区的面积现在覆盖了近260万公顷的竹林。大熊猫几乎完全依赖竹子为食——一只成年大熊猫每天要吃大约12到38公斤的竹子。"
+      },
+      {
+        "text": "Scientists have also developed new methods to help pandas reproduce in zoos and research centers. Breeding pandas in captivity was once considered extremely difficult, but researchers now understand much more about panda behavior and biology. In 2025 alone, more than 40 panda cubs were born in breeding centers across China.",
+        "translation": "科学家们还开发了新方法来帮助大熊猫在动物园和研究中心繁殖。圈养大熊猫的繁殖曾经被认为极其困难，但研究人员现在对大熊猫的行为和生物学有了更多了解。仅在2025年，中国各地的繁殖中心就有超过40只熊猫幼崽出生。"
+      },
+      {
+        "text": "However, experts warn that the job is not finished. Climate change could destroy large areas of bamboo in the future. If the bamboo forests disappear, the pandas will lose their main source of food. Scientists estimate that climate change could reduce panda habitat by more than 35% by the end of this century. We need to continue our efforts to protect these beautiful animals and the environment they live in.",
+        "translation": "然而，专家们警告说这场战斗还没有结束。气候变化在未来可能会摧毁大面积的竹林。如果竹林消失，大熊猫将失去主要的食物来源。科学家估计，到本世纪末，气候变化可能会使大熊猫的栖息地减少超过35%。我们需要继续努力保护这些美丽的动物以及它们赖以生存的环境。"
+      }
+    ]
+  }
+]

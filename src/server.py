@@ -1,49 +1,68 @@
 """
-Vocab in News - Web Server (Iteration 1)
+Vocab in News - Web Server (Iteration 5)
 Flask app serving interactive article reading page with
-word annotation and paragraph-level Chinese translations.
+word annotation, paragraph-level Chinese translations,
+multiple difficulty levels, and multiple articles.
 """
 
 import json
 import os
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
-from vocab_service import find_difficult_words, find_difficult_words_sorted, tokenize
+from vocab_service import (
+    find_difficult_words,
+    find_difficult_words_sorted,
+    tokenize,
+    get_levels_for_user,
+    get_max_highlights,
+    LEVEL_NAMES,
+)
+
 
 app = Flask(__name__)
 
-SAMPLE_ARTICLE_PATH = os.path.join(os.path.dirname(__file__), "sample_article.json")
+SAMPLE_ARTICLES_PATH = os.path.join(os.path.dirname(__file__), "sample_articles.json")
 
 
-def load_article():
-    with open(SAMPLE_ARTICLE_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+def load_articles():
+    """Load all articles from the JSON array file."""
+    with open(SAMPLE_ARTICLES_PATH, "r", encoding="utf-8") as f:
+        articles = json.load(f)
+    return articles
 
 
-MAX_HIGHLIGHT_WORDS = 6  # Limit highlighted words per article for learners
+def get_article_by_id(article_id: int):
+    """Load a specific article by id. Returns None if not found."""
+    articles = load_articles()
+    for a in articles:
+        if a.get("id") == article_id:
+            return a
+    return None
 
-def build_paragraphs_with_tokens(article: dict) -> list:
+
+def build_paragraphs_with_tokens(article: dict, user_level: int = 2) -> list:
     """Process article paragraphs, adding tokenization and difficult-word data.
 
-    Limits highlighted words to MAX_HIGHLIGHT_WORDS to avoid overwhelming
-    learners (user research says 3-5 optimal, 8+ causes dropout).
+    Limits highlighted words based on level-specific MAX_HIGHLIGHTS.
     """
+    max_highlights = get_max_highlights(user_level)
+
     # Collect all difficult words across the whole article, sorted by first appearance
     full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
-    all_difficult = find_difficult_words_sorted(full_text)
+    all_difficult = find_difficult_words_sorted(full_text, user_level)
     # Only highlight the first N words; rest are shown as normal
-    highlighted_lowers = {w["lower"] for w in all_difficult[:MAX_HIGHLIGHT_WORDS]}
+    highlighted_lowers = {w["lower"] for w in all_difficult[:max_highlights]}
 
     enriched = []
     for para in article.get("paragraphs", []):
         text = para["text"]
-        tokens = tokenize(text)
+        tokens = tokenize(text, user_level)
         # Downgrade words that exceed the highlight limit
         for t in tokens:
             if t["is_difficult"] and t["word"] and t["word"].lower() not in highlighted_lowers:
                 t["is_difficult"] = False
-        difficult_words = [w for w in find_difficult_words(text)
+        difficult_words = [w for w in find_difficult_words(text, user_level)
                           if w["lower"] in highlighted_lowers]
         enriched.append({
             "text": text,
@@ -56,21 +75,76 @@ def build_paragraphs_with_tokens(article: dict) -> list:
 
 @app.route("/")
 def index():
-    """Serve the main reading page shell (client-side rendering fetches /api/article)."""
+    """Serve the main reading page shell."""
     return render_template("index.html")
+
+
+@app.route("/api/articles")
+def api_articles():
+    """Return list of article summaries (title, source, date, id)."""
+    articles = load_articles()
+    summaries = []
+    for a in articles:
+        summaries.append({
+            "id": a.get("id", 0),
+            "title": a.get("title", ""),
+            "source": a.get("source", ""),
+            "date": a.get("date", ""),
+        })
+    return jsonify(summaries)
 
 
 @app.route("/api/article")
 def api_article():
-    """Return article as JSON with vocabulary annotations."""
-    article = load_article()
-    paragraphs = build_paragraphs_with_tokens(article)
+    """Return article as JSON with vocabulary annotations.
+
+    Query params:
+        id: article id (default 0)
+        level: user difficulty level 1-4 (default 2 = 初中)
+    """
+    article_id = request.args.get("id", 0, type=int)
+    user_level = request.args.get("level", 2, type=int)
+
+    # Clamp level to valid range
+    if user_level < 1:
+        user_level = 1
+    elif user_level > 4:
+        user_level = 4
+
+    article = get_article_by_id(article_id)
+    if article is None:
+        # Fall back to first article
+        articles = load_articles()
+        if articles:
+            article = articles[0]
+        else:
+            return jsonify({"error": "No articles found"}), 404
+
+    paragraphs = build_paragraphs_with_tokens(article, user_level)
+
     return jsonify({
+        "id": article.get("id", 0),
         "title": article["title"],
         "source": article["source"],
         "url": article.get("url", ""),
         "date": article["date"],
+        "level": user_level,
+        "levelName": LEVEL_NAMES.get(user_level, "初中"),
+        "maxHighlights": get_max_highlights(user_level),
         "paragraphs": paragraphs,
+    })
+
+
+@app.route("/api/levels")
+def api_levels():
+    """Return level configuration for the frontend."""
+    return jsonify({
+        "levels": [
+            {"id": 1, "name": "小学", "maxHighlights": 3},
+            {"id": 2, "name": "初中", "maxHighlights": 6},
+            {"id": 3, "name": "高中", "maxHighlights": 8},
+            {"id": 4, "name": "大学", "maxHighlights": 10},
+        ],
     })
 
 
