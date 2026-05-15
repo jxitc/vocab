@@ -9,12 +9,14 @@
 
 ### 环境
 - macOS Darwin 25.2.0
-- Python 3.x (待确认)
-- 无 git repo（需初始化）
+- Python 3.9.6 + pip 21.2.4
+- git repo 已初始化（2 commits）
 
-### 待解决问题
-- [ ] git 初始化
-- [ ] 确认 Python 环境
-- [ ] Dev Agent 完成 Iter 0 构建
+### 已完成
+- [x] git 初始化 + .gitignore
+- [x] 确认 Python 3.9.6
+- [x] 迭代方法论文档
+- [x] user_role.md 用户画像
+- [ ] Dev Agent 完成 Iter 0 构建 (running in background)
 
 ---
