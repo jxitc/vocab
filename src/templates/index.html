@@ -715,19 +715,32 @@
             synth.cancel();
 
             var utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.85;
+            utterance.rate = 0.8;
 
-            // Try to pick an English voice
+            // Pick the best available English voice
             var voices = synth.getVoices();
             if (voices.length > 0) {
+                // Tier 1: known natural-sounding voices
+                var preferred = ['Samantha', 'Daniel', 'Karen', 'Moira',
+                                'Google US English', 'Google UK English Female',
+                                'Google UK English Male',
+                                'Microsoft David', 'Microsoft Zira',
+                                'Microsoft Aria'];
                 var enVoice = null;
+                var fallback = null;
                 for (var i = 0; i < voices.length; i++) {
-                    if (voices[i].lang && voices[i].lang.indexOf('en') === 0) {
-                        enVoice = voices[i];
-                        break;
+                    var v = voices[i];
+                    if (!v.lang || v.lang.indexOf('en') !== 0) continue;
+                    if (!fallback) fallback = v;  // first English voice as backup
+                    for (var j = 0; j < preferred.length; j++) {
+                        if (v.name.indexOf(preferred[j]) !== -1) {
+                            enVoice = v;
+                            break;
+                        }
                     }
+                    if (enVoice) break;
                 }
-                if (enVoice) utterance.voice = enVoice;
+                utterance.voice = enVoice || fallback;
             }
 
             function onDone() {
