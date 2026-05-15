@@ -393,13 +393,20 @@ def tokenize(text: str) -> List[Dict]:
     with is_word=False.
     """
     tokens = []
-    # Match: word characters OR single non-word/non-space chars OR whitespace runs
-    pattern = re.compile(r"([a-zA-Z]+(?:'[a-zA-Z]+)?)|([^\w\s])|(\s+)")
+    # Match: word/hyphenated/number tokens OR punctuation OR whitespace
+    # Groups: 1=alpha words+contractions+hyphenations  2=numbers+number-hyphen combos
+    #          3=single punctuation  4=whitespace
+    pattern = re.compile(
+        r"([a-zA-Z]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)*)"
+        r"|(\d[\d,]*(?:-[a-zA-Z]+)*)"
+        r"|([^\w\s])"
+        r"|(\s+)"
+    )
     for match in pattern.finditer(text):
         raw = match.group(0)
-        word_part = match.group(1)
+        word_part = match.group(1) or match.group(2)  # alpha or numeric
         if word_part:
-            entry = _lookup(word_part.lower())
+            entry = _lookup(word_part.lower()) if match.group(1) else None
             tokens.append({
                 "text": word_part,
                 "is_word": True,

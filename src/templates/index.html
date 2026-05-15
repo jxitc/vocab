@@ -218,15 +218,16 @@
 
         .word-popup .popup-close {
             position: absolute;
-            top: 8px;
-            right: 10px;
-            font-size: 16px;
-            color: #bbb;
+            top: 6px;
+            right: 8px;
+            font-size: 20px;
+            color: #999;
             cursor: pointer;
             background: none;
             border: none;
             line-height: 1;
-            padding: 2px 6px;
+            padding: 4px 8px;
+            z-index: 1001;
         }
 
         .word-popup .popup-close:hover {
@@ -356,8 +357,9 @@
 
         <!-- Help hint -->
         <div class="help-hint">
-            提示：<strong>黄色高亮</strong>的词是重点生词，点击可以查看中文释义。
-            其他英文单词也可以点击，会跳转到在线词典。每段下方有「显示翻译」按钮。
+            提示：<strong>黄色高亮</strong> = 本节课重点生词（点击看中文释义）。
+            点过的生词会<strong style="color:#28a745;">变绿</strong>表示已学。
+            每段下方有「显示翻译」按钮可以看中文。
         </div>
 
         <!-- Article paragraphs with interactive words -->
@@ -513,10 +515,10 @@
 
                 showPopup(wordEl, word, pos, definition);
             } else {
-                // Non-difficult word: open dictionary in new tab
+                // Non-difficult word: open Chinese-friendly dictionary
                 hidePopup();
                 window.open(
-                    'https://www.merriam-webster.com/dictionary/' + encodeURIComponent(word),
+                    'https://dict.youdao.com/w/' + encodeURIComponent(word),
                     '_blank'
                 );
             }
@@ -558,6 +560,16 @@
         // ── Finish button ──────────────────────────────
         finishBtn.addEventListener('click', function() {
             var learnedCount = Object.keys(learnedWords).length;
+
+            if (learnedCount === 0) {
+                // Student hasn't clicked any words — nudge them gently
+                var nudged = confirm(
+                    '你还没有点击任何生词哦！\n\n点击黄色高亮的词可以查看中文释义，帮助你学习。\n\n要不要先去看看生词再点"完成"？\n\n（点"取消"继续阅读，点"确定"仍然完成）'
+                );
+                if (!nudged) {
+                    return;  // Go back to reading
+                }
+            }
 
             learnedCountEl.textContent = learnedCount;
             totalClicksEl.textContent = totalClicks;

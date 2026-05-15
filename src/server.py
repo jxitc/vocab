@@ -9,7 +9,7 @@ import os
 
 from flask import Flask, jsonify, render_template
 
-from vocab_service import find_difficult_words, tokenize
+from vocab_service import find_difficult_words, find_difficult_words_sorted, tokenize
 
 app = Flask(__name__)
 
@@ -21,13 +21,30 @@ def load_article():
         return json.load(f)
 
 
+MAX_HIGHLIGHT_WORDS = 6  # Limit highlighted words per article for learners
+
 def build_paragraphs_with_tokens(article: dict) -> list:
-    """Process article paragraphs, adding tokenization and difficult-word data."""
+    """Process article paragraphs, adding tokenization and difficult-word data.
+
+    Limits highlighted words to MAX_HIGHLIGHT_WORDS to avoid overwhelming
+    learners (user research says 3-5 optimal, 8+ causes dropout).
+    """
+    # Collect all difficult words across the whole article, sorted by first appearance
+    full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
+    all_difficult = find_difficult_words_sorted(full_text)
+    # Only highlight the first N words; rest are shown as normal
+    highlighted_lowers = {w["lower"] for w in all_difficult[:MAX_HIGHLIGHT_WORDS]}
+
     enriched = []
     for para in article.get("paragraphs", []):
         text = para["text"]
         tokens = tokenize(text)
-        difficult_words = find_difficult_words(text)
+        # Downgrade words that exceed the highlight limit
+        for t in tokens:
+            if t["is_difficult"] and t["word"] and t["word"].lower() not in highlighted_lowers:
+                t["is_difficult"] = False
+        difficult_words = [w for w in find_difficult_words(text)
+                          if w["lower"] in highlighted_lowers]
         enriched.append({
             "text": text,
             "translation": para["translation"],

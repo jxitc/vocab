@@ -142,11 +142,22 @@ class TestTokenize:
         assert "don't" in words
         assert "can't" in words
 
-    def test_numbers_not_words(self):
+    def test_numbers_are_word_tokens(self):
+        """Numbers should be preserved as word tokens (fixes Iter 1 bug)."""
         tokens = tokenize("I have 3 cats and 42 dogs.")
         word_texts = [t["text"] for t in tokens if t["is_word"]]
-        assert "3" not in word_texts
-        assert "42" not in word_texts
+        assert "3" in word_texts   # numbers are rendered as words
+        assert "42" in word_texts
+        # Numbers should NOT be marked as difficult
+        num_tokens = [t for t in tokens if t["text"] == "3"]
+        assert num_tokens[0]["is_difficult"] is False
+
+    def test_hyphenated_number_words(self):
+        """'17-year-old' and '1,000' must be single tokens (Iter 2 fix)."""
+        tokens = tokenize("A 17-year-old student found 1,000 stars.")
+        word_texts = [t["text"] for t in tokens if t["is_word"]]
+        assert "17-year-old" in word_texts
+        assert "1,000" in word_texts
 
 
 class TestFindDifficultWords:
@@ -235,9 +246,10 @@ class TestIntegrationWithArticle:
         )
         result = find_difficult_words(text)
         count = len(result)
-        # Should be between 5 and 12 difficult words for a ~220 word article
-        assert 5 <= count <= 16, (
-            f"Expected 5-13 difficult words, got {count}. "
+        # Should be between 5 and 14 difficult words for a ~220 word article
+        # (stemming may match inflected forms like "planets"->"planet", "extremely"->"extreme")
+        assert 5 <= count <= 15, (
+            f"Expected 5-15 difficult words, got {count}. "
             f"Words: {[r['word'] for r in result]}"
         )
 
