@@ -291,6 +291,12 @@
             background: #fff3cd;
             border: 1px solid #e6a817;
             transition: background-color 0.25s, border-color 0.25s;
+            cursor: pointer;
+        }
+
+        .word-panel-item:hover {
+            background: #ffe69c;
+            border-color: #cc8c00;
         }
 
         .word-panel-item.learned {
@@ -573,8 +579,12 @@
 
         <!-- Article body (dynamically rendered) -->
         <div class="article-body" id="articleBody">
-            <div class="loading">
-                <span class="spinner"></span>正在加载文章...
+            <div class="loading" id="loadingState">
+                <span class="spinner"></span>正在为你准备今天的新闻...
+            </div>
+            <div class="error-msg" id="errorState" style="display:none;">
+                文章加载失败，请检查网络后重试。<br>
+                <button onclick="location.reload()">重新加载</button>
             </div>
         </div>
 
@@ -974,6 +984,9 @@
                 var item = document.createElement('div');
                 item.className = 'word-panel-item' + (isLearned ? ' learned' : '');
                 item.setAttribute('data-word-lower', uw.lower);
+                item.setAttribute('data-word', uw.word);
+                item.setAttribute('data-definition', uw.definition || '');
+                item.setAttribute('data-pos', uw.pos || '');
 
                 var wordSpan = document.createElement('span');
                 wordSpan.className = 'word-panel-word';
@@ -1023,11 +1036,17 @@
 
         // ── Fetch & Init ───────────────────────────────
         async function loadArticle() {
+            var loadingEl = document.getElementById('loadingState');
+            var errorEl = document.getElementById('errorState');
+
             try {
                 var resp = await fetch('/api/article');
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var article = await resp.json();
                 state.article = article;
+
+                // Hide loading, show content
+                loadingEl.style.display = 'none';
 
                 populateHeader(article);
                 renderArticle(article);
@@ -1035,7 +1054,8 @@
                 restoreFinishedState();
             } catch(err) {
                 console.error('Failed to load article:', err);
-                articleBody.innerHTML = '<div class="error-msg">文章加载失败，请检查网络后重试。<br><button onclick="location.reload()">重新加载</button></div>';
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
             }
         }
 
@@ -1112,6 +1132,7 @@
 
         // ── Event Delegation: Word Panel ──────────────
         wordPanel.addEventListener('click', function(e) {
+            // 1. Speaker icon in panel
             var panelSpeaker = e.target.closest('.word-panel-speaker');
             if (panelSpeaker) {
                 e.stopPropagation();
@@ -1119,11 +1140,30 @@
                 if (word) speakWord(word, panelSpeaker);
                 return;
             }
+
+            // 2. Panel word item click — show popup and mark as learned
+            var panelItem = e.target.closest('.word-panel-item');
+            if (panelItem) {
+                e.stopPropagation();
+                state.totalClicks++;
+
+                var lower = panelItem.getAttribute('data-word-lower');
+                var word = panelItem.getAttribute('data-word');
+                var def = panelItem.getAttribute('data-definition');
+                var pos = panelItem.getAttribute('data-pos');
+
+                if (!state.learnedWords[lower]) {
+                    markWordAsLearned(lower);
+                }
+
+                showPopup(panelItem, word, pos, def);
+                return;
+            }
         });
 
         // ── Close popup on outside click ───────────────
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.word') && !e.target.closest('.word-popup') && !e.target.closest('.word-panel-speaker')) {
+            if (!e.target.closest('.word') && !e.target.closest('.word-popup') && !e.target.closest('.word-panel-item')) {
                 hidePopup();
             }
         });

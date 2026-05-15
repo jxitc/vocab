@@ -309,7 +309,7 @@ VOCAB_DIFFICULTY: Dict[str, Tuple[str, str]] = {
     "orbit": ("轨道；绕行", "n./v."),
     "planet": ("行星", "n."),
     "satellite": ("卫星", "n."),
-    "solar": ("太阳的", "adj."),
+    "solar": ("太阳的；太阳系的", "adj."),
     "species": ("物种", "n."),
     "telescope": ("望远镜", "n."),
     "temperature": ("温度", "n."),

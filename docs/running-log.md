@@ -41,6 +41,16 @@
 - [x] 客户端渲染 fetch(/api/article) — Phase A平台迁移
 - [x] 优雅降级 (SpeechSynthesis不可用时隐藏图标)
 - [x] 29 tests passing
-### 测试中
-- Test Agent 正在验证 (音频标记为需手动测试)
+### 测试结果 (35c901b)
+- All P0 bugs fixed ✓
+- Audio UI ✓ (实际发音质量需手动验证)
+- localStorage ✓
+- 4 issues: 面板不可交互/状态不同步/无loading/solar释义不准确
+
+## Iter 4 (进行中)
+### 目标
+1. 生词面板可点击交互（弹窗+标记已学）
+2. 面板与文章学习状态双向同步
+3. 加载动画 "正在为你准备今天的新闻..."
+4. solar释义修正：太阳的 → 太阳的；太阳系的
 
