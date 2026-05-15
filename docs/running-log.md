@@ -33,8 +33,14 @@
 - [x] 提示文字解释黄→绿颜色系统
 - [x] 29 tests passing
 
-## Iter 3 (进行中)
-### 目标
-- TTS发音功能 (Web Speech API)
-- 生词汇总面板
-- localStorage进度保存
+## Iter 3 (e296573)
+### 已实现
+- [x] Web Speech API TTS发音 (speaker图标 + popup朗读按钮, rate 0.85)
+- [x] 生词汇总面板 "本课生词 (6个)" — 实时更新黄→绿色状态
+- [x] localStorage进度持久化 (已学单词 + 完成状态)
+- [x] 客户端渲染 fetch(/api/article) — Phase A平台迁移
+- [x] 优雅降级 (SpeechSynthesis不可用时隐藏图标)
+- [x] 29 tests passing
+### 测试中
+- Test Agent 正在验证 (音频标记为需手动测试)
+
