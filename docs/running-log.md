@@ -5,37 +5,36 @@
 ### 当前状态
 - 项目初始化，仅含设计文档
 - Dev Agent 正在构建 Iter 0 基线产品
-- 基线目标：Flask 服务器 + China Daily 文章抓取 + 简单阅读页面
 
 ### 环境
 - macOS Darwin 25.2.0
 - Python 3.9.6 + pip 21.2.4
-- git repo 已初始化（2 commits）
+- git repo 已初始化
 
-### 已完成
-- [x] git 初始化 + .gitignore
-- [x] 确认 Python 3.9.6
-- [x] 迭代方法论文档
-- [x] user_role.md 用户画像
-- [x] Dev Agent 完成 Iter 0 构建 (running in background)
-- [x] Iter 0 Test 完成 — 5个致命缺陷（见 iter-0-test-report.md）
+### Iter 0
+- [x] 基础 Flask 服务器 + China Daily 文章
+- [x] Test: 5个致命缺陷 — 静态英文墙，生词率18-20%
+- 教训: 没中文翻译/查词/互动 = 用户马上离开
 
-### Iter 0 教训
-- 静态英文页面 = 对初中生没有任何价值
-- 304词文章，生词率18-20%，目标3-5%
-- 没有中文翻译/查词/互动 = 用户马上离开
+### Iter 1 (5c48a8b)
+- [x] vocab_service.py: ~200词难度DB + 中文释义 + 词干提取
+- [x] 交互式前端: 点击生词弹出中文释义
+- [x] 段落级中文翻译 (显示/隐藏)
+- [x] 新文章: 青少年发现行星 (适龄话题)
+- [x] "我读完了！"按钮 + 鼓励语
+- [x] Test: 发现P0数字bug、13个生词过多、弹窗问题
 
-- [x] Iter 1 Dev 完成 — 28单元测试通过
-- [x] 修复 sample_article.json 中文引号导致 JSON 解析失败
-- [x] Iter 1 git commit (5c48a8b)
+### Iter 2 (39e95fe)
+- [x] P0: 正则修复，数字和连字符词正常显示
+- [x] 高亮词限制为6个 (从13个降到6个)
+- [x] 非生词改为有道词典 (替代Merriam-Webster)
+- [x] 弹窗关闭按钮z-index修复
+- [x] "学了0个词"提醒逻辑
+- [x] 提示文字解释黄→绿颜色系统
+- [x] 29 tests passing
 
-### Iter 1 已实现
-- vocab_service.py: ~200词难度数据库，含中文释义
-- 交互式前端: 点击生词弹出中文释义
-- 段落级中文翻译（显示/隐藏切换）
-- 新文章: 青少年发现行星（适龄、有趣）
-- 难度徽章显示"初中水平"
-- "我读完了！"按钮 + 鼓励语 + 生词统计
-
----
-
+## Iter 3 (进行中)
+### 目标
+- TTS发音功能 (Web Speech API)
+- 生词汇总面板
+- localStorage进度保存

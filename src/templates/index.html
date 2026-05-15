@@ -85,6 +85,56 @@
             line-height: 1.6;
         }
 
+        /* ── Loading & Error ──────────────────────────── */
+        .loading {
+            text-align: center;
+            padding: 48px 20px;
+            color: #999;
+            font-size: 15px;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e8e4dc;
+            border-top-color: #a09888;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 40px 20px;
+            color: #c0392b;
+            font-size: 15px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+        }
+
+        .error-msg button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .error-msg button:hover {
+            background: #a93226;
+        }
+
         /* ── Article Body ─────────────────────────────── */
         .article-body {
             font-size: 19px;
@@ -128,6 +178,34 @@
         .word.clicked-before {
             background-color: #d4edda !important;
             border-bottom-color: #28a745 !important;
+        }
+
+        /* ── Speaker icon in article ──────────────────── */
+        .word-speaker {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            color: #b08830;
+            margin-left: 1px;
+            vertical-align: middle;
+            padding: 2px;
+            border-radius: 50%;
+            transition: color 0.15s, background-color 0.15s, transform 0.15s;
+        }
+
+        .word-speaker:hover {
+            color: #805500;
+            background-color: rgba(0,0,0,0.06);
+        }
+
+        .word-speaker.speaking {
+            color: #e6a817;
+            animation: speakerPulse 0.35s infinite alternate;
+        }
+
+        @keyframes speakerPulse {
+            from { transform: scale(1); color: #e6a817; }
+            to   { transform: scale(1.35); color: #cc7000; }
         }
 
         /* ── Translation toggle ───────────────────────── */
@@ -174,16 +252,93 @@
             display: block;
         }
 
+        /* ── Word Panel (本课生词) ────────────────────── */
+        .word-panel {
+            margin: 32px 0;
+            padding: 20px 24px;
+            background: #ffffff;
+            border: 1px solid #e8e4dc;
+            border-radius: 12px;
+        }
+
+        .word-panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0ebe4;
+        }
+
+        .word-panel-title .count {
+            font-weight: 400;
+            color: #888;
+        }
+
+        .word-panel-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .word-panel-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            background: #fff3cd;
+            border: 1px solid #e6a817;
+            transition: background-color 0.25s, border-color 0.25s;
+        }
+
+        .word-panel-item.learned {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .word-panel-word {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .word-panel-def {
+            color: #c0392b;
+            font-size: 13px;
+        }
+
+        .word-panel-speaker {
+            cursor: pointer;
+            color: #999;
+            display: inline-flex;
+            align-items: center;
+            padding: 2px;
+            border-radius: 50%;
+            transition: color 0.15s, background-color 0.15s;
+            margin-left: 2px;
+        }
+
+        .word-panel-speaker:hover {
+            color: #555;
+            background-color: rgba(0,0,0,0.06);
+        }
+
+        .word-panel-speaker.speaking {
+            color: #e6a817;
+            animation: speakerPulse 0.35s infinite alternate;
+        }
+
         /* ── Popup / Tooltip ──────────────────────────── */
         .word-popup {
             position: fixed;
             z-index: 1000;
             background: #ffffff;
             border: 1px solid #ddd;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
-            padding: 14px 18px;
-            min-width: 180px;
+            padding: 16px 20px;
+            min-width: 200px;
             max-width: 280px;
             opacity: 0;
             transform: translateY(6px);
@@ -202,6 +357,7 @@
             font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 2px;
+            padding-right: 24px;
         }
 
         .word-popup .popup-pos {
@@ -218,9 +374,9 @@
 
         .word-popup .popup-close {
             position: absolute;
-            top: 6px;
-            right: 8px;
-            font-size: 20px;
+            top: 8px;
+            right: 10px;
+            font-size: 22px;
             color: #999;
             cursor: pointer;
             background: none;
@@ -228,10 +384,46 @@
             line-height: 1;
             padding: 4px 8px;
             z-index: 1001;
+            border-radius: 4px;
         }
 
         .word-popup .popup-close:hover {
-            color: #666;
+            color: #555;
+            background: #f5f5f5;
+        }
+
+        .popup-actions {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .popup-speak-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 16px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .popup-speak-btn:hover {
+            background: #e8e8e8;
+            color: #333;
+        }
+
+        .popup-speak-btn.speaking {
+            background: #fff3cd;
+            border-color: #e6a817;
+            color: #8d6e00;
+            animation: speakerPulse 0.35s infinite alternate;
         }
 
         /* ── Completion Section ───────────────────────── */
@@ -339,6 +531,22 @@
                 padding: 12px 30px;
                 font-size: 15px;
             }
+
+            .word-panel {
+                padding: 16px;
+            }
+            .word-panel-list {
+                gap: 8px;
+            }
+            .word-panel-item {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .word-speaker svg {
+                width: 14px;
+                height: 14px;
+            }
         }
     </style>
 </head>
@@ -347,10 +555,10 @@
         <!-- Header -->
         <header>
             <div class="site-name">新闻词汇学习</div>
-            <h1 class="article-title">{{ article.title }}</h1>
+            <h1 class="article-title" id="articleTitle">加载中...</h1>
             <div class="article-meta">
-                <span>来源: {{ article.source }}</span>
-                <span>日期: {{ article.date }}</span>
+                <span id="articleSource">来源: —</span>
+                <span id="articleDate">日期: —</span>
                 <span class="level-badge">初中水平</span>
             </div>
         </header>
@@ -360,39 +568,20 @@
             提示：<strong>黄色高亮</strong> = 本节课重点生词（点击看中文释义）。
             点过的生词会<strong style="color:#28a745;">变绿</strong>表示已学。
             每段下方有「显示翻译」按钮可以看中文。
+            点击旁边的 <span style="display:inline-flex;vertical-align:middle;">🔊</span> 图标可以听发音。
         </div>
 
-        <!-- Article paragraphs with interactive words -->
+        <!-- Article body (dynamically rendered) -->
         <div class="article-body" id="articleBody">
-            {% for para in paragraphs %}
-            <div class="paragraph-block">
-                <p class="paragraph-text">
-                    {% for token in para.tokens %}
-                        {% if token.is_word %}
-                            {% if token.is_difficult %}
-                            <span class="word difficult"
-                                  data-word="{{ token.word }}"
-                                  data-definition="{{ token.definition }}"
-                                  data-pos="{{ token.pos }}"
-                                  data-difficult="true">{{ token.text }}</span>
-                            {% else %}
-                            <span class="word normal"
-                                  data-word="{{ token.word }}"
-                                  data-difficult="false">{{ token.text }}</span>
-                            {% endif %}
-                        {% else %}
-                            {{ token.text }}
-                        {% endif %}
-                    {% endfor %}
-                </p>
-                <div class="translation-toggle" data-para="{{ loop.index0 }}">
-                    <span class="arrow">&#9654;</span>显示翻译
-                </div>
-                <div class="translation-text" data-para="{{ loop.index0 }}">
-                    {{ para.translation }}
-                </div>
+            <div class="loading">
+                <span class="spinner"></span>正在加载文章...
             </div>
-            {% endfor %}
+        </div>
+
+        <!-- Word Summary Panel (本课生词) -->
+        <div class="word-panel" id="wordPanel" style="display:none;">
+            <h3 class="word-panel-title" id="wordPanelTitle">本课生词</h3>
+            <div class="word-panel-list" id="wordPanelList"></div>
         </div>
 
         <!-- Completion Section -->
@@ -422,50 +611,184 @@
         <div class="popup-word" id="popupWord"></div>
         <div class="popup-pos" id="popupPos"></div>
         <div class="popup-def" id="popupDef"></div>
+        <div class="popup-actions" id="popupActions">
+            <button class="popup-speak-btn" id="popupSpeakBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+                朗读
+            </button>
+        </div>
     </div>
 
     <script>
     (function() {
-        // ── State ──────────────────────────────────────
-        var learnedWords = {};       // { "wordlower": true } for unique difficult words clicked
-        var totalClicks = 0;
-        var currentPopupWord = null;
+        // ── Constants ─────────────────────────────────
+        var PROGRESS_KEY = 'vocab_in_news_progress';
 
+        var SPEAKER_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+
+        var PANEL_SPEAKER_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+
+        // ── State ──────────────────────────────────────
+        var state = {
+            article: null,
+            learnedWords: {},     // { "wordlower": true }
+            totalClicks: 0,
+            isFinished: false,
+            currentPopupWord: null
+        };
+
+        var currentSpeaker = null;
+        var speechSupported = 'speechSynthesis' in window;
+        var storageAvailable = (function() {
+            try { var t = '__t__'; localStorage.setItem(t, t); localStorage.removeItem(t); return true; }
+            catch(e) { return false; }
+        })();
+
+        // ── DOM refs ────────────────────────────────────
+        var articleBody = document.getElementById('articleBody');
+        var wordPanel = document.getElementById('wordPanel');
+        var wordPanelTitle = document.getElementById('wordPanelTitle');
+        var wordPanelList = document.getElementById('wordPanelList');
         var popup = document.getElementById('wordPopup');
         var popupWord = document.getElementById('popupWord');
         var popupPos = document.getElementById('popupPos');
         var popupDef = document.getElementById('popupDef');
         var popupClose = document.getElementById('popupClose');
+        var popupSpeakBtn = document.getElementById('popupSpeakBtn');
         var finishBtn = document.getElementById('finishBtn');
         var finishMsg = document.getElementById('finishMsg');
         var learnedCountEl = document.getElementById('learnedCount');
         var totalClicksEl = document.getElementById('totalClicks');
 
-        // ── Popup positioning ──────────────────────────
+        // ── localStorage Persistence ────────────────────
+        function loadProgress() {
+            if (!storageAvailable) return;
+            try {
+                var raw = localStorage.getItem(PROGRESS_KEY);
+                if (!raw) return;
+                var data = JSON.parse(raw);
+                if (data && typeof data.learnedWords === 'object') {
+                    state.learnedWords = data.learnedWords;
+                }
+                if (data && data.isFinished) {
+                    state.isFinished = true;
+                }
+                if (typeof data.totalClicks === 'number') {
+                    state.totalClicks = data.totalClicks;
+                }
+            } catch(e) {
+                // Corrupted data — ignore and start fresh
+            }
+        }
+
+        function saveProgress() {
+            if (!storageAvailable) return;
+            try {
+                var data = {
+                    learnedWords: state.learnedWords,
+                    isFinished: state.isFinished,
+                    totalClicks: state.totalClicks,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+            } catch(e) {
+                // Storage full or unavailable — fail silently
+            }
+        }
+
+        // ── Audio / Speech ─────────────────────────────
+        function speakWord(word, speakerEl) {
+            if (!speechSupported) return;
+
+            var synth = window.speechSynthesis;
+
+            // Clear previous speaker visual state
+            if (currentSpeaker) {
+                currentSpeaker.classList.remove('speaking');
+                currentSpeaker = null;
+            }
+
+            synth.cancel();
+
+            var utterance = new SpeechSynthesisUtterance(word);
+            utterance.rate = 0.85;
+
+            // Try to pick an English voice
+            var voices = synth.getVoices();
+            if (voices.length > 0) {
+                var enVoice = null;
+                for (var i = 0; i < voices.length; i++) {
+                    if (voices[i].lang && voices[i].lang.indexOf('en') === 0) {
+                        enVoice = voices[i];
+                        break;
+                    }
+                }
+                if (enVoice) utterance.voice = enVoice;
+            }
+
+            function onDone() {
+                if (speakerEl) speakerEl.classList.remove('speaking');
+                popupSpeakBtn.classList.remove('speaking');
+                if (currentSpeaker === speakerEl || currentSpeaker === popupSpeakBtn) {
+                    currentSpeaker = null;
+                }
+            }
+
+            utterance.onstart = function() {
+                if (speakerEl) speakerEl.classList.add('speaking');
+                currentSpeaker = speakerEl;
+            };
+            utterance.onend = onDone;
+            utterance.onerror = onDone;
+
+            synth.speak(utterance);
+        }
+
+        // Preload voices (some browsers load them async)
+        if (speechSupported) {
+            speechSynthesis.onvoiceschanged = function() {
+                // Voices are now available
+            };
+            // Trigger voice loading
+            speechSynthesis.getVoices();
+        }
+
+        // ── Popup ──────────────────────────────────────
         function showPopup(el, word, pos, def) {
-            if (currentPopupWord === el) {
+            if (state.currentPopupWord === el) {
                 hidePopup();
                 return;
             }
-            currentPopupWord = el;
+            state.currentPopupWord = el;
 
             popupWord.textContent = word;
             popupPos.textContent = pos || '';
-            popupDef.textContent = def;
+            popupDef.textContent = def || '';
+            popupSpeakBtn.classList.remove('speaking');
+
+            // Show/hide speaker button based on support
+            document.getElementById('popupActions').style.display = speechSupported ? 'flex' : 'none';
 
             var rect = el.getBoundingClientRect();
-            var popupWidth = 260;
-            var left = rect.left + rect.width / 2 - popupWidth / 2;
-            var top = rect.bottom + 8;
+            var popupRect = popup.getBoundingClientRect();
+            var popupWidth = popupRect.width || 260;
+            var popupHeight = popupRect.height || 140;
 
-            // Keep popup within viewport
+            var left = rect.left + rect.width / 2 - popupWidth / 2;
+            var top = rect.bottom + 10;
+
+            // Keep popup within viewport horizontally
             if (left < 10) left = 10;
             if (left + popupWidth > window.innerWidth - 10) {
                 left = window.innerWidth - popupWidth - 10;
             }
             // If popup would go below viewport, show above
-            if (top + 120 > window.innerHeight) {
-                top = rect.top - 120 - 8;
+            if (top + popupHeight > window.innerHeight - 10) {
+                top = rect.top - popupHeight - 10;
             }
             if (top < 10) top = 10;
 
@@ -476,7 +799,7 @@
 
         function hidePopup() {
             popup.classList.remove('active');
-            currentPopupWord = null;
+            state.currentPopupWord = null;
         }
 
         popupClose.addEventListener('click', function(e) {
@@ -484,103 +807,353 @@
             hidePopup();
         });
 
-        // ── Word click handler ─────────────────────────
-        var articleBody = document.getElementById('articleBody');
+        // Popup "朗读" button
+        popupSpeakBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (state.currentPopupWord) {
+                var word = state.currentPopupWord.getAttribute('data-word');
+                if (word) {
+                    popupSpeakBtn.classList.remove('speaking');
+                    speakWord(word, popupSpeakBtn);
+                }
+            }
+        });
 
-        articleBody.addEventListener('click', function(e) {
-            var wordEl = e.target.closest('.word');
-            if (!wordEl) {
-                hidePopup();
+        // ── Mark word as learned ───────────────────────
+        function markWordAsLearned(wordLower) {
+            if (state.learnedWords[wordLower]) return; // Already learned
+
+            state.learnedWords[wordLower] = true;
+
+            // Update all instances in article body
+            var allDifficultWords = articleBody.querySelectorAll('.word.difficult');
+            for (var i = 0; i < allDifficultWords.length; i++) {
+                var dw = allDifficultWords[i];
+                if (dw.getAttribute('data-word') && dw.getAttribute('data-word').toLowerCase() === wordLower) {
+                    dw.classList.add('clicked-before');
+                }
+            }
+
+            // Update word panel item
+            var panelItem = wordPanelList.querySelector('.word-panel-item[data-word-lower="' + wordLower + '"]');
+            if (panelItem) {
+                panelItem.classList.add('learned');
+            }
+
+            saveProgress();
+        }
+
+        // ── Article Rendering ──────────────────────────
+        function renderArticle(article) {
+            articleBody.innerHTML = '';
+
+            var paragraphs = article.paragraphs;
+            for (var pi = 0; pi < paragraphs.length; pi++) {
+                var para = paragraphs[pi];
+                var block = document.createElement('div');
+                block.className = 'paragraph-block';
+
+                var textEl = document.createElement('p');
+                textEl.className = 'paragraph-text';
+
+                var tokens = para.tokens;
+                for (var ti = 0; ti < tokens.length; ti++) {
+                    var token = tokens[ti];
+
+                    if (token.is_word) {
+                        var span = document.createElement('span');
+                        var lower = token.word ? token.word.toLowerCase() : '';
+
+                        if (token.is_difficult) {
+                            span.className = 'word difficult';
+                            if (state.learnedWords[lower]) {
+                                span.classList.add('clicked-before');
+                            }
+                            span.setAttribute('data-word', token.word);
+                            span.setAttribute('data-definition', token.definition || '');
+                            span.setAttribute('data-pos', token.pos || '');
+                            span.setAttribute('data-difficult', 'true');
+                            span.textContent = token.text;
+
+                            // Add speaker icon if TTS is supported
+                            if (speechSupported) {
+                                var speaker = document.createElement('span');
+                                speaker.className = 'word-speaker';
+                                speaker.setAttribute('data-word', token.word);
+                                speaker.innerHTML = SPEAKER_SVG;
+                                speaker.title = '点击听发音';
+                                span.appendChild(speaker);
+                            }
+                        } else {
+                            span.className = 'word normal';
+                            span.setAttribute('data-word', token.word);
+                            span.setAttribute('data-difficult', 'false');
+                            span.textContent = token.text;
+                        }
+
+                        textEl.appendChild(span);
+                    } else {
+                        // Non-word token (space, punctuation) — preserve as text
+                        textEl.appendChild(document.createTextNode(token.text));
+                    }
+                }
+
+                block.appendChild(textEl);
+
+                // Translation toggle
+                var toggle = document.createElement('div');
+                toggle.className = 'translation-toggle';
+                toggle.setAttribute('data-para', String(pi));
+                toggle.innerHTML = '<span class="arrow">&#9654;</span><span class="toggle-label">显示翻译</span>';
+                block.appendChild(toggle);
+
+                var translationEl = document.createElement('div');
+                translationEl.className = 'translation-text';
+                translationEl.setAttribute('data-para', String(pi));
+                translationEl.textContent = para.translation;
+                block.appendChild(translationEl);
+
+                articleBody.appendChild(block);
+            }
+        }
+
+        // ── Word Panel Rendering ───────────────────────
+        function renderWordPanel(article) {
+            // Collect unique difficult words in order of first appearance
+            var uniqueWords = [];
+            var seen = {};
+
+            var paragraphs = article.paragraphs;
+            for (var pi = 0; pi < paragraphs.length; pi++) {
+                var tokens = paragraphs[pi].tokens;
+                for (var ti = 0; ti < tokens.length; ti++) {
+                    var token = tokens[ti];
+                    if (token.is_difficult && token.is_word) {
+                        var lower = token.word.toLowerCase();
+                        if (!seen[lower]) {
+                            seen[lower] = true;
+                            uniqueWords.push({
+                                word: token.word,
+                                lower: lower,
+                                definition: token.definition,
+                                pos: token.pos
+                            });
+                        }
+                    }
+                }
+            }
+
+            var count = uniqueWords.length;
+
+            if (count === 0) {
+                wordPanel.style.display = 'none';
                 return;
             }
 
-            e.stopPropagation();
-            totalClicks++;
+            wordPanel.style.display = 'block';
+            wordPanelTitle.innerHTML = '本课生词 <span class="count">(' + count + '个)</span>';
 
-            var isDifficult = wordEl.getAttribute('data-difficult') === 'true';
-            var word = wordEl.getAttribute('data-word');
+            wordPanelList.innerHTML = '';
+            for (var i = 0; i < uniqueWords.length; i++) {
+                var uw = uniqueWords[i];
+                var isLearned = !!state.learnedWords[uw.lower];
 
-            if (isDifficult) {
-                var definition = wordEl.getAttribute('data-definition');
-                var pos = wordEl.getAttribute('data-pos');
-                var lower = word.toLowerCase();
+                var item = document.createElement('div');
+                item.className = 'word-panel-item' + (isLearned ? ' learned' : '');
+                item.setAttribute('data-word-lower', uw.lower);
 
-                // Track learned words
-                if (!learnedWords[lower]) {
-                    learnedWords[lower] = true;
+                var wordSpan = document.createElement('span');
+                wordSpan.className = 'word-panel-word';
+                wordSpan.textContent = uw.word;
+
+                var defSpan = document.createElement('span');
+                defSpan.className = 'word-panel-def';
+                defSpan.textContent = uw.definition || '';
+
+                item.appendChild(wordSpan);
+                item.appendChild(defSpan);
+
+                // Panel speaker icon
+                if (speechSupported) {
+                    var panelSpeaker = document.createElement('span');
+                    panelSpeaker.className = 'word-panel-speaker';
+                    panelSpeaker.setAttribute('data-word', uw.word);
+                    panelSpeaker.innerHTML = PANEL_SPEAKER_SVG;
+                    panelSpeaker.title = '点击听发音';
+                    item.appendChild(panelSpeaker);
                 }
 
-                // Mark as clicked
-                wordEl.classList.add('clicked-before');
+                wordPanelList.appendChild(item);
+            }
+        }
 
-                showPopup(wordEl, word, pos, definition);
-            } else {
-                // Non-difficult word: open Chinese-friendly dictionary
-                hidePopup();
-                window.open(
-                    'https://dict.youdao.com/w/' + encodeURIComponent(word),
-                    '_blank'
-                );
+        // ── Restore finished state ─────────────────────
+        function restoreFinishedState() {
+            if (state.isFinished) {
+                var learnedCount = Object.keys(state.learnedWords).length;
+                learnedCountEl.textContent = learnedCount;
+                totalClicksEl.textContent = state.totalClicks;
+                finishMsg.classList.add('visible');
+                finishBtn.classList.add('done');
+                finishBtn.textContent = '已完成 ✓';
+                finishBtn.disabled = true;
+            }
+        }
+
+        // ── Populate header ────────────────────────────
+        function populateHeader(article) {
+            document.getElementById('articleTitle').textContent = article.title;
+            document.getElementById('articleSource').textContent = '来源: ' + article.source;
+            document.getElementById('articleDate').textContent = '日期: ' + article.date;
+            document.title = article.title + ' - Vocab in News';
+        }
+
+        // ── Fetch & Init ───────────────────────────────
+        async function loadArticle() {
+            try {
+                var resp = await fetch('/api/article');
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                var article = await resp.json();
+                state.article = article;
+
+                populateHeader(article);
+                renderArticle(article);
+                renderWordPanel(article);
+                restoreFinishedState();
+            } catch(err) {
+                console.error('Failed to load article:', err);
+                articleBody.innerHTML = '<div class="error-msg">文章加载失败，请检查网络后重试。<br><button onclick="location.reload()">重新加载</button></div>';
+            }
+        }
+
+        // ── Event Delegation: Article Body ─────────────
+        articleBody.addEventListener('click', function(e) {
+            // 1. Speaker icon click inside article
+            var speakerEl = e.target.closest('.word-speaker');
+            if (speakerEl) {
+                e.stopPropagation();
+                var word = speakerEl.getAttribute('data-word');
+                if (word) speakWord(word, speakerEl);
+                return;
+            }
+
+            // 2. Translation toggle
+            var toggle = e.target.closest('.translation-toggle');
+            if (toggle) {
+                e.stopPropagation();
+                var paraIdx = toggle.getAttribute('data-para');
+                var transEl = articleBody.querySelector('.translation-text[data-para="' + paraIdx + '"]');
+                if (!transEl) return;
+
+                var arrow = toggle.querySelector('.arrow');
+                var label = toggle.querySelector('.toggle-label');
+
+                if (transEl.classList.contains('visible')) {
+                    transEl.classList.remove('visible');
+                    toggle.classList.remove('open');
+                    if (arrow) arrow.innerHTML = '&#9654;';
+                    if (label) label.textContent = '显示翻译';
+                } else {
+                    transEl.classList.add('visible');
+                    toggle.classList.add('open');
+                    if (arrow) arrow.innerHTML = '&#9660;';
+                    if (label) label.textContent = '隐藏翻译';
+                }
+                return;
+            }
+
+            // 3. Word click
+            var wordEl = e.target.closest('.word');
+            if (wordEl) {
+                e.stopPropagation();
+                state.totalClicks++;
+
+                var isDifficult = wordEl.getAttribute('data-difficult') === 'true';
+                var word = wordEl.getAttribute('data-word');
+
+                if (isDifficult) {
+                    var definition = wordEl.getAttribute('data-definition');
+                    var pos = wordEl.getAttribute('data-pos');
+                    var lower = word.toLowerCase();
+
+                    // Track as learned
+                    if (!state.learnedWords[lower]) {
+                        markWordAsLearned(lower);
+                    }
+
+                    showPopup(wordEl, word, pos, definition);
+                } else {
+                    // Non-difficult word: open Youdao dictionary
+                    hidePopup();
+                    window.open(
+                        'https://dict.youdao.com/w/' + encodeURIComponent(word),
+                        '_blank'
+                    );
+                }
+                return;
+            }
+
+            // 4. Click elsewhere in article body — hide popup
+            hidePopup();
+        });
+
+        // ── Event Delegation: Word Panel ──────────────
+        wordPanel.addEventListener('click', function(e) {
+            var panelSpeaker = e.target.closest('.word-panel-speaker');
+            if (panelSpeaker) {
+                e.stopPropagation();
+                var word = panelSpeaker.getAttribute('data-word');
+                if (word) speakWord(word, panelSpeaker);
+                return;
             }
         });
 
         // ── Close popup on outside click ───────────────
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.word') && !e.target.closest('.word-popup')) {
+            if (!e.target.closest('.word') && !e.target.closest('.word-popup') && !e.target.closest('.word-panel-speaker')) {
                 hidePopup();
-            }
-        });
-
-        // ── Translation toggle ─────────────────────────
-        articleBody.addEventListener('click', function(e) {
-            var toggle = e.target.closest('.translation-toggle');
-            if (!toggle) return;
-
-            e.stopPropagation();
-            var paraIndex = toggle.getAttribute('data-para');
-            var textEl = document.querySelector(
-                '.translation-text[data-para="' + paraIndex + '"]'
-            );
-
-            if (textEl.classList.contains('visible')) {
-                textEl.classList.remove('visible');
-                toggle.classList.remove('open');
-                toggle.querySelector('.arrow').textContent = '▶';
-                toggle.childNodes[toggle.childNodes.length - 1].textContent = ' 显示翻译';
-            } else {
-                textEl.classList.add('visible');
-                toggle.classList.add('open');
-                toggle.querySelector('.arrow').textContent = '▼';
-                // Update text node after arrow
-                var arrow = toggle.querySelector('.arrow');
-                arrow.nextSibling.textContent = ' 隐藏翻译';
             }
         });
 
         // ── Finish button ──────────────────────────────
         finishBtn.addEventListener('click', function() {
-            var learnedCount = Object.keys(learnedWords).length;
+            if (state.isFinished) return; // Already done
+
+            var learnedCount = Object.keys(state.learnedWords).length;
 
             if (learnedCount === 0) {
-                // Student hasn't clicked any words — nudge them gently
                 var nudged = confirm(
                     '你还没有点击任何生词哦！\n\n点击黄色高亮的词可以查看中文释义，帮助你学习。\n\n要不要先去看看生词再点"完成"？\n\n（点"取消"继续阅读，点"确定"仍然完成）'
                 );
                 if (!nudged) {
-                    return;  // Go back to reading
+                    return;
                 }
             }
 
             learnedCountEl.textContent = learnedCount;
-            totalClicksEl.textContent = totalClicks;
+            totalClicksEl.textContent = state.totalClicks;
 
             finishMsg.classList.add('visible');
             finishBtn.classList.add('done');
             finishBtn.textContent = '已完成 ✓';
             finishBtn.disabled = true;
 
+            state.isFinished = true;
+            saveProgress();
+
             // Scroll to the message
             finishMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // ── Bootstrap ──────────────────────────────────
+        loadProgress();
+        loadArticle();
+
+        // Handle window resize to reposition popup if needed
+        window.addEventListener('resize', function() {
+            if (state.currentPopupWord) {
+                hidePopup();
+            }
         });
     })();
     </script>

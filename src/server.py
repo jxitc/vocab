@@ -56,10 +56,8 @@ def build_paragraphs_with_tokens(article: dict) -> list:
 
 @app.route("/")
 def index():
-    """Serve the main reading page."""
-    article = load_article()
-    paragraphs = build_paragraphs_with_tokens(article)
-    return render_template("index.html", article=article, paragraphs=paragraphs)
+    """Serve the main reading page shell (client-side rendering fetches /api/article)."""
+    return render_template("index.html")
 
 
 @app.route("/api/article")
