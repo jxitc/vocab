@@ -14,45 +14,46 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
                          "PingFang SC", "Microsoft YaHei", sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f8f6f2;
             color: #1a1a1a;
             line-height: 1.8;
             -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
-            max-width: 720px;
+            max-width: 680px;
             margin: 0 auto;
-            padding: 40px 24px 80px;
+            padding: 32px 20px 80px;
         }
 
+        /* ── Header ───────────────────────────────────── */
         header {
-            margin-bottom: 40px;
+            margin-bottom: 36px;
             padding-bottom: 24px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid #e8e4dc;
         }
 
         .site-name {
-            font-size: 14px;
-            color: #888;
-            text-transform: uppercase;
+            font-size: 13px;
+            color: #a09888;
             letter-spacing: 2px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .article-title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            line-height: 1.35;
-            color: #111;
-            margin-bottom: 16px;
+            line-height: 1.4;
+            color: #1a1a1a;
+            margin-bottom: 14px;
         }
 
         .article-meta {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #999;
             display: flex;
-            gap: 16px;
+            gap: 18px;
             flex-wrap: wrap;
         }
 
@@ -62,38 +63,514 @@
             gap: 4px;
         }
 
+        .level-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        /* ── Help hint ────────────────────────────────── */
+        .help-hint {
+            background: #fff9e6;
+            border: 1px solid #f0e4b8;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 28px;
+            font-size: 14px;
+            color: #8d6e00;
+            line-height: 1.6;
+        }
+
+        /* ── Article Body ─────────────────────────────── */
         .article-body {
-            font-size: 18px;
-            line-height: 2;
+            font-size: 19px;
+            line-height: 2.1;
             color: #222;
         }
 
-        .article-body p {
-            margin-bottom: 1.2em;
-            text-indent: 2em;
+        .paragraph-block {
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .article-body p:first-of-type {
-            text-indent: 0;
+        .paragraph-text {
+            margin-bottom: 0;
+        }
+
+        /* ── Word styles ──────────────────────────────── */
+        .word {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            border-radius: 3px;
+            padding: 1px 2px;
+            position: relative;
+        }
+
+        .word.difficult {
+            background-color: #fff3cd;
+            border-bottom: 2px solid #e6a817;
+            font-weight: 500;
+        }
+
+        .word.difficult:hover {
+            background-color: #ffe69c;
+            border-bottom-color: #cc8c00;
+        }
+
+        .word.normal:hover {
+            background-color: #e8e8e8;
+        }
+
+        .word.clicked-before {
+            background-color: #d4edda !important;
+            border-bottom-color: #28a745 !important;
+        }
+
+        /* ── Translation toggle ───────────────────────── */
+        .translation-toggle {
+            display: inline-block;
+            font-size: 13px;
+            color: #6b8ab7;
+            cursor: pointer;
+            margin-top: 6px;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 4px 0;
+            transition: color 0.15s;
+        }
+
+        .translation-toggle:hover {
+            color: #3a5fcd;
+        }
+
+        .translation-toggle .arrow {
+            display: inline-block;
+            transition: transform 0.2s ease;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+
+        .translation-toggle.open .arrow {
+            transform: rotate(90deg);
+        }
+
+        .translation-text {
+            display: none;
+            font-size: 15px;
+            color: #666;
+            line-height: 1.8;
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: #f5f3ef;
+            border-left: 3px solid #c4b89e;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .translation-text.visible {
+            display: block;
+        }
+
+        /* ── Popup / Tooltip ──────────────────────────── */
+        .word-popup {
+            position: fixed;
+            z-index: 1000;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+            padding: 14px 18px;
+            min-width: 180px;
+            max-width: 280px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            pointer-events: none;
+        }
+
+        .word-popup.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .word-popup .popup-word {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .word-popup .popup-pos {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .word-popup .popup-def {
+            font-size: 15px;
+            color: #c0392b;
+            font-weight: 500;
+        }
+
+        .word-popup .popup-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 16px;
+            color: #bbb;
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+            padding: 2px 6px;
+        }
+
+        .word-popup .popup-close:hover {
+            color: #666;
+        }
+
+        /* ── Completion Section ───────────────────────── */
+        .completion-section {
+            margin-top: 40px;
+            padding: 28px 24px;
+            background: #ffffff;
+            border: 1px solid #e8e4dc;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .finish-btn {
+            display: inline-block;
+            background: #2e7d32;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 1px;
+        }
+
+        .finish-btn:hover {
+            background: #1b5e20;
+        }
+
+        .finish-btn:active {
+            transform: scale(0.97);
+        }
+
+        .finish-btn.done {
+            background: #aaa;
+            cursor: default;
+        }
+
+        .finish-msg {
+            display: none;
+            margin-top: 18px;
+            padding: 16px 20px;
+            background: #e8f5e9;
+            border-radius: 10px;
+        }
+
+        .finish-msg.visible {
+            display: block;
+        }
+
+        .finish-msg .encouragement {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 6px;
+        }
+
+        .finish-msg .stats {
+            font-size: 14px;
+            color: #558b2f;
+        }
+
+        .counter-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .counter-item {
+            font-size: 13px;
+            color: #777;
+        }
+
+        .counter-item strong {
+            color: #2e7d32;
+            font-size: 18px;
+        }
+
+        /* ── Footer ───────────────────────────────────── */
+        footer {
+            text-align: center;
+            margin-top: 36px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* ── Mobile ───────────────────────────────────── */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 14px 60px;
+            }
+            .article-title {
+                font-size: 22px;
+            }
+            .article-body {
+                font-size: 17px;
+            }
+            .word-popup {
+                max-width: 240px;
+            }
+            .finish-btn {
+                padding: 12px 30px;
+                font-size: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <header>
             <div class="site-name">新闻词汇学习</div>
             <h1 class="article-title">{{ article.title }}</h1>
             <div class="article-meta">
                 <span>来源: {{ article.source }}</span>
                 <span>日期: {{ article.date }}</span>
+                <span class="level-badge">初中水平</span>
             </div>
         </header>
 
-        <div class="article-body">
-            {% for paragraph in article.body.split('\n\n') %}
-                <p>{{ paragraph }}</p>
+        <!-- Help hint -->
+        <div class="help-hint">
+            提示：<strong>黄色高亮</strong>的词是重点生词，点击可以查看中文释义。
+            其他英文单词也可以点击，会跳转到在线词典。每段下方有「显示翻译」按钮。
+        </div>
+
+        <!-- Article paragraphs with interactive words -->
+        <div class="article-body" id="articleBody">
+            {% for para in paragraphs %}
+            <div class="paragraph-block">
+                <p class="paragraph-text">
+                    {% for token in para.tokens %}
+                        {% if token.is_word %}
+                            {% if token.is_difficult %}
+                            <span class="word difficult"
+                                  data-word="{{ token.word }}"
+                                  data-definition="{{ token.definition }}"
+                                  data-pos="{{ token.pos }}"
+                                  data-difficult="true">{{ token.text }}</span>
+                            {% else %}
+                            <span class="word normal"
+                                  data-word="{{ token.word }}"
+                                  data-difficult="false">{{ token.text }}</span>
+                            {% endif %}
+                        {% else %}
+                            {{ token.text }}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                <div class="translation-toggle" data-para="{{ loop.index0 }}">
+                    <span class="arrow">&#9654;</span>显示翻译
+                </div>
+                <div class="translation-text" data-para="{{ loop.index0 }}">
+                    {{ para.translation }}
+                </div>
+            </div>
             {% endfor %}
         </div>
+
+        <!-- Completion Section -->
+        <div class="completion-section">
+            <button class="finish-btn" id="finishBtn">我读完了！</button>
+            <div class="finish-msg" id="finishMsg">
+                <div class="encouragement">太棒了！你今天读了一篇英语新闻，又进步了一点！</div>
+                <div class="counter-row">
+                    <div class="counter-item">
+                        学习了 <strong id="learnedCount">0</strong> 个生词
+                    </div>
+                    <div class="counter-item">
+                        共点击 <strong id="totalClicks">0</strong> 次
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Vocab in News &mdash; 用新闻学英语
+        </footer>
     </div>
+
+    <!-- Popup for word definitions -->
+    <div class="word-popup" id="wordPopup">
+        <button class="popup-close" id="popupClose">&times;</button>
+        <div class="popup-word" id="popupWord"></div>
+        <div class="popup-pos" id="popupPos"></div>
+        <div class="popup-def" id="popupDef"></div>
+    </div>
+
+    <script>
+    (function() {
+        // ── State ──────────────────────────────────────
+        var learnedWords = {};       // { "wordlower": true } for unique difficult words clicked
+        var totalClicks = 0;
+        var currentPopupWord = null;
+
+        var popup = document.getElementById('wordPopup');
+        var popupWord = document.getElementById('popupWord');
+        var popupPos = document.getElementById('popupPos');
+        var popupDef = document.getElementById('popupDef');
+        var popupClose = document.getElementById('popupClose');
+        var finishBtn = document.getElementById('finishBtn');
+        var finishMsg = document.getElementById('finishMsg');
+        var learnedCountEl = document.getElementById('learnedCount');
+        var totalClicksEl = document.getElementById('totalClicks');
+
+        // ── Popup positioning ──────────────────────────
+        function showPopup(el, word, pos, def) {
+            if (currentPopupWord === el) {
+                hidePopup();
+                return;
+            }
+            currentPopupWord = el;
+
+            popupWord.textContent = word;
+            popupPos.textContent = pos || '';
+            popupDef.textContent = def;
+
+            var rect = el.getBoundingClientRect();
+            var popupWidth = 260;
+            var left = rect.left + rect.width / 2 - popupWidth / 2;
+            var top = rect.bottom + 8;
+
+            // Keep popup within viewport
+            if (left < 10) left = 10;
+            if (left + popupWidth > window.innerWidth - 10) {
+                left = window.innerWidth - popupWidth - 10;
+            }
+            // If popup would go below viewport, show above
+            if (top + 120 > window.innerHeight) {
+                top = rect.top - 120 - 8;
+            }
+            if (top < 10) top = 10;
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+            popup.classList.add('active');
+        }
+
+        function hidePopup() {
+            popup.classList.remove('active');
+            currentPopupWord = null;
+        }
+
+        popupClose.addEventListener('click', function(e) {
+            e.stopPropagation();
+            hidePopup();
+        });
+
+        // ── Word click handler ─────────────────────────
+        var articleBody = document.getElementById('articleBody');
+
+        articleBody.addEventListener('click', function(e) {
+            var wordEl = e.target.closest('.word');
+            if (!wordEl) {
+                hidePopup();
+                return;
+            }
+
+            e.stopPropagation();
+            totalClicks++;
+
+            var isDifficult = wordEl.getAttribute('data-difficult') === 'true';
+            var word = wordEl.getAttribute('data-word');
+
+            if (isDifficult) {
+                var definition = wordEl.getAttribute('data-definition');
+                var pos = wordEl.getAttribute('data-pos');
+                var lower = word.toLowerCase();
+
+                // Track learned words
+                if (!learnedWords[lower]) {
+                    learnedWords[lower] = true;
+                }
+
+                // Mark as clicked
+                wordEl.classList.add('clicked-before');
+
+                showPopup(wordEl, word, pos, definition);
+            } else {
+                // Non-difficult word: open dictionary in new tab
+                hidePopup();
+                window.open(
+                    'https://www.merriam-webster.com/dictionary/' + encodeURIComponent(word),
+                    '_blank'
+                );
+            }
+        });
+
+        // ── Close popup on outside click ───────────────
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.word') && !e.target.closest('.word-popup')) {
+                hidePopup();
+            }
+        });
+
+        // ── Translation toggle ─────────────────────────
+        articleBody.addEventListener('click', function(e) {
+            var toggle = e.target.closest('.translation-toggle');
+            if (!toggle) return;
+
+            e.stopPropagation();
+            var paraIndex = toggle.getAttribute('data-para');
+            var textEl = document.querySelector(
+                '.translation-text[data-para="' + paraIndex + '"]'
+            );
+
+            if (textEl.classList.contains('visible')) {
+                textEl.classList.remove('visible');
+                toggle.classList.remove('open');
+                toggle.querySelector('.arrow').textContent = '▶';
+                toggle.childNodes[toggle.childNodes.length - 1].textContent = ' 显示翻译';
+            } else {
+                textEl.classList.add('visible');
+                toggle.classList.add('open');
+                toggle.querySelector('.arrow').textContent = '▼';
+                // Update text node after arrow
+                var arrow = toggle.querySelector('.arrow');
+                arrow.nextSibling.textContent = ' 隐藏翻译';
+            }
+        });
+
+        // ── Finish button ──────────────────────────────
+        finishBtn.addEventListener('click', function() {
+            var learnedCount = Object.keys(learnedWords).length;
+
+            learnedCountEl.textContent = learnedCount;
+            totalClicksEl.textContent = totalClicks;
+
+            finishMsg.classList.add('visible');
+            finishBtn.classList.add('done');
+            finishBtn.textContent = '已完成 ✓';
+            finishBtn.disabled = true;
+
+            // Scroll to the message
+            finishMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    })();
+    </script>
 </body>
 </html>

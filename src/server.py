@@ -1,12 +1,15 @@
 """
-Vocab in News - Web Server (Iteration 0)
-Minimal Flask app serving a single article reading page.
+Vocab in News - Web Server (Iteration 1)
+Flask app serving interactive article reading page with
+word annotation and paragraph-level Chinese translations.
 """
 
 import json
 import os
 
 from flask import Flask, jsonify, render_template
+
+from vocab_service import find_difficult_words, tokenize
 
 app = Flask(__name__)
 
@@ -18,18 +21,42 @@ def load_article():
         return json.load(f)
 
 
+def build_paragraphs_with_tokens(article: dict) -> list:
+    """Process article paragraphs, adding tokenization and difficult-word data."""
+    enriched = []
+    for para in article.get("paragraphs", []):
+        text = para["text"]
+        tokens = tokenize(text)
+        difficult_words = find_difficult_words(text)
+        enriched.append({
+            "text": text,
+            "translation": para["translation"],
+            "tokens": tokens,
+            "difficult_words": difficult_words,
+        })
+    return enriched
+
+
 @app.route("/")
 def index():
     """Serve the main reading page."""
     article = load_article()
-    return render_template("index.html", article=article)
+    paragraphs = build_paragraphs_with_tokens(article)
+    return render_template("index.html", article=article, paragraphs=paragraphs)
 
 
 @app.route("/api/article")
 def api_article():
-    """Return article as JSON."""
+    """Return article as JSON with vocabulary annotations."""
     article = load_article()
-    return jsonify(article)
+    paragraphs = build_paragraphs_with_tokens(article)
+    return jsonify({
+        "title": article["title"],
+        "source": article["source"],
+        "url": article.get("url", ""),
+        "date": article["date"],
+        "paragraphs": paragraphs,
+    })
 
 
 if __name__ == "__main__":
