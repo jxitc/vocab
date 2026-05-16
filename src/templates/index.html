@@ -1241,6 +1241,12 @@
                     <div class="counter-item">
                         共点击 <strong id="totalClicks">0</strong> 次
                     </div>
+                    <div class="counter-item" id="readingTimeItem" style="display:none;">
+                        阅读用时 <strong id="readingTime">0</strong> 分钟
+                    </div>
+                    <div class="counter-item" id="readingSpeedItem" style="display:none;">
+                        阅读速度 <strong id="readingSpeed">0</strong> 词/分钟
+                    </div>
                 </div>
             </div>
 
@@ -1306,7 +1312,8 @@
             myWordsVisible: false,
             totalArticlesRead: 0,
             totalWordsLearned: 0,
-            lastReadDates: []     // ISO date strings for streak calculation
+            lastReadDates: [],    // ISO date strings for streak calculation
+            readingStartTime: null  // timestamp when article loaded
         };
 
         var currentSpeaker = null;
@@ -1341,6 +1348,10 @@
         var finishMsg = document.getElementById('finishMsg');
         var learnedCountEl = document.getElementById('learnedCount');
         var totalClicksEl = document.getElementById('totalClicks');
+        var readingTimeEl = document.getElementById('readingTime');
+        var readingTimeItem = document.getElementById('readingTimeItem');
+        var readingSpeedEl = document.getElementById('readingSpeed');
+        var readingSpeedItem = document.getElementById('readingSpeedItem');
         var readingStats = document.getElementById('readingStats');
         var statArticles = document.getElementById('statArticles');
         var statWordsTotal = document.getElementById('statWordsTotal');
@@ -2160,6 +2171,7 @@
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var article = await resp.json();
                 state.article = article;
+                state.readingStartTime = Date.now();
 
                 loadingEl.style.display = 'none';
 
@@ -2393,6 +2405,27 @@
 
             learnedCountEl.textContent = learnedCount;
             totalClicksEl.textContent = state.totalClicks;
+
+            // Calculate reading time and speed
+            if (state.readingStartTime) {
+                var elapsedSec = Math.round((Date.now() - state.readingStartTime) / 1000);
+                var minutes = Math.floor(elapsedSec / 60);
+                var seconds = elapsedSec % 60;
+                readingTimeEl.textContent = minutes + '分' + seconds + '秒';
+                readingTimeItem.style.display = '';
+
+                // Words per minute (count words in article text)
+                var wordCount = 0;
+                if (state.article && state.article.paragraphs) {
+                    for (var pi = 0; pi < state.article.paragraphs.length; pi++) {
+                        var text = state.article.paragraphs[pi].text;
+                        wordCount += text.split(/\\s+/).length;
+                    }
+                }
+                var wpm = elapsedSec > 0 ? Math.round(wordCount / (elapsedSec / 60)) : 0;
+                readingSpeedEl.textContent = wpm;
+                readingSpeedItem.style.display = '';
+            }
 
             finishMsg.classList.add('visible');
             finishBtn.classList.add('done');
