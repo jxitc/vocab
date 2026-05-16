@@ -208,6 +208,17 @@
         .share-btn:hover { border-color: #999; color: #666; }
         .share-btn.copied { color: #43a047; border-color: #66bb6a; }
 
+        .daily-summary {
+            background: #e8f5e9;
+            border: 1.5px solid #a5d6a7;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: #2e7d32;
+            text-align: center;
+        }
+
         .article-card-star {
             display: inline;
             color: #f5a623;
@@ -1926,6 +1937,7 @@
         body.dark .share-btn { background: #252528; border-color: #3a3a40; color: #555; }
         body.dark .share-btn:hover { border-color: #555; color: #999; }
         body.dark .share-btn.copied { color: #66bb6a; border-color: #3a6b3a; }
+        body.dark .daily-summary { background: #1a2e1a; border-color: #2a5a2a; color: #81c784; }
         body.dark .focus-mode-toggle {
             background: #252528;
             border-color: #3a3a40;
@@ -2174,6 +2186,10 @@
     <div class="read-progress-bar" id="readProgressBar"><div class="read-progress-fill" id="readProgressFill"></div></div>
     <button class="back-to-top" id="backToTop" title="返回顶部">↑</button>
     <div class="container">
+        <!-- Daily Summary Banner -->
+        <div class="daily-summary" id="dailySummary" style="display:none;">
+            <span id="dailySummaryText"></span>
+        </div>
         <!-- Header -->
         <header>
             <div class="site-name">
@@ -2535,6 +2551,8 @@
         var shareBtn = document.getElementById('shareBtn');
         var backToTopBtn = document.getElementById('backToTop');
         var readProgressFill = document.getElementById('readProgressFill');
+        var dailySummary = document.getElementById('dailySummary');
+        var dailySummaryText = document.getElementById('dailySummaryText');
 
         // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
@@ -3977,6 +3995,27 @@
             return div.innerHTML;
         }
 
+        function showDailySummary() {
+            var today = new Date().toISOString().split('T')[0];
+            var readToday = 0;
+            var learnedToday = 0;
+            for (var date in state.lastReadDates) {
+                if (state.lastReadDates.hasOwnProperty(date) && date === today) {
+                    readToday++;
+                }
+            }
+            // Count words learned today (approximate from learnedWords)
+            var todayArticles = 0;
+            var totalLearned = Object.keys(state.learnedWords).length;
+            if (state.todayReadCount > 0 || totalLearned > 0) {
+                dailySummary.style.display = 'block';
+                var parts = [];
+                if (state.todayReadCount > 0) parts.push(state.todayReadCount + ' 篇文章');
+                if (totalLearned > 0) parts.push(totalLearned + ' 个生词');
+                dailySummaryText.textContent = '☀️ 今天已读 ' + parts.join('，学习了 ') + '。继续加油！';
+            }
+        }
+
         // ── URL Params ────────────────────────────────
         function getUrlParam(name) {
             var params = new URLSearchParams(window.location.search);
@@ -4068,6 +4107,7 @@
             loadProgress();
             loadKnownWords();
             loadStats();
+            showDailySummary();
             loadAchievements();
             // Track initial level usage
             state.usedLevels[state.userLevel] = true;
