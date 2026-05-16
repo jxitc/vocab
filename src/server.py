@@ -1,5 +1,5 @@
 """
-Vocab in News - Web Server (Iteration 23)
+Vocab in News - Web Server (Iteration 24)
 Flask app serving interactive article reading page with
 word annotation, paragraph-level Chinese translations,
 multiple difficulty levels, and multiple articles.
@@ -118,6 +118,7 @@ def api_articles():
             "source": a.get("source", ""),
             "date": a.get("date", ""),
             "wordCount": word_count,
+            "topic": a.get("topic", ""),
         })
     return jsonify(summaries)
 
@@ -167,6 +168,7 @@ def api_article():
         "maxHighlights": get_max_highlights(user_level),
         "paragraphs": paragraphs,
         "comprehension": article.get("comprehension", []),
+        "topic": article.get("topic", ""),
     })
 
 

@@ -32,7 +32,8 @@
         "question": "The planet is very cold, below freezing.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "太空"
   },
   {
     "id": 1,
@@ -67,7 +68,8 @@
         "question": "Pandas eat mainly meat and fish.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "自然"
   },
   {
     "id": 2,
@@ -102,7 +104,8 @@
         "question": "Esports players don't need any physical training.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "体育"
   },
   {
     "id": 3,
@@ -137,7 +140,8 @@
         "question": "She scored 400 points in the competition.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "体育"
   },
   {
     "id": 4,
@@ -172,7 +176,8 @@
         "question": "Crows cannot use tools.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "自然"
   },
   {
     "id": 5,
@@ -207,7 +212,8 @@
         "question": "Her invention is very expensive to build.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "环保"
   },
   {
     "id": 6,
@@ -242,7 +248,8 @@
         "question": "He performed in London.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "文化"
   },
   {
     "id": 7,
@@ -277,7 +284,8 @@
         "question": "The children in the village already had computers.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "教育"
   },
   {
     "id": 8,
@@ -312,7 +320,8 @@
         "question": "The space station orbits at 100 kilometers above Earth.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "太空"
   },
   {
     "id": 9,
@@ -347,7 +356,8 @@
         "question": "The girl who invented it is from China.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "环保"
   },
   {
     "id": 10,
@@ -382,7 +392,8 @@
         "question": "The study was published in the journal 'Science'.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "健康"
   },
   {
     "id": 11,
@@ -417,7 +428,8 @@
         "question": "The artist used digital printing to create the mural.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "艺术"
   },
   {
     "id": 12,
@@ -452,7 +464,8 @@
         "question": "The team was from Beijing.",
         "answer": false
       }
-    ]
+    ],
+    "topic": "城市"
   },
   {
     "id": 13,
@@ -487,7 +500,8 @@
         "text": "Education experts have praised LingoBuddy for its innovative approach. Professor James Liu, a language education researcher at Stanford University, said: 'Maria has created something that many professional companies have tried and failed to do — she made language practice feel natural and fun.' Maria plans to add more languages to the app next year, including Japanese, Korean, and Arabic.",
         "translation": "教育专家赞扬了LingoBuddy的创新方法。斯坦福大学语言教育研究员刘詹姆斯教授说：「玛利亚创造了许多专业公司尝试但未能做到的事情——她让语言练习变得自然而有趣。」玛利亚计划明年为应用添加更多语言，包括日语、韩语和阿拉伯语。"
       }
-    ]
+    ],
+    "topic": "教育"
   },
   {
     "id": 14,
@@ -522,6 +536,79 @@
         "text": "The project has received attention from city officials, and other schools are now planning similar garden projects. The Lincoln students have created a simple guide to help other schools get started. 'We learned that you don't have to wait until you're an adult to make a difference,' said Emma Davis, 13, one of the student leaders. 'If you see a problem in your neighborhood, you can be the one to fix it.'",
         "translation": "该项目引起了市政官员的关注，其他学校正在规划类似的花园项目。林肯中学的学生们创建了一个简单的指南来帮助其他学校起步。「我们学到了，你不必等到成为成年人才去做出改变，」13岁的学生领袖之一艾玛·戴维斯说。「如果你看到社区中的问题，你可以成为解决它的人。」"
       }
-    ]
+    ],
+    "topic": "城市"
+  },
+  {
+    "id": 15,
+    "title": "A 13-Year-Old Chess Champion from India Just Beat a Grandmaster Twice His Age",
+    "source": "体育周刊",
+    "url": "https://example.com/chess-teen-champion",
+    "date": "2026-05-08",
+    "comprehension": [
+      {
+        "question": "The chess champion is 13 years old.",
+        "answer": true
+      },
+      {
+        "question": "He is from China.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A 13-year-old boy from India has made history by becoming the youngest player to defeat a world top-10 grandmaster in an official tournament. Arjun Patel, who learned chess at age five from his grandfather, won a stunning victory against a 26-year-old grandmaster from Russia at the Asian Chess Championship held in Singapore last weekend. The match lasted more than four hours and ended with a brilliant checkmate that surprised even the tournament commentators.",
+        "translation": "一名13岁的印度男孩创造了历史，成为在正式比赛中击败世界前十特级大师的最年轻棋手。阿尔琼·帕特尔五岁时从祖父那里学会下棋，上周末在新加坡举行的亚洲国际象棋锦标赛上，他惊人地战胜了一位26岁的俄罗斯特级大师。这场比赛持续了四个多小时，以一个连锦标赛解说员都感到惊讶的精彩将杀结束。"
+      },
+      {
+        "text": "Arjun's journey in chess began in a small apartment in Mumbai, where his grandfather taught him the basics using an old wooden chess set. 'My grandfather always told me that chess is like life — you need to think three steps ahead,' Arjun said after his victory. He now practices for about four hours every day, balancing schoolwork and chess training. His parents have been supportive, but they make sure he doesn't miss his regular classes.",
+        "translation": "阿尔琼的国际象棋之旅始于孟买的一间小公寓，他的祖父用一套旧木制象棋教他基础知识。「我祖父总是告诉我，国际象棋就像生活——你需要提前想三步，」阿尔琼在获胜后说。他现在每天练习大约四个小时，平衡学业和国际象棋训练。他的父母一直很支持，但他们确保他不会错过常规课程。"
+      },
+      {
+        "text": "What makes Arjun's playing style special is his creativity. While many young players rely on memorizing opening moves from books, Arjun often creates unexpected strategies in the middle of a game. 'He plays with imagination,' said the grandmaster he defeated. 'I was prepared for standard openings, but he kept surprising me with moves I had never seen before.' Chess experts have compared his style to some of the greatest players in history.",
+        "translation": "阿尔琼的下棋风格特别之处在于他的创造力。虽然许多年轻棋手依赖记忆书本上的开局着法，阿尔琼经常在对局中途创造出意想不到的策略。「他充满想象力地下棋，」被他击败的特级大师说。「我准备了标准开局，但他不断用我从未见过的着法让我惊讶。」国际象棋专家将他的风格比作历史上一些最伟大的棋手。"
+      },
+      {
+        "text": "Arjun's victory has inspired many young people in India to take up chess. Several schools in Mumbai have started chess clubs, and Arjun himself volunteers to teach younger children on weekends. 'I want to show other kids that age doesn't matter,' he said. 'If you love something and work hard, you can achieve amazing things.' He is now preparing for the World Junior Chess Championship later this year.",
+        "translation": "阿尔琼的胜利激励了许多印度年轻人开始学习国际象棋。孟买的几所学校已经开设了国际象棋俱乐部，阿尔琼本人也在周末志愿教更小的孩子。「我想告诉其他孩子，年龄不重要，」他说。「如果你热爱某件事并努力去做，你就能取得了不起的成就。」他正在为今年晚些时候的世界青少年国际象棋锦标赛做准备。"
+      }
+    ],
+    "topic": "体育"
+  },
+  {
+    "id": 16,
+    "title": "Teen Engineers Build a Robot That Can Plant 1,000 Trees in a Single Day",
+    "source": "科技日报",
+    "url": "https://example.com/tree-planting-robot",
+    "date": "2026-05-12",
+    "comprehension": [
+      {
+        "question": "The robot can plant 1,000 trees in one day.",
+        "answer": true
+      },
+      {
+        "question": "The robot was built by university professors.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A team of high school students from Shenzhen has built a robot that could help fight climate change — one tree at a time. Their invention, called 'GreenBot', is a small autonomous vehicle that can dig holes, plant seeds, and water them automatically. In field tests, a single GreenBot was able to plant over 1,000 tree seeds in just one day, which is about 20 times faster than a human worker can do by hand.",
+        "translation": "深圳的一队高中生制造了一个可以帮助应对气候变化的机器人——一次种一棵树。他们的发明名为「GreenBot」，是一种小型自主车辆，可以自动挖洞、播种和浇水。在实地测试中，单个GreenBot一天内就能种植超过1000颗树种子，这大约是人工种植速度的20倍。"
+      },
+      {
+        "text": "The idea came to the team leader, 16-year-old Zhang Wei, during a summer camp trip to a region that had been affected by forest fires. 'I saw miles and miles of land with no trees,' he recalled. 'I thought, there must be a faster way to bring forests back.' Together with four classmates from the school's robotics club, he spent eight months designing and building the GreenBot. They used parts from old electronics and received a small grant from a local environmental organization.",
+        "translation": "这个想法是队长、16岁的张伟在一次夏令营旅行中想到的，他们去了一个受森林火灾影响的地区。「我看到连绵数英里的土地没有树木，」他回忆道。「我想，一定有更快的方法让森林恢复。」他与学校机器人俱乐部的四位同学一起，花了八个月时间设计和制造GreenBot。他们使用了旧电子产品的零件，并获得了当地环保组织的小额资助。"
+      },
+      {
+        "text": "The GreenBot uses a simple GPS system to navigate and a camera to identify good spots for planting. It carries a container with hundreds of seed balls — small balls of soil and nutrients with a tree seed inside. When it finds a suitable location, it drills a small hole, drops a seed ball, covers it with soil, and sprays a measured amount of water. The robot is powered by solar panels and can work for up to 10 hours on a sunny day.",
+        "translation": "GreenBot使用简单的GPS系统导航，用摄像头识别适合种植的地点。它携带一个装有数百个种子球的容器——种子球是由土壤和营养物质组成的小球，内含一颗树种。当它找到合适的位置时，会钻一个小洞，放入种子球，用土覆盖，并喷洒定量的水。机器人由太阳能板供电，在晴天可以工作长达10小时。"
+      },
+      {
+        "text": "The students' project won first prize at the National Youth Science and Technology Competition. Environmental experts have praised the design for being both practical and affordable — each GreenBot costs less than 2,000 yuan to build. The team has shared their design plans online for free, hoping that people in other countries will build their own GreenBots. 'We don't want to make money from this,' Zhang said. 'We want to help the planet.'",
+        "translation": "学生们的项目在全国青少年科技竞赛中获得了一等奖。环保专家赞扬了该设计既实用又经济——每个GreenBot的制造成本不到2000元。团队已在网上免费分享了他们的设计方案，希望其他国家的人也能制造自己的GreenBot。「我们不想从中赚钱，」张伟说。「我们想帮助地球。」"
+      }
+    ],
+    "topic": "科技"
   }
 ]

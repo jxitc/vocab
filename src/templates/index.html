@@ -232,6 +232,37 @@
             color: #aaa;
         }
 
+        .topic-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .topic-太空 { background: #e3f2fd; color: #1565c0; }
+        .topic-自然 { background: #e8f5e9; color: #2e7d32; }
+        .topic-体育 { background: #fce4ec; color: #c62828; }
+        .topic-环保 { background: #e0f2f1; color: #00695c; }
+        .topic-文化 { background: #f3e5f5; color: #6a1b9a; }
+        .topic-教育 { background: #fff3e0; color: #e65100; }
+        .topic-健康 { background: #fce4ec; color: #ad1457; }
+        .topic-艺术 { background: #f9fbe7; color: #827717; }
+        .topic-城市 { background: #e8eaf6; color: #283593; }
+        .topic-科技 { background: #e1f5fe; color: #0277bd; }
+        body.dark .topic-太空 { background: #0d2137; color: #64b5f6; }
+        body.dark .topic-自然 { background: #0d2e0d; color: #81c784; }
+        body.dark .topic-体育 { background: #2e0d0d; color: #ef9a9a; }
+        body.dark .topic-环保 { background: #0d2e2e; color: #80cbc4; }
+        body.dark .topic-文化 { background: #1a0d2e; color: #ce93d8; }
+        body.dark .topic-教育 { background: #2e1a0d; color: #ffab91; }
+        body.dark .topic-健康 { background: #2e0d1a; color: #f48fb1; }
+        body.dark .topic-艺术 { background: #1a1a0d; color: #d4e157; }
+        body.dark .topic-城市 { background: #0d0d2e; color: #9fa8da; }
+        body.dark .topic-科技 { background: #0d1a2e; color: #81d4fa; }
+
         @keyframes badgePulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
@@ -3389,8 +3420,9 @@
 
                 var wordCount = a.wordCount || 0;
                 var readTime = Math.max(1, Math.round(wordCount / 150));
+                var topicTag = a.topic ? '<span class="topic-tag topic-' + escapeHtml(a.topic) + '">' + escapeHtml(a.topic) + '</span>' : '';
                 card.innerHTML =
-                    '<div class="article-card-title">' + escapeHtml(a.title) + badge + '</div>' +
+                    '<div class="article-card-title">' + escapeHtml(a.title) + badge + topicTag + '</div>' +
                     '<div class="article-card-meta">' +
                         '<span>' + escapeHtml(a.source) + '</span>' +
                         '<span>' + escapeHtml(a.date) + '</span>' +
