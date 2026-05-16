@@ -2900,6 +2900,58 @@
             }
         });
 
+        // ── Keyboard Shortcuts ──────────────────────────
+        document.addEventListener('keydown', function(e) {
+            // Don't intercept when user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' ||
+                e.target.tagName === 'SELECT' || e.target.isContentEditable) return;
+
+            // 1-4: switch difficulty levels
+            if (e.key >= '1' && e.key <= '4') {
+                var lvl = parseInt(e.key);
+                state.userLevel = lvl;
+                savePreferences();
+                updateLevelButtons();
+                loadArticleContent(state.articleId);
+                return;
+            }
+
+            // Escape: close popups/panels
+            if (e.key === 'Escape') {
+                if (popup.classList.contains('active')) {
+                    hidePopup();
+                } else if (myWordsPanel.classList.contains('visible')) {
+                    myWordsPanel.classList.remove('visible');
+                    state.myWordsVisible = false;
+                }
+                return;
+            }
+
+            // Arrow keys: switch articles (when not in an active popup)
+            if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !popup.classList.contains('active')) {
+                var articles = state.articles;
+                if (articles.length <= 1) return;
+                var curIdx = -1;
+                for (var i = 0; i < articles.length; i++) {
+                    if (articles[i].id === state.articleId) { curIdx = i; break; }
+                }
+                if (e.key === 'ArrowLeft') {
+                    curIdx = (curIdx - 1 + articles.length) % articles.length;
+                } else {
+                    curIdx = (curIdx + 1) % articles.length;
+                }
+                state.articleId = articles[curIdx].id;
+                savePreferences();
+                loadArticleContent(state.articleId);
+            }
+        });
+
+        // Help hint: mention keyboard shortcuts
+        var helpHint = document.querySelector('.help-hint');
+        if (helpHint) {
+            helpHint.innerHTML += '<br>快捷键：<strong>1-4</strong> 切换难度 · <strong>← →</strong> 切换文章 · <strong>Esc</strong> 关闭弹窗';
+        }
+
         // ── Bootstrap ──────────────────────────────────
         init();
 
