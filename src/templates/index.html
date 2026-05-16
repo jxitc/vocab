@@ -258,6 +258,23 @@
             overflow: hidden;
         }
 
+        .article-card-progress {
+            height: 3px;
+            background: #e8e4dc;
+            border-radius: 0 0 8px 8px;
+            margin: 6px -16px -12px -16px;
+            overflow: hidden;
+        }
+        .article-card-progress-fill {
+            height: 100%;
+            background: #66bb6a;
+            border-radius: 0 0 8px 8px;
+            transition: width 0.3s ease;
+        }
+        .article-card-progress-fill.complete {
+            background: #43a047;
+        }
+
         .article-card-meta {
             font-size: 11px;
             color: #999;
@@ -1776,6 +1793,8 @@
             color: #777;
         }
         body.dark .topic-chip:hover { border-color: #555; color: #aaa; }
+        body.dark .article-card-progress { background: #3a3a40; }
+        body.dark .article-card-progress-fill { background: #4a8a4a; }
         body.dark .topic-chip.active {
             background: #3a6b3a;
             color: #81c784;
@@ -2260,6 +2279,7 @@
             darkMode: false,
             favoriteArticles: {},       // {articleId: true} for bookmarked articles
             articleScrollPositions: {}, // {articleId: scrollY} for restore position
+            articleReadPct: {},        // {articleId: percent (0-100)} reading progress
             topicFilter: ''            // current topic filter ('' = all)
         };
 
@@ -2357,11 +2377,18 @@
                     state.favoriteArticles = data.favoriteArticles;
                 }
             } catch(e) { /* ignore */ }
-            // Load scroll positions
+            // Load scroll positions and read percentages
             try {
                 var scrollRaw = localStorage.getItem(PREF_KEY + '_scroll');
                 if (scrollRaw) {
-                    state.articleScrollPositions = JSON.parse(scrollRaw);
+                    var scrollData = JSON.parse(scrollRaw);
+                    // Support both old format ({id: scrollY}) and new format ({scroll: {id: y}, pct: {id: p}})
+                    if (scrollData.pct) {
+                        state.articleReadPct = scrollData.pct;
+                        state.articleScrollPositions = scrollData.scroll || scrollData;
+                    } else {
+                        state.articleScrollPositions = scrollData;
+                    }
                 }
             } catch(e) { /* ignore */ }
         }
@@ -2404,7 +2431,10 @@
                 };
                 localStorage.setItem(PREF_KEY, JSON.stringify(data));
                 // Save scroll positions separately (changes frequently)
-                localStorage.setItem(PREF_KEY + '_scroll', JSON.stringify(state.articleScrollPositions));
+                localStorage.setItem(PREF_KEY + '_scroll', JSON.stringify({
+                    scroll: state.articleScrollPositions,
+                    pct: state.articleReadPct
+                }));
             } catch(e) { /* ignore */ }
         }
 
@@ -3630,6 +3660,12 @@
             renderArticleSwitcher();
         }
 
+        function calcReadPct() {
+            var docH = document.documentElement.scrollHeight - window.innerHeight;
+            if (docH <= 0) return 0;
+            return Math.min(100, Math.round((window.scrollY / docH) * 100));
+        }
+
         // ── Article Switcher ───────────────────────────
         function renderArticleSwitcher() {
             var randomWrap = document.getElementById('randomBtnWrap');
@@ -3672,13 +3708,19 @@
                 var readTime = Math.max(1, Math.round(wordCount / 150));
                 var topicTag = a.topic ? '<span class="topic-tag topic-' + escapeHtml(a.topic) + '">' + escapeHtml(a.topic) + '</span>' : '';
                 var favStar = state.favoriteArticles[a.id] ? ' <span class="article-card-star">★</span>' : '';
+                var pct = state.articleReadPct[a.id] || 0;
+                var progressBar = '';
+                if (pct > 0) {
+                    var cls = pct >= 95 ? ' complete' : '';
+                    progressBar = '<div class="article-card-progress"><div class="article-card-progress-fill' + cls + '" style="width:' + pct + '%;"></div></div>';
+                }
                 card.innerHTML =
                     '<div class="article-card-title">' + escapeHtml(a.title) + badge + topicTag + favStar + '</div>' +
                     '<div class="article-card-meta">' +
                         '<span>' + escapeHtml(a.source) + '</span>' +
                         '<span>' + escapeHtml(a.date) + '</span>' +
                         '<span>' + wordCount + '词 · ' + readTime + '分钟</span>' +
-                    '</div>';
+                    '</div>' + progressBar;
 
                 articleSwitcher.appendChild(card);
             }
@@ -4094,6 +4136,7 @@
             var pick = others[Math.floor(Math.random() * others.length)];
             // Save scroll position for current article
             state.articleScrollPositions[state.articleId] = window.scrollY;
+            state.articleReadPct[state.articleId] = calcReadPct();
             state.articleId = pick;
             savePreferences();
             state.isFinished = false;
@@ -4116,6 +4159,7 @@
 
             // Save scroll position for current article
             state.articleScrollPositions[state.articleId] = window.scrollY;
+            state.articleReadPct[state.articleId] = calcReadPct();
 
             state.articleId = newArticleId;
             savePreferences();
@@ -4153,6 +4197,10 @@
                     return;
                 }
             }
+
+            // Mark article as 100% read
+            state.articleReadPct[state.articleId] = 100;
+            savePreferences();
 
             learnedCountEl.textContent = learnedCount;
             totalClicksEl.textContent = state.totalClicks;
@@ -4709,6 +4757,14 @@
         window.addEventListener('resize', function() {
             if (state.currentPopupWord) {
                 hidePopup();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (state.articleId != null) {
+                state.articleScrollPositions[state.articleId] = window.scrollY;
+                state.articleReadPct[state.articleId] = calcReadPct();
+                savePreferences();
             }
         });
     })();
