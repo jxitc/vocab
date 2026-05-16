@@ -12,6 +12,25 @@
             padding: 0;
         }
 
+        .read-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            z-index: 1001;
+        }
+        .read-progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #66bb6a, #43a047);
+            transition: width 0.15s linear;
+        }
+        body.dark .read-progress-fill {
+            background: linear-gradient(90deg, #4a8a4a, #66bb6a);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
                          "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -2134,6 +2153,7 @@
     </style>
 </head>
 <body>
+    <div class="read-progress-bar" id="readProgressBar"><div class="read-progress-fill" id="readProgressFill"></div></div>
     <button class="back-to-top" id="backToTop" title="返回顶部">↑</button>
     <div class="container">
         <!-- Header -->
@@ -2493,6 +2513,7 @@
         var achievementToast = null;
         var favBtn = document.getElementById('favBtn');
         var backToTopBtn = document.getElementById('backToTop');
+        var readProgressFill = document.getElementById('readProgressFill');
 
         // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
@@ -4974,7 +4995,7 @@
             }
         });
 
-        // ── Back to Top ────────────────────────────────
+        // ── Back to Top + Reading Progress Bar ─────────
         var backToTopTimer = null;
         window.addEventListener('scroll', function() {
             if (backToTopTimer) return;
@@ -4986,6 +5007,9 @@
                     backToTopBtn.classList.remove('visible');
                 }
             }, 100);
+            // Update reading progress bar (no debounce needed)
+            var pct = calcReadPct();
+            if (readProgressFill) readProgressFill.style.width = pct + '%';
         }, { passive: true });
 
         backToTopBtn.addEventListener('click', function() {

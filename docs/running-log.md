@@ -273,3 +273,10 @@
 - [x] 滚动监听 (passive模式，100ms防抖)，暗色模式适配
 - [x] 78 tests passing
 
+## Iter 33
+### 已实现
+- [x] 阅读进度指示条 — 页面顶部固定3px绿色渐变进度条，随滚动实时更新
+- [x] 与返回顶部按钮共用scroll事件 (passive模式)
+- [x] 暗色模式适配
+- [x] 78 tests passing
+
