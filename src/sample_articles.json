@@ -826,5 +826,65 @@
       }
     ],
     "topic": "艺术"
+  },
+  {
+    "id": 23,
+    "title": "Teenager Creates Smart Recycling Bin That Uses AI to Sort Waste",
+    "source": "科技日报",
+    "url": "",
+    "date": "2026-05-16",
+    "comprehension": [
+      {"question": "The smart bin uses artificial intelligence to recognize different types of waste.", "answer": true},
+      {"question": "The recycling bin was developed by a university research team.", "answer": false}
+    ],
+    "paragraphs": [
+      {
+        "text": "A 14-year-old student from Shanghai has built a smart recycling bin that uses artificial intelligence to sort different types of waste automatically. The device, called 'EcoSort', can recognize plastic, paper, glass, metal, and food waste with over 95 percent accuracy. When you throw something into the bin, a small camera takes a photo and an AI program identifies the material. Then a simple mechanical arm pushes the item into the correct compartment.",
+        "translation": "一位来自上海的14岁学生制作了一个智能回收箱，利用人工智能自动分类不同类型的垃圾。这个名为'EcoSort'的设备可以识别塑料、纸张、玻璃、金属和厨余垃圾，准确率超过95%。当你把东西扔进垃圾桶时，一个小型摄像头会拍照，AI程序会识别材料。然后一个简单的机械臂将物品推入正确的隔间。"
+      },
+      {
+        "text": "The idea came to Li Wei during his school's environmental science class. 'We learned that millions of tons of recyclable materials end up in landfills every year because people don't sort their waste correctly,' he explained. 'I thought technology could help solve this problem.' Li Wei spent six months learning about machine learning and computer vision from online courses. He used a cheap Raspberry Pi computer and built the sorting mechanism from recycled materials he found around his neighborhood.",
+        "translation": "这个想法来自李伟在学校环境科学课上。「我们了解到每年有数百万吨可回收材料最终被填埋，因为人们没有正确分类垃圾，」他解释说。「我想技术可以帮助解决这个问题。」李伟花了六个月时间从在线课程学习机器学习和计算机视觉。他使用了一台便宜的树莓派电脑，并用在社区周围找到的回收材料制作了分类装置。"
+      },
+      {
+        "text": "After testing EcoSort at his home for two months, Li Wei brought the device to his school. The school administration was so impressed that they placed four EcoSort bins in the cafeteria. In just one month, the school's recycling rate improved from 40 percent to 85 percent. 'The bins make recycling easy and even fun,' said the school principal. 'Students now compete to see which class can recycle the most.'",
+        "translation": "在家测试了两个月后，李伟把设备带到了学校。学校管理层印象深刻，在食堂放置了四个EcoSort垃圾桶。仅一个月，学校的回收率从40%提高到85%。「这些垃圾桶让回收变得简单甚至有趣，」校长说。「学生们现在比赛看哪个班级回收最多。」"
+      },
+      {
+        "text": "Li Wei's invention won first prize at the National Youth Science Competition. A major electronics company has offered to help him develop a commercial version of EcoSort for homes and offices. 'I want to make recycling so easy that nobody has an excuse not to do it,' Li Wei said. 'If every home had an EcoSort, we could reduce landfill waste by half within ten years.' He is now working on adding voice control and a mobile app that tracks how much each household recycles.",
+        "translation": "李伟的发明在全国青少年科学竞赛中获得一等奖。一家大型电子公司已提出帮助他开发家庭和办公室使用的EcoSort商业版本。「我想让回收变得如此简单，以至于没有人有借口不去做，」李伟说。「如果每个家庭都有一个EcoSort，我们可以在十年内将填埋垃圾减少一半。」他现在正在开发语音控制和一款追踪每个家庭回收量的手机应用。"
+      }
+    ],
+    "topic": "科技"
+  },
+  {
+    "id": 24,
+    "title": "16-Year-Old Helps Preserve Ancient Local Dialect Through Digital Recordings",
+    "source": "文化周刊",
+    "url": "",
+    "date": "2026-05-16",
+    "comprehension": [
+      {"question": "The student recorded elderly speakers to preserve a local dialect.", "answer": true},
+      {"question": "The dialect project was funded by a large government grant from the beginning.", "answer": false}
+    ],
+    "paragraphs": [
+      {
+        "text": "A 16-year-old high school student from Fujian province has taken on an unusual mission: saving her grandmother's dialect from disappearing. Wang Xiaoling grew up hearing her grandmother speak Minnan, a local Chinese dialect that has been spoken for over a thousand years. But she noticed that fewer and fewer young people could understand it. 'When my grandmother told me stories in Minnan, it felt like opening a window into the past,' Xiaoling said. 'I realized that when her generation is gone, this beautiful language might be gone too.'",
+        "translation": "一位来自福建省的16岁高中生承担了一个不寻常的使命：拯救她祖母的方言免于消失。王晓玲从小听着祖母说闽南语长大，这是一种已有上千年历史的当地方言。但她注意到，越来越少的年轻人能听懂它。「当祖母用闽南语给我讲故事时，感觉就像打开了一扇通往过去的窗户，」晓玲说。「我意识到，当她们这一代人离去时，这种美丽的语言可能也会随之消失。」"
+      },
+      {
+        "text": "Using just her smartphone and a borrowed microphone, Xiaoling started visiting elderly residents in her village. She recorded them telling traditional stories, singing folk songs, and explaining local customs — all in Minnan. She has now collected over 200 hours of recordings from more than 30 elderly speakers. Each recording is carefully labeled with the speaker's name, age, and the content of what they shared. 'These recordings are like time capsules,' she explained. 'They capture not just words, but emotions, memories, and a whole way of life.'",
+        "translation": "仅用她的智能手机和一个借来的麦克风，晓玲开始拜访村里的老人。她录下了他们用闽南语讲述传统故事、唱民歌和解释当地习俗。她现在已经从30多位老人那里收集了超过200小时的录音。每段录音都仔细标注了说话者的姓名、年龄和分享内容。「这些录音就像时间胶囊，」她解释说。「它们不仅捕捉了词语，还捕捉了情感、记忆和整个生活方式。」"
+      },
+      {
+        "text": "Xiaoling didn't stop at recording. She worked with her computer science teacher to build a simple website where anyone can listen to the recordings and read Chinese translations. She also created study guides with common Minnan phrases and their pronunciations. The website now receives over 5,000 visits per month from people around the world who want to learn about Minnan culture. 'I got messages from people in America and Australia whose grandparents spoke Minnan but they never learned it,' she said. 'They thanked me for helping them connect with their roots.'",
+        "translation": "晓玲并没有止步于录音。她和计算机老师合作建立了一个简单网站，任何人都可以在上面听录音并阅读中文翻译。她还制作了学习指南，包含常用闽南语短语及其发音。该网站现在每月有超过5000次访问，来自世界各地想要了解闽南文化的人。「我收到了来自美国和澳大利亚的人的留言，他们的祖父母说闽南语但他们从未学过，」她说。「他们感谢我帮助他们与自己的根源建立联系。」"
+      },
+      {
+        "text": "A university linguistics department heard about Xiaoling's project and has offered to help preserve the recordings in their official archive. The local government is also considering funding an expanded version of the project to cover other nearby villages. 'I started this just to save my grandmother's stories,' Xiaoling said. 'I never expected it would touch so many people. Language is more than just words — it carries the wisdom and identity of an entire community. When we lose a language, we lose a unique way of seeing the world.'",
+        "translation": "一所大学的语言学系听说了晓玲的项目，提出帮助将录音保存在他们的官方档案中。当地政府也在考虑资助扩大该项目以覆盖附近其他村庄。「我开始做这个只是想保存祖母的故事，」晓玲说。「我从没想到会触动这么多人。语言不仅仅是词语——它承载着整个社区的智慧和身份认同。当我们失去一种语言时，我们就失去了一种独特的看待世界的方式。」"
+      }
+    ],
+    "topic": "文化"
   }
 ]
