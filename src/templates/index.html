@@ -112,6 +112,33 @@
             gap: 4px;
         }
 
+        .fav-btn {
+            padding: 3px 8px;
+            font-size: 18px;
+            border: 1.5px solid #e0dcd4;
+            border-radius: 8px;
+            background: #fff;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .fav-btn:hover {
+            border-color: #e6a800;
+            color: #e6a800;
+        }
+        .fav-btn.starred {
+            color: #f5a623;
+            border-color: #f5a623;
+        }
+
+        .article-card-star {
+            display: inline;
+            color: #f5a623;
+            font-size: 13px;
+        }
+
         /* ── Level Selector ──────────────────────────── */
         .level-selector {
             display: flex;
@@ -1699,6 +1726,14 @@
         body.dark .article-card-title { color: #d0d0d0; }
         body.dark .article-card.active .article-card-title { color: #81c784; }
         body.dark .article-card-meta { color: #777; }
+        body.dark .fav-btn {
+            background: #252528;
+            border-color: #3a3a40;
+            color: #555;
+        }
+        body.dark .fav-btn:hover { border-color: #b08020; color: #b08020; }
+        body.dark .fav-btn.starred { color: #f0a020; border-color: #8a6a20; }
+        body.dark .article-card-star { color: #f0a020; }
         body.dark .word { color: #d0d0d0; }
         body.dark .word.difficult {
             background-color: #4a3a10;
@@ -1921,6 +1956,7 @@
             <div class="article-meta">
                 <span id="articleSource">来源: —</span>
                 <span id="articleDate">日期: —</span>
+                <button class="fav-btn" id="favBtn" title="收藏文章" style="display:none;">☆</button>
             </div>
             <!-- Difficulty Level Selector -->
             <div class="level-selector">
@@ -2170,7 +2206,9 @@
             hasPerfectQuiz: false,
             hasSpeedRead: false,
             fontSize: 'medium',
-            darkMode: false
+            darkMode: false,
+            favoriteArticles: {},       // {articleId: true} for bookmarked articles
+            articleScrollPositions: {}  // {articleId: scrollY} for restore position
         };
 
         var currentSpeaker = null;
@@ -2241,6 +2279,7 @@
         var achievementsGrid = document.getElementById('achievementsGrid');
         var achievementsCount = document.getElementById('achievementsCount');
         var achievementToast = null;
+        var favBtn = document.getElementById('favBtn');
 
         // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
@@ -2260,6 +2299,16 @@
                 }
                 if (typeof data.darkMode === 'boolean') {
                     state.darkMode = data.darkMode;
+                }
+                if (typeof data.favoriteArticles === 'object') {
+                    state.favoriteArticles = data.favoriteArticles;
+                }
+            } catch(e) { /* ignore */ }
+            // Load scroll positions
+            try {
+                var scrollRaw = localStorage.getItem(PREF_KEY + '_scroll');
+                if (scrollRaw) {
+                    state.articleScrollPositions = JSON.parse(scrollRaw);
                 }
             } catch(e) { /* ignore */ }
         }
@@ -2297,9 +2346,12 @@
                     articleId: state.articleId,
                     fontSize: state.fontSize,
                     darkMode: state.darkMode,
+                    favoriteArticles: state.favoriteArticles,
                     timestamp: new Date().toISOString()
                 };
                 localStorage.setItem(PREF_KEY, JSON.stringify(data));
+                // Save scroll positions separately (changes frequently)
+                localStorage.setItem(PREF_KEY + '_scroll', JSON.stringify(state.articleScrollPositions));
             } catch(e) { /* ignore */ }
         }
 
@@ -3439,11 +3491,31 @@
         }
 
         // ── Populate header ────────────────────────────
+        function updateFavButton() {
+            if (!favBtn) return;
+            var isFav = state.favoriteArticles[state.articleId];
+            favBtn.style.display = 'inline-block';
+            favBtn.textContent = isFav ? '★' : '☆';
+            favBtn.className = 'fav-btn' + (isFav ? ' starred' : '');
+        }
+
+        function toggleFavorite() {
+            if (state.favoriteArticles[state.articleId]) {
+                delete state.favoriteArticles[state.articleId];
+            } else {
+                state.favoriteArticles[state.articleId] = true;
+            }
+            updateFavButton();
+            savePreferences();
+            renderArticleSwitcher();
+        }
+
         function populateHeader(article) {
             document.getElementById('articleTitle').textContent = article.title;
             document.getElementById('articleSource').textContent = '来源: ' + article.source;
             document.getElementById('articleDate').textContent = '日期: ' + article.date;
             document.title = article.title + ' - Vocab in News';
+            updateFavButton();
         }
 
         // ── Level Selector ──────────────────────────────
@@ -3502,8 +3574,9 @@
                 var wordCount = a.wordCount || 0;
                 var readTime = Math.max(1, Math.round(wordCount / 150));
                 var topicTag = a.topic ? '<span class="topic-tag topic-' + escapeHtml(a.topic) + '">' + escapeHtml(a.topic) + '</span>' : '';
+                var favStar = state.favoriteArticles[a.id] ? ' <span class="article-card-star">★</span>' : '';
                 card.innerHTML =
-                    '<div class="article-card-title">' + escapeHtml(a.title) + badge + topicTag + '</div>' +
+                    '<div class="article-card-title">' + escapeHtml(a.title) + badge + topicTag + favStar + '</div>' +
                     '<div class="article-card-meta">' +
                         '<span>' + escapeHtml(a.source) + '</span>' +
                         '<span>' + escapeHtml(a.date) + '</span>' +
@@ -3566,6 +3639,12 @@
                 renderArticle(article);
                 applyFontSize();
                 renderWordPanel(article);
+
+                // Restore scroll position for this article
+                var savedPos = state.articleScrollPositions[state.articleId];
+                if (savedPos) {
+                    setTimeout(function() { window.scrollTo(0, savedPos); }, 100);
+                }
                 restoreFinishedState();
                 renderArticleSwitcher();
                 updateMyWordsToggle();
@@ -3855,6 +3934,14 @@
             savePreferences();
         });
 
+        // ── Favorite Button ────────────────────────────
+        if (favBtn) {
+            favBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleFavorite();
+            });
+        }
+
         historyHeader.addEventListener('click', function() {
             var open = historyList.style.display === 'block';
             historyList.style.display = open ? 'none' : 'block';
@@ -3899,6 +3986,8 @@
             }
             if (others.length === 0) return;
             var pick = others[Math.floor(Math.random() * others.length)];
+            // Save scroll position for current article
+            state.articleScrollPositions[state.articleId] = window.scrollY;
             state.articleId = pick;
             savePreferences();
             state.isFinished = false;
@@ -3919,6 +4008,9 @@
             var newArticleId = parseInt(card.getAttribute('data-article-id'), 10);
             if (newArticleId === state.articleId) return;
 
+            // Save scroll position for current article
+            state.articleScrollPositions[state.articleId] = window.scrollY;
+
             state.articleId = newArticleId;
             savePreferences();
 
@@ -3927,6 +4019,8 @@
             finishBtn.classList.remove('done');
             finishBtn.textContent = '我读完了！';
             finishBtn.disabled = false;
+            quizSection.style.display = 'none';
+            compSection.style.display = 'none';
             saveProgress();
 
             loadArticleContent(state.articleId);
