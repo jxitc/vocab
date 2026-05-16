@@ -252,3 +252,11 @@
 - [x] 专注模式暗色模式适配
 - [x] 78 tests passing
 
+## Iter 30
+### 已实现
+- [x] 文章排序 — 话题筛选栏右侧排序下拉框，支持默认/最新/词数↑/词数↓
+- [x] 排序偏好localStorage持久化
+- [x] 排序下拉框暗色模式适配
+- [x] 修复: renderTopicFilter()覆盖sortSelect的问题 (改为动态重建sortSelect)
+- [x] 78 tests passing
+
