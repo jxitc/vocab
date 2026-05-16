@@ -151,3 +151,10 @@
 - [x] 修复: recordArticleRead 多余闭合括号 (pre-existing brace bug)
 - [x] 78 tests passing
 
+## Iter 17
+### 已实现
+- [x] 段落朗读 — 每段文字旁🔊图标，点击用TTS朗读整段内容
+- [x] 朗读时段落高亮 (绿色左边框 + 浅绿背景)
+- [x] 字号控制 — 小/中/大三档 (16px/19px/23px)，偏好持久化至localStorage
+- [x] 78 tests passing
+

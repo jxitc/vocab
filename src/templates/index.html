@@ -606,6 +606,74 @@
             to   { transform: scale(1.35); color: #cc7000; }
         }
 
+        /* ── Paragraph speaker ───────────────────────── */
+        .paragraph-speaker {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            color: #999;
+            margin-left: 2px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        .paragraph-speaker:hover {
+            color: #555;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .paragraph-speaker.speaking {
+            color: #2e7d32;
+            background: #e8f5e9;
+        }
+
+        .paragraph-block.speaking {
+            background: #f9fbf9;
+            border-left: 3px solid #81c784;
+            padding-left: 12px;
+            margin-left: -15px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s;
+        }
+
+        /* ── Font Size Controls ───────────────────────── */
+        .font-size-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 12px;
+        }
+
+        .font-size-btn {
+            padding: 2px 10px;
+            font-size: 12px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 12px;
+            background: #fff;
+            color: #888;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .font-size-btn:hover {
+            border-color: #a09888;
+            color: #555;
+        }
+
+        .font-size-btn.active {
+            background: #5a4e2f;
+            color: #fff;
+            border-color: #5a4e2f;
+        }
+
+        .article-body.fs-small { font-size: 16px; }
+        .article-body.fs-medium { font-size: 19px; }
+        .article-body.fs-large { font-size: 23px; }
+
         /* ── Translation toggle ───────────────────────── */
         .translation-toggle {
             display: inline-block;
@@ -1334,6 +1402,12 @@
                 <button class="level-btn active" data-level="2">初中</button>
                 <button class="level-btn" data-level="3">高中</button>
                 <button class="level-btn" data-level="4">大学</button>
+                <span class="font-size-controls">
+                    <span class="level-selector-label">字号:</span>
+                    <button class="font-size-btn" data-fs="small">小</button>
+                    <button class="font-size-btn active" data-fs="medium">中</button>
+                    <button class="font-size-btn" data-fs="large">大</button>
+                </span>
             </div>
         </header>
 
@@ -1541,7 +1615,8 @@
             unlockedAchievements: {}, // {achievementId: timestamp}
             usedLevels: {},           // {level: true}
             hasPerfectQuiz: false,
-            hasSpeedRead: false
+            hasSpeedRead: false,
+            fontSize: 'medium'
         };
 
         var currentSpeaker = null;
@@ -1617,7 +1692,24 @@
                 if (data && typeof data.articleId === 'number') {
                     state.articleId = data.articleId;
                 }
+                if (data && typeof data.fontSize === 'string') {
+                    state.fontSize = data.fontSize;
+                }
             } catch(e) { /* ignore */ }
+        }
+
+        function applyFontSize() {
+            var fs = state.fontSize || 'medium';
+            articleBody.className = 'article-body fs-' + fs;
+            var btns = document.querySelectorAll('.font-size-btn');
+            for (var i = 0; i < btns.length; i++) {
+                var b = btns[i];
+                if (b.getAttribute('data-fs') === fs) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            }
         }
 
         function savePreferences() {
@@ -1626,6 +1718,7 @@
                 var data = {
                     userLevel: state.userLevel,
                     articleId: state.articleId,
+                    fontSize: state.fontSize,
                     timestamp: new Date().toISOString()
                 };
                 localStorage.setItem(PREF_KEY, JSON.stringify(data));
@@ -2021,6 +2114,72 @@
             speechSynthesis.getVoices();
         }
 
+        var currentParagraphSpeaker = null;
+
+        function speakParagraph(text, speakerEl) {
+            if (!speechSupported) return;
+
+            var synth = window.speechSynthesis;
+            synth.cancel();
+
+            // Reset previous speaker
+            if (currentParagraphSpeaker) {
+                currentParagraphSpeaker.classList.remove('speaking');
+                var prevBlock = currentParagraphSpeaker.closest('.paragraph-block');
+                if (prevBlock) prevBlock.classList.remove('speaking');
+            }
+            if (currentSpeaker) {
+                currentSpeaker.classList.remove('speaking');
+                currentSpeaker = null;
+            }
+
+            currentParagraphSpeaker = speakerEl;
+            speakerEl.classList.add('speaking');
+            var block = speakerEl.closest('.paragraph-block');
+            if (block) block.classList.add('speaking');
+
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+
+            var voices = synth.getVoices();
+            if (voices.length > 0) {
+                var preferred = ['Samantha', 'Daniel', 'Karen', 'Moira',
+                                'Google US English', 'Google UK English Female',
+                                'Microsoft David', 'Microsoft Zira'];
+                var enVoice = null;
+                var fallback = null;
+                for (var i = 0; i < voices.length; i++) {
+                    var v = voices[i];
+                    if (!v.lang || v.lang.indexOf('en') !== 0) continue;
+                    if (!fallback) fallback = v;
+                    for (var j = 0; j < preferred.length; j++) {
+                        if (v.name.indexOf(preferred[j]) !== -1) {
+                            enVoice = v;
+                            break;
+                        }
+                    }
+                    if (enVoice) break;
+                }
+                utterance.voice = enVoice || fallback;
+            }
+
+            function onParaDone() {
+                speakerEl.classList.remove('speaking');
+                if (block) block.classList.remove('speaking');
+                if (currentParagraphSpeaker === speakerEl) {
+                    currentParagraphSpeaker = null;
+                }
+            }
+
+            utterance.onstart = function() {
+                speakerEl.classList.add('speaking');
+            };
+            utterance.onend = onParaDone;
+            utterance.onerror = onParaDone;
+
+            synth.speak(utterance);
+        }
+
         // ── Popup ──────────────────────────────────────
         function updateKnownBtn(wordLower) {
             if (state.knownWords[wordLower]) {
@@ -2369,6 +2528,17 @@
 
                 block.appendChild(textEl);
 
+                // Paragraph speaker button
+                if (speechSupported) {
+                    var paraSpeaker = document.createElement('span');
+                    paraSpeaker.className = 'paragraph-speaker';
+                    paraSpeaker.setAttribute('data-para', String(pi));
+                    paraSpeaker.setAttribute('data-text', para.text);
+                    paraSpeaker.title = '朗读段落';
+                    paraSpeaker.innerHTML = '🔊';
+                    block.appendChild(paraSpeaker);
+                }
+
                 // Translation toggle
                 var toggle = document.createElement('div');
                 toggle.className = 'translation-toggle';
@@ -2589,6 +2759,7 @@
 
                 populateHeader(article);
                 renderArticle(article);
+                applyFontSize();
                 renderWordPanel(article);
                 restoreFinishedState();
                 renderArticleSwitcher();
@@ -2620,12 +2791,21 @@
 
         // ── Event Delegation: Article Body ─────────────
         articleBody.addEventListener('click', function(e) {
-            // 1. Speaker icon click inside article
+            // 1. Word speaker icon click
             var speakerEl = e.target.closest('.word-speaker');
             if (speakerEl) {
                 e.stopPropagation();
                 var word = speakerEl.getAttribute('data-word');
                 if (word) speakWord(word, speakerEl);
+                return;
+            }
+
+            // 1b. Paragraph speaker click
+            var paraSpeaker = e.target.closest('.paragraph-speaker');
+            if (paraSpeaker) {
+                e.stopPropagation();
+                var paraText = paraSpeaker.getAttribute('data-text');
+                if (paraText) speakParagraph(paraText, paraSpeaker);
                 return;
             }
 
@@ -2770,10 +2950,22 @@
         // ── Event Delegation: Level Selector ──────────
         document.querySelector('.level-selector').addEventListener('click', function(e) {
             var btn = e.target.closest('.level-btn');
-            if (!btn) return;
-            var newLevel = parseInt(btn.getAttribute('data-level'), 10);
-            if (newLevel && newLevel >= 1 && newLevel <= 4) {
-                onLevelChange(newLevel);
+            var fsBtn = e.target.closest('.font-size-btn');
+            if (btn) {
+                var newLevel = parseInt(btn.getAttribute('data-level'), 10);
+                if (newLevel && newLevel >= 1 && newLevel <= 4) {
+                    onLevelChange(newLevel);
+                }
+                return;
+            }
+            if (fsBtn) {
+                var fs = fsBtn.getAttribute('data-fs');
+                if (fs) {
+                    state.fontSize = fs;
+                    applyFontSize();
+                    savePreferences();
+                }
+                return;
             }
         });
 
