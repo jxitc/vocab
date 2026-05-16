@@ -682,5 +682,77 @@
       }
     ],
     "topic": "健康"
+  },
+  {
+    "id": 19,
+    "title": "Students Design a Bike-Friendly City That Won an International Urban Planning Award",
+    "source": "城市日报",
+    "url": "https://example.com/bike-friendly-city-students",
+    "date": "2026-05-15",
+    "comprehension": [
+      {
+        "question": "The students' design won first place in an international competition.",
+        "answer": true
+      },
+      {
+        "question": "The design was created by university students.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A team of middle school students from Hangzhou has designed a city plan that won first prize at the International Young Urban Planners Competition. Their design, called 'GreenWheel City', imagines a future where bicycles are the main form of transportation. Cars are allowed only on the outer edges of the city, while the center is filled with wide bike lanes, gardens, and public spaces where people can meet and play. The competition received over 600 entries from 45 countries.",
+        "translation": "杭州的一个中学生团队设计了一份城市规划，在国际青年城市规划竞赛中获得一等奖。他们的设计名为「绿轮之城」，设想了一个以自行车为主要交通工具的未来城市。汽车只允许在城市外围行驶，而市中心则布满宽阔的自行车道、花园和供人们聚会玩耍的公共空间。该竞赛收到了来自45个国家的600多份参赛作品。"
+      },
+      {
+        "text": "The team leader, 13-year-old Chen Mei, got the idea during her daily bike ride to school. 'I noticed that many parents drive their children to school even when they live very close. The streets are always crowded and noisy,' she said. 'I thought, what if we designed a city where kids could safely bike everywhere?' She gathered five classmates and they spent three months researching urban planning, studying famous bike-friendly cities like Copenhagen and Amsterdam for inspiration.",
+        "translation": "团队负责人、13岁的陈美是在每天骑车上学的路上想到这个主意的。「我注意到很多家长即使住得很近也开车送孩子上学。街上总是拥挤嘈杂，」她说。「我想，如果我们设计一个孩子们可以安全骑车去任何地方的城市呢？」她召集了五位同学，他们花了三个月时间研究城市规划，研究哥本哈根和阿姆斯特丹等著名自行车友好城市以获取灵感。"
+      },
+      {
+        "text": "What made GreenWheel City stand out was its focus on young people's needs. The design includes safe bike paths connecting every school, park, and library, with special bridges over busy roads. There are also 'homework gardens' — quiet outdoor study spaces with Wi-Fi and solar-powered charging stations. The judges praised the design for being both creative and practical. 'These students have thought about problems that many professional planners overlook,' said one judge.",
+        "translation": "绿轮之城脱颖而出的原因在于它关注年轻人的需求。设计包括连接每所学校、公园和图书馆的安全自行车道，以及在繁忙道路上方的专用桥梁。还有「作业花园」——带有Wi-Fi和太阳能充电站的安静户外学习空间。评委赞扬该设计既富有创意又实用。「这些学生思考了许多专业规划者忽视的问题，」一位评委说。"
+      },
+      {
+        "text": "The students' victory has attracted attention from real city planners. The Hangzhou city government has invited the team to present their ideas at a real urban development meeting. 'We never expected this to go so far,' Chen Mei said. 'We just wanted to imagine a better way to live. But now we realize that young people's voices matter in shaping the future of our cities.' The team hopes their design will inspire other cities to become more bike-friendly and youth-focused.",
+        "translation": "学生们的胜利引起了真正城市规划者的关注。杭州市政府邀请团队在一次真实的城市发展会议上展示他们的想法。「我们从未想到这会走这么远，」陈美说。「我们只是想想象一种更好的生活方式。但现在我们意识到，年轻人的声音在塑造我们城市的未来中很重要。」团队希望他们的设计能激励其他城市变得更适合自行车出行、更关注青少年。"
+      }
+    ],
+    "topic": "城市"
+  },
+  {
+    "id": 20,
+    "title": "A 12-Year-Old Beekeeper Helps Save Endangered Bees and Wins a National Science Prize",
+    "source": "自然探索",
+    "url": "https://example.com/young-beekeeper-bees",
+    "date": "2026-05-15",
+    "comprehension": [
+      {
+        "question": "The student discovered that planting certain flowers helps bee populations recover.",
+        "answer": true
+      },
+      {
+        "question": "The student runs the bee project alone without any help from scientists.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "While most 12-year-olds spend their weekends playing video games, Zhang Hao from Kunming spends his taking care of thousands of bees. Zhang is one of China's youngest beekeepers, and his passion for these tiny insects has led to an important scientific discovery. Working with researchers from the Yunnan Agricultural University, he helped identify which local flowers are most effective at supporting endangered bee populations. His project won the top prize at the National Youth Science Awards.",
+        "translation": "当大多数12岁的孩子在周末玩电子游戏时，来自昆明的张昊在照顾成千上万只蜜蜂。张昊是中国最年轻的养蜂人之一，他对这些微小昆虫的热爱导致了一项重要的科学发现。他与云南农业大学的研究人员合作，帮助确定了哪些本地花卉最有效地支持濒危蜜蜂种群。他的项目在全国青少年科学奖中获得了最高奖。"
+      },
+      {
+        "text": "Zhang's interest in bees began when he was eight years old. His grandfather kept a few beehives in the countryside, and young Zhang was fascinated by how organized and hardworking the bees were. 'I learned that bees are responsible for pollinating about one-third of the food we eat,' Zhang explained. 'Without bees, many fruits and vegetables would disappear.' When he learned that bee populations around the world were declining, he decided he wanted to help.",
+        "translation": "张昊对蜜蜂的兴趣始于他八岁时。他的祖父在乡下养了几箱蜜蜂，小张昊对蜜蜂的组织性和勤劳感到着迷。「我了解到蜜蜂负责为我们吃的约三分之一的食物授粉，」张昊解释说。「没有蜜蜂，许多水果和蔬菜将会消失。」当他了解到世界各地的蜜蜂种群正在减少时，他决定要帮忙。"
+      },
+      {
+        "text": "For his research project, Zhang planted 20 different types of local flowers in his family's garden and carefully recorded which ones attracted the most bees. He also measured the health of bee colonies that visited different flower types. After two years of observation, he discovered that three specific native flowers — a type of lavender, a local wild rose, and a small purple flower called 'bee's friend' — were particularly effective at supporting bee health and population growth.",
+        "translation": "在他的研究项目中，张昊在家里的花园种植了20种不同类型的本地花卉，并仔细记录了哪些花最吸引蜜蜂。他还测量了访问不同花型的蜂群的健康状况。经过两年的观察，他发现三种特定的本地花卉——一种薰衣草、一种本地野玫瑰和一种叫做「蜜蜂之友」的小紫花——对支持蜜蜂健康和种群增长特别有效。"
+      },
+      {
+        "text": "Zhang's findings are now being used by local farmers and gardeners who want to help protect bees. He has created a free guide that teaches people how to plant 'bee-friendly gardens' using the flowers he identified. Several schools in Yunnan have started their own bee gardens based on his guide. 'Bees may be small, but they do some of the most important work on our planet,' Zhang said. 'I hope more young people will join me in protecting them.'",
+        "translation": "张昊的研究结果现在正被想要帮助保护蜜蜂的当地农民和园丁使用。他创建了一份免费指南，教人们如何使用他确定的花卉种植「蜜蜂友好花园」。云南的几所学校已经根据他的指南开办了自己的蜜蜂花园。「蜜蜂虽小，但它们做着地球上最重要的一些工作，」张昊说。「我希望更多年轻人能加入我保护它们的行列。」"
+      }
+    ],
+    "topic": "自然"
   }
 ]

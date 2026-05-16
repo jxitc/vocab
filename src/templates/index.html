@@ -4871,6 +4871,12 @@
                 return;
             }
 
+            // F: toggle focus mode
+            if (e.key === 'f' || e.key === 'F') {
+                toggleFocusMode();
+                return;
+            }
+
             // Escape: close popups/panels
             if (e.key === 'Escape') {
                 if (popup.classList.contains('active')) {

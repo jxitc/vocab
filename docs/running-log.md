@@ -260,3 +260,10 @@
 - [x] 修复: renderTopicFilter()覆盖sortSelect的问题 (改为动态重建sortSelect)
 - [x] 78 tests passing
 
+## Iter 31
+### 已实现
+- [x] F键快捷键 — 按F切换专注阅读模式
+- [x] 2篇新文章 — 学生设计自行车友好城市获国际奖 (城市日报) + 12岁养蜂人保护蜜蜂 (自然探索)
+- [x] 文章总数从19篇增至21篇
+- [x] 78 tests passing
+
