@@ -287,3 +287,10 @@
 - [x] 文章总数从21篇增至23篇
 - [x] 78 tests passing
 
+## Iter 35
+### 已实现
+- [x] 文章链接分享 — 🔗 按钮复制文章URL (?id=参数)，访问直接跳转指定文章
+- [x] 复制✓反馈动画 (1.5s)，navigator.clipboard + 降级alert
+- [x] 分享按钮暗色模式适配
+- [x] 78 tests passing
+

@@ -193,6 +193,21 @@
             border-color: #f5a623;
         }
 
+        .share-btn {
+            padding: 3px 8px;
+            font-size: 15px;
+            border: 1.5px solid #e0dcd4;
+            border-radius: 8px;
+            background: #fff;
+            color: #bbb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .share-btn:hover { border-color: #999; color: #666; }
+        .share-btn.copied { color: #43a047; border-color: #66bb6a; }
+
         .article-card-star {
             display: inline;
             color: #f5a623;
@@ -1908,6 +1923,9 @@
         body.dark .fav-btn:hover { border-color: #b08020; color: #b08020; }
         body.dark .fav-btn.starred { color: #f0a020; border-color: #8a6a20; }
         body.dark .article-card-star { color: #f0a020; }
+        body.dark .share-btn { background: #252528; border-color: #3a3a40; color: #555; }
+        body.dark .share-btn:hover { border-color: #555; color: #999; }
+        body.dark .share-btn.copied { color: #66bb6a; border-color: #3a6b3a; }
         body.dark .focus-mode-toggle {
             background: #252528;
             border-color: #3a3a40;
@@ -2170,6 +2188,7 @@
                 <span id="articleDate">日期: —</span>
                 <span id="articleWordCount" style="color:#999;font-size:12px;"></span>
                 <button class="fav-btn" id="favBtn" title="收藏文章" style="display:none;">☆</button>
+                <button class="share-btn" id="shareBtn" title="复制链接" style="display:none;">🔗</button>
             </div>
             <!-- Difficulty Level Selector -->
             <div class="level-selector">
@@ -2513,6 +2532,7 @@
         var achievementsCount = document.getElementById('achievementsCount');
         var achievementToast = null;
         var favBtn = document.getElementById('favBtn');
+        var shareBtn = document.getElementById('shareBtn');
         var backToTopBtn = document.getElementById('backToTop');
         var readProgressFill = document.getElementById('readProgressFill');
 
@@ -3799,6 +3819,7 @@
             document.getElementById('articleWordCount').textContent = wc + '词 · ' + rt + '分钟';
             document.title = article.title + ' - Vocab in News';
             updateFavButton();
+            if (shareBtn) shareBtn.style.display = 'inline-block';
         }
 
         // ── Level Selector ──────────────────────────────
@@ -3956,6 +3977,12 @@
             return div.innerHTML;
         }
 
+        // ── URL Params ────────────────────────────────
+        function getUrlParam(name) {
+            var params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
         // ── Fetch & Init ───────────────────────────────
         async function loadArticleList() {
             try {
@@ -4030,6 +4057,14 @@
             }
             applyDarkMode();
             applyFocusMode();
+            // URL param overrides saved article id
+            var urlId = getUrlParam('id');
+            if (urlId !== null) {
+                var parsed = parseInt(urlId, 10);
+                if (!isNaN(parsed) && parsed >= 0) {
+                    state.articleId = parsed;
+                }
+            }
             loadProgress();
             loadKnownWords();
             loadStats();
@@ -4309,6 +4344,24 @@
             favBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 toggleFavorite();
+            });
+        }
+
+        // ── Share Button ──────────────────────────────
+        if (shareBtn) {
+            shareBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var url = window.location.origin + window.location.pathname + '?id=' + state.articleId;
+                navigator.clipboard.writeText(url).then(function() {
+                    shareBtn.textContent = '✓';
+                    shareBtn.classList.add('copied');
+                    setTimeout(function() {
+                        shareBtn.textContent = '🔗';
+                        shareBtn.classList.remove('copied');
+                    }, 1500);
+                }).catch(function() {
+                    alert('链接: ' + url);
+                });
             });
         }
 
