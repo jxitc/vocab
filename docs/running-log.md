@@ -305,3 +305,11 @@
 - [x] 帮助提示增加F键快捷键 — "· <strong>F</strong> 专注模式"
 - [x] 78 tests passing
 
+## Iter 38
+### 已实现
+- [x] 文章搜索框 — 输入关键词实时筛选文章标题，支持大小写不敏感匹配
+- [x] 搜索偏好持久化至 localStorage
+- [x] 搜索与话题筛选可同时使用
+- [x] 暗色模式适配
+- [x] 78 tests passing
+

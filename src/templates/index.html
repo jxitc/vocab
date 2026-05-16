@@ -315,6 +315,30 @@
             color: #999;
             margin-right: 4px;
         }
+        .article-search-wrap {
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .article-search {
+            padding: 3px 10px;
+            font-size: 12px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 14px;
+            background: #fff;
+            color: #555;
+            outline: none;
+            width: 140px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+        .article-search:focus {
+            border-color: #a09888;
+        }
+        .article-search::placeholder {
+            color: #bbb;
+        }
         .topic-chip {
             padding: 3px 11px;
             font-size: 12px;
@@ -1949,6 +1973,13 @@
             border-color: #3a6b3a;
             color: #81c784;
         }
+        body.dark .article-search {
+            background: #252528;
+            border-color: #3a3a40;
+            color: #aaa;
+        }
+        body.dark .article-search:focus { border-color: #555; }
+        body.dark .article-search::placeholder { color: #555; }
         body.dark .sort-select {
             background: #252528;
             border-color: #3a3a40;
@@ -2472,6 +2503,7 @@
             articleScrollPositions: {}, // {articleId: scrollY} for restore position
             articleReadPct: {},        // {articleId: percent (0-100)} reading progress
             topicFilter: '',           // current topic filter ('' = all)
+            articleSearch: '',         // current article search query
             focusMode: false,          // distraction-free reading mode
             sortMode: 'default'        // article sort order
         };
@@ -2582,6 +2614,9 @@
                 if (typeof data.sortMode === 'string') {
                     state.sortMode = data.sortMode;
                 }
+                if (typeof data.articleSearch === 'string') {
+                    state.articleSearch = data.articleSearch;
+                }
             } catch(e) { /* ignore */ }
             // Load scroll positions and read percentages
             try {
@@ -2656,6 +2691,7 @@
                     darkMode: state.darkMode,
                     focusMode: state.focusMode,
                     sortMode: state.sortMode,
+                    articleSearch: state.articleSearch,
                     favoriteArticles: state.favoriteArticles,
                     timestamp: new Date().toISOString()
                 };
@@ -3881,7 +3917,7 @@
             }
 
             // Rebuild chips
-            topicFilterEl.innerHTML = '<span class="topic-filter-label">话题:</span>';
+            topicFilterEl.innerHTML = '<span class="article-search-wrap"><input class="article-search" id="articleSearchInput" type="text" placeholder="搜索文章..." value="' + escapeHtml(state.articleSearch || '') + '"></span><span class="topic-filter-label">话题:</span>';
             var allActive = !state.topicFilter ? ' active' : '';
             topicFilterEl.innerHTML += '<button class="topic-chip' + allActive + '" data-topic="">全部</button>';
 
@@ -3901,6 +3937,16 @@
                 newSort.value = state.sortMode || 'default';
                 newSort.addEventListener('change', function() {
                     state.sortMode = newSort.value;
+                    savePreferences();
+                    renderArticleSwitcher();
+                });
+            }
+
+            // Re-bind search input
+            var searchInput = document.getElementById('articleSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    state.articleSearch = searchInput.value.trim();
                     savePreferences();
                     renderArticleSwitcher();
                 });
@@ -3938,6 +3984,14 @@
             if (state.topicFilter) {
                 visibleArticles = state.articles.filter(function(a) {
                     return a.topic === state.topicFilter;
+                });
+            }
+
+            // Filter by search query (case-insensitive title match)
+            if (state.articleSearch) {
+                var q = state.articleSearch.toLowerCase();
+                visibleArticles = visibleArticles.filter(function(a) {
+                    return (a.title || '').toLowerCase().indexOf(q) !== -1;
                 });
             }
 
