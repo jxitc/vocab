@@ -1123,6 +1123,128 @@
             margin-top: 6px;
         }
 
+        /* ── Achievements ──────────────────────────────── */
+        .achievements-section {
+            margin: 24px 0 16px;
+            padding: 16px 20px;
+            background: #fff;
+            border: 1.5px solid #e8e4dc;
+            border-radius: 12px;
+        }
+
+        .achievements-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .achievements-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .achievements-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .achievements-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .achievement-badge {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 6px;
+            border-radius: 10px;
+            width: 68px;
+            text-align: center;
+            transition: transform 0.2s, opacity 0.3s;
+            cursor: default;
+            user-select: none;
+        }
+
+        .achievement-badge.unlocked {
+            background: #fdf8ed;
+            border: 1.5px solid #e6d5a8;
+        }
+
+        .achievement-badge.unlocked:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement-badge.locked {
+            background: #fafafa;
+            border: 1.5px dashed #e8e8e8;
+            opacity: 0.45;
+        }
+
+        .achievement-badge .badge-icon {
+            font-size: 22px;
+            margin-bottom: 2px;
+            line-height: 1;
+        }
+
+        .achievement-badge .badge-name {
+            font-size: 10px;
+            color: #777;
+            line-height: 1.2;
+        }
+
+        .achievement-badge.unlocked .badge-name {
+            color: #5a4e2f;
+            font-weight: 600;
+        }
+
+        .achievement-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: #fffef5;
+            border: 2px solid #f0c040;
+            border-radius: 14px;
+            padding: 12px 22px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .achievement-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .achievement-toast-icon {
+            font-size: 28px;
+        }
+
+        .achievement-toast-body {
+            text-align: left;
+        }
+
+        .achievement-toast-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #5a4e2f;
+        }
+
+        .achievement-toast-sub {
+            font-size: 11px;
+            color: #999;
+            margin-top: 1px;
+        }
+
         /* ── Footer ───────────────────────────────────── */
         footer {
             text-align: center;
@@ -1318,6 +1440,15 @@
             </div>
         </div>
 
+        <!-- Achievements -->
+        <div class="achievements-section" id="achievementsSection" style="display:none;">
+            <div class="achievements-header">
+                <span class="achievements-title">🏅 成就徽章</span>
+                <span class="achievements-count" id="achievementsCount">0/11</span>
+            </div>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+
         <!-- Completion Section -->
         <div class="completion-section">
             <button class="finish-btn" id="finishBtn">我读完了！</button>
@@ -1380,6 +1511,7 @@
         var PREF_KEY = 'vocab_in_news_prefs';
         var KNOWN_KEY = 'vocab_in_news_user_vocab';
         var STATS_KEY = 'vocab_in_news_stats';
+        var ACHIEVEMENT_KEY = 'vocab_in_news_achievements';
 
         var SPEAKER_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 
@@ -1405,7 +1537,11 @@
             readingStartTime: null, // timestamp when article loaded
             dailyGoal: 2,           // articles per day goal
             todayReadCount: 0,      // articles read today
-            readArticleIds: {}      // set of article IDs the user has read
+            readArticleIds: {},     // set of article IDs the user has read
+            unlockedAchievements: {}, // {achievementId: timestamp}
+            usedLevels: {},           // {level: true}
+            hasPerfectQuiz: false,
+            hasSpeedRead: false
         };
 
         var currentSpeaker = null;
@@ -1463,6 +1599,10 @@
         var flashcardActions = document.getElementById('flashcardActions');
         var flashcardResult = document.getElementById('flashcardResult');
         var levelBtns = document.querySelectorAll('.level-btn');
+        var achievementsSection = document.getElementById('achievementsSection');
+        var achievementsGrid = document.getElementById('achievementsGrid');
+        var achievementsCount = document.getElementById('achievementsCount');
+        var achievementToast = null;
 
         // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
@@ -1671,13 +1811,146 @@
                     goalCelebration.style.display = 'none';
                 }, 5000);
             }
-        }
+
+            // Check achievements
+            checkAchievements();
         }
 
         function recordWordLearned() {
             state.totalWordsLearned++;
             saveStats();
             updateStatsDisplay();
+            checkAchievements();
+        }
+
+        // ── Achievements ────────────────────────────────
+        var ACHIEVEMENT_DEFS = [
+            { id: 'first_read', name: '初次阅读', desc: '完成第一篇新闻', icon: '📰',
+              check: function(s) { return s.totalArticlesRead >= 1; } },
+            { id: 'read_5', name: '阅读达人', desc: '累计阅读5篇文章', icon: '📚',
+              check: function(s) { return s.totalArticlesRead >= 5; } },
+            { id: 'read_10', name: '阅读大师', desc: '累计阅读10篇文章', icon: '🏆',
+              check: function(s) { return s.totalArticlesRead >= 10; } },
+            { id: 'learn_10', name: '词海初探', desc: '累计学习10个生词', icon: '🌱',
+              check: function(s) { return s.totalWordsLearned >= 10; } },
+            { id: 'learn_30', name: '词汇达人', desc: '累计学习30个生词', icon: '📝',
+              check: function(s) { return s.totalWordsLearned >= 30; } },
+            { id: 'learn_50', name: '词海霸主', desc: '累计学习50个生词', icon: '👑',
+              check: function(s) { return s.totalWordsLearned >= 50; } },
+            { id: 'streak_3', name: '三日坚持', desc: '连续3天阅读', icon: '🔥',
+              check: function(s) { return computeStreak() >= 3; } },
+            { id: 'streak_7', name: '七日之约', desc: '连续7天阅读', icon: '⭐',
+              check: function(s) { return computeStreak() >= 7; } },
+            { id: 'perfect_quiz', name: '满分测验', desc: '小测验全部答对', icon: '💯',
+              check: function(s) { return s.hasPerfectQuiz; } },
+            { id: 'speed_reader', name: '速读高手', desc: '阅读速度超150词/分', icon: '⚡',
+              check: function(s) { return s.hasSpeedRead; } },
+            { id: 'all_levels', name: '全能学者', desc: '用过全部4个难度', icon: '🎓',
+              check: function(s) { var k = Object.keys(s.usedLevels); return k.length >= 4; } }
+        ];
+
+        function loadAchievements() {
+            if (!storageAvailable) return;
+            try {
+                var raw = localStorage.getItem(ACHIEVEMENT_KEY);
+                if (!raw) return;
+                var data = JSON.parse(raw);
+                if (data && typeof data.unlocked === 'object') {
+                    state.unlockedAchievements = data.unlocked;
+                }
+                if (data && typeof data.usedLevels === 'object') {
+                    state.usedLevels = data.usedLevels;
+                }
+                if (typeof data.hasPerfectQuiz === 'boolean') {
+                    state.hasPerfectQuiz = data.hasPerfectQuiz;
+                }
+                if (typeof data.hasSpeedRead === 'boolean') {
+                    state.hasSpeedRead = data.hasSpeedRead;
+                }
+            } catch(e) { /* ignore */ }
+        }
+
+        function saveAchievements() {
+            if (!storageAvailable) return;
+            try {
+                localStorage.setItem(ACHIEVEMENT_KEY, JSON.stringify({
+                    unlocked: state.unlockedAchievements,
+                    usedLevels: state.usedLevels,
+                    hasPerfectQuiz: state.hasPerfectQuiz,
+                    hasSpeedRead: state.hasSpeedRead
+                }));
+            } catch(e) { /* ignore */ }
+        }
+
+        function checkAchievements() {
+            var newlyUnlocked = [];
+            for (var i = 0; i < ACHIEVEMENT_DEFS.length; i++) {
+                var def = ACHIEVEMENT_DEFS[i];
+                if (state.unlockedAchievements[def.id]) continue;
+                if (def.check(state)) {
+                    state.unlockedAchievements[def.id] = Date.now();
+                    newlyUnlocked.push(def);
+                }
+            }
+            if (newlyUnlocked.length > 0) {
+                saveAchievements();
+                for (var j = 0; j < newlyUnlocked.length; j++) {
+                    showAchievementToast(newlyUnlocked[j]);
+                }
+            }
+            renderAchievements();
+        }
+
+        function renderAchievements() {
+            var unlockedCount = Object.keys(state.unlockedAchievements).length;
+            var total = ACHIEVEMENT_DEFS.length;
+            if (unlockedCount === 0) {
+                achievementsSection.style.display = 'none';
+                return;
+            }
+            achievementsSection.style.display = 'block';
+            achievementsCount.textContent = unlockedCount + '/' + total;
+            achievementsGrid.innerHTML = '';
+            for (var i = 0; i < ACHIEVEMENT_DEFS.length; i++) {
+                var def = ACHIEVEMENT_DEFS[i];
+                var isUnlocked = !!state.unlockedAchievements[def.id];
+                var badge = document.createElement('div');
+                badge.className = 'achievement-badge ' + (isUnlocked ? 'unlocked' : 'locked');
+                badge.title = isUnlocked ? def.name + ': ' + def.desc : '???: ' + def.desc;
+                badge.innerHTML =
+                    '<span class="badge-icon">' + (isUnlocked ? def.icon : '🔒') + '</span>' +
+                    '<span class="badge-name">' + (isUnlocked ? def.name : '???') + '</span>';
+                if (isUnlocked) {
+                    var ts = state.unlockedAchievements[def.id];
+                    var d = new Date(ts);
+                    badge.innerHTML += '<span class="badge-desc">' +
+                        (d.getMonth()+1) + '/' + d.getDate() + '</span>';
+                }
+                achievementsGrid.appendChild(badge);
+            }
+        }
+
+        function showAchievementToast(def) {
+            if (achievementToast) {
+                achievementToast.remove();
+            }
+            var toast = document.createElement('div');
+            toast.className = 'achievement-toast';
+            toast.innerHTML =
+                '<span class="achievement-toast-icon">' + def.icon + '</span>' +
+                '<div class="achievement-toast-body">' +
+                    '<div class="achievement-toast-title">🏅 成就解锁: ' + def.name + '</div>' +
+                    '<div class="achievement-toast-sub">' + def.desc + '</div>' +
+                '</div>';
+            document.body.appendChild(toast);
+            achievementToast = toast;
+            // Trigger animation
+            setTimeout(function() { toast.classList.add('show'); }, 50);
+            // Auto-hide after 3.5s
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); achievementToast = null; }, 500);
+            }, 3500);
         }
 
         // ── Get known words as comma-separated string ─────
@@ -2225,6 +2498,9 @@
             state.userLevel = newLevel;
             updateLevelButtons();
             savePreferences();
+            // Track level usage for achievement
+            state.usedLevels[newLevel] = true;
+            saveAchievements();
             loadArticleContent(state.articleId);
         }
 
@@ -2330,9 +2606,13 @@
             loadProgress();
             loadKnownWords();
             loadStats();
+            loadAchievements();
+            // Track initial level usage
+            state.usedLevels[state.userLevel] = true;
             updateLevelButtons();
             renderMyWordsPanel();
             updateStatsDisplay();
+            renderAchievements();
 
             await loadArticleList();
             await loadArticleContent(state.articleId);
@@ -2561,6 +2841,12 @@
                 var wpm = elapsedSec > 0 ? Math.round(wordCount / (elapsedSec / 60)) : 0;
                 readingSpeedEl.textContent = wpm;
                 readingSpeedItem.style.display = '';
+
+                // Achievement: speed reader (>150 wpm)
+                if (wpm > 150 && !state.hasSpeedRead) {
+                    state.hasSpeedRead = true;
+                    saveAchievements();
+                }
             }
 
             finishMsg.classList.add('visible');
@@ -2766,6 +3052,13 @@
                 '<div class="quiz-message">' + message + '</div>';
 
             quizResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Achievement: perfect quiz
+            if (score === total && total > 0 && !state.hasPerfectQuiz) {
+                state.hasPerfectQuiz = true;
+                saveAchievements();
+                checkAchievements();
+            }
         }
 
         // ── Flashcard Review ────────────────────────────
