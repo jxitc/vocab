@@ -5128,6 +5128,25 @@
                 return;
             }
 
+            // R: random article
+            if (e.key === 'r' || e.key === 'R') {
+                if (state.articles.length <= 1) return;
+                var curId = state.articleId;
+                var others = [];
+                for (var j = 0; j < state.articles.length; j++) {
+                    if (state.articles[j].id !== curId) others.push(state.articles[j].id);
+                }
+                if (others.length === 0) return;
+                var pick = others[Math.floor(Math.random() * others.length)];
+                state.articleScrollPositions[state.articleId] = window.scrollY;
+                state.articleReadPct[state.articleId] = calcReadPct();
+                saveScrollPositions();
+                state.articleId = pick;
+                savePreferences();
+                loadArticleContent(state.articleId);
+                return;
+            }
+
             // Escape: close popups/panels
             if (e.key === 'Escape') {
                 if (popup.classList.contains('active')) {
@@ -5161,7 +5180,7 @@
         // Help hint: mention keyboard shortcuts
         var helpHint = document.querySelector('.help-hint');
         if (helpHint) {
-            helpHint.innerHTML += '<br>快捷键：<strong>1-4</strong> 切换难度 · <strong>← →</strong> 切换文章 · <strong>F</strong> 专注模式 · <strong>Esc</strong> 关闭弹窗';
+            helpHint.innerHTML += '<br>快捷键：<strong>1-4</strong> 切换难度 · <strong>← →</strong> 切换文章 · <strong>F</strong> 专注模式 · <strong>R</strong> 随机文章 · <strong>Esc</strong> 关闭弹窗';
         }
 
         // ── Bootstrap ──────────────────────────────────
