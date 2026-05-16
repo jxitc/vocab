@@ -953,6 +953,49 @@
             font-size: 12px;
         }
 
+        .goal-item {
+            position: relative;
+        }
+
+        .goal-select {
+            font-size: 11px;
+            padding: 2px 4px;
+            border: 1px solid #d5cfc6;
+            border-radius: 4px;
+            background: #faf9f7;
+            color: #888;
+            cursor: pointer;
+            font-family: inherit;
+            margin-left: 4px;
+        }
+
+        .goal-select:focus {
+            outline: none;
+            border-color: #66bb6a;
+        }
+
+        .goal-achieved {
+            animation: goalPulse 0.6s ease-in-out 3;
+        }
+
+        @keyframes goalPulse {
+            0%, 100% { color: #2e7d32; }
+            50% { color: #66bb6a; transform: scale(1.1); }
+        }
+
+        .goal-celebration {
+            text-align: center;
+            padding: 10px 16px;
+            margin: 12px 0;
+            background: #e8f5e9;
+            border: 1.5px solid #81c784;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2e7d32;
+            display: none;
+        }
+
         /* ── Quiz ────────────────────────────────────── */
         .quiz-section {
             margin-top: 24px;
@@ -1227,6 +1270,21 @@
                 <strong id="statStreak">0</strong>
                 <span class="stat-unit">天</span>
             </div>
+            <div class="stat-item goal-item">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-label">目标</span>
+                <strong id="statGoal">0/1</strong>
+                <span class="stat-unit">篇</span>
+                <select class="goal-select" id="goalSelect">
+                    <option value="1">1篇</option>
+                    <option value="2" selected>2篇</option>
+                    <option value="3">3篇</option>
+                    <option value="5">5篇</option>
+                </select>
+            </div>
+            <div class="goal-celebration" id="goalCelebration">
+                🎉 太厉害了！你今天的目标完成了！
+            </div>
         </div>
 
         <!-- Completion Section -->
@@ -1313,7 +1371,9 @@
             totalArticlesRead: 0,
             totalWordsLearned: 0,
             lastReadDates: [],    // ISO date strings for streak calculation
-            readingStartTime: null  // timestamp when article loaded
+            readingStartTime: null, // timestamp when article loaded
+            dailyGoal: 2,           // articles per day goal
+            todayReadCount: 0       // articles read today
         };
 
         var currentSpeaker = null;
@@ -1356,6 +1416,9 @@
         var statArticles = document.getElementById('statArticles');
         var statWordsTotal = document.getElementById('statWordsTotal');
         var statStreak = document.getElementById('statStreak');
+        var statGoal = document.getElementById('statGoal');
+        var goalSelect = document.getElementById('goalSelect');
+        var goalCelebration = document.getElementById('goalCelebration');
         var quizSection = document.getElementById('quizSection');
         var quizQuestions = document.getElementById('quizQuestions');
         var quizResult = document.getElementById('quizResult');
@@ -1469,6 +1532,14 @@
                 if (Array.isArray(data.lastReadDates)) {
                     state.lastReadDates = data.lastReadDates;
                 }
+                if (typeof data.dailyGoal === 'number') {
+                    state.dailyGoal = data.dailyGoal;
+                }
+                if (typeof data.todayReadCount === 'number' && data.todayDate === new Date().toISOString().substring(0, 10)) {
+                    state.todayReadCount = data.todayReadCount;
+                } else {
+                    state.todayReadCount = 0; // new day
+                }
             } catch(e) { /* ignore */ }
         }
 
@@ -1478,7 +1549,10 @@
                 var data = {
                     totalArticlesRead: state.totalArticlesRead,
                     totalWordsLearned: state.totalWordsLearned,
-                    lastReadDates: state.lastReadDates
+                    lastReadDates: state.lastReadDates,
+                    dailyGoal: state.dailyGoal,
+                    todayReadCount: state.todayReadCount,
+                    todayDate: new Date().toISOString().substring(0, 10)
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(data));
             } catch(e) { /* ignore */ }
@@ -1535,10 +1609,13 @@
             statArticles.textContent = state.totalArticlesRead;
             statWordsTotal.textContent = state.totalWordsLearned;
             statStreak.textContent = computeStreak();
+            statGoal.textContent = state.todayReadCount + '/' + state.dailyGoal;
+            goalSelect.value = String(state.dailyGoal);
         }
 
         function recordArticleRead() {
             state.totalArticlesRead++;
+            state.todayReadCount++;
             state.lastReadDates.push(new Date().toISOString());
             // Keep only last 60 dates to avoid unbounded growth
             if (state.lastReadDates.length > 60) {
@@ -1546,6 +1623,15 @@
             }
             saveStats();
             updateStatsDisplay();
+
+            // Check if daily goal met
+            if (state.todayReadCount >= state.dailyGoal) {
+                goalCelebration.style.display = 'block';
+                setTimeout(function() {
+                    goalCelebration.style.display = 'none';
+                }, 5000);
+            }
+        }
         }
 
         function recordWordLearned() {
@@ -2749,6 +2835,19 @@
             flashcardProgress.style.display = 'block';
             flashcardResult.style.display = 'none';
             startReview();
+        });
+
+        goalSelect.addEventListener('change', function() {
+            state.dailyGoal = parseInt(goalSelect.value);
+            saveStats();
+            updateStatsDisplay();
+            // Check if already met with new goal
+            if (state.todayReadCount >= state.dailyGoal) {
+                goalCelebration.style.display = 'block';
+                setTimeout(function() {
+                    goalCelebration.style.display = 'none';
+                }, 5000);
+            }
         });
 
         // ── Bootstrap ──────────────────────────────────
