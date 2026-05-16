@@ -610,5 +610,77 @@
       }
     ],
     "topic": "科技"
+  },
+  {
+    "id": 17,
+    "title": "A 14-Year-Old Composer Wrote a Symphony Performed by 100 Musicians Around the World",
+    "source": "文化周刊",
+    "url": "https://example.com/teen-composer-symphony",
+    "date": "2026-05-15",
+    "comprehension": [
+      {
+        "question": "The young composer wrote the symphony using online collaboration.",
+        "answer": true
+      },
+      {
+        "question": "She started learning music composition after winning a competition.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A 14-year-old girl from Chengdu has done something that many professional musicians only dream of — she wrote a full symphony that was performed by 100 musicians from 12 different countries. Li Yutong's composition, titled 'Voices of the Yangtze', combines traditional Chinese instruments with a Western orchestra. What makes this even more remarkable is that the musicians never met in person. They each recorded their parts at home and the performance was put together online, reaching over two million viewers worldwide.",
+        "translation": "一位来自成都的14岁女孩做到了许多专业音乐家梦寐以求的事情——她创作了一部完整的交响乐，由来自12个国家的100位音乐家演奏。李雨桐的作品名为《长江之声》，将中国传统乐器与西方管弦乐队相结合。更令人惊叹的是，这些音乐家从未线下见面。他们各自在家中录制了自己的部分，演出通过线上合成，全球超过两百万观众观看。"
+      },
+      {
+        "text": "Yutong started playing the piano when she was four years old, but she discovered her love for composing at age nine. 'I was listening to a piece by Beethoven and suddenly I thought — I want to create my own music,' she said. Her parents, both engineers, supported her unusual hobby by buying her music software and books about composition. She began by writing short pieces for piano, then gradually learned to write for more instruments.",
+        "translation": "雨桐四岁时开始弹钢琴，但她在九岁时发现了对作曲的热爱。「我正在听贝多芬的一首曲子，突然想到——我想创作自己的音乐，」她说。她的父母都是工程师，通过给她购买音乐软件和作曲书籍来支持她这个不寻常的爱好。她从写钢琴短曲开始，然后逐渐学会了为更多乐器写作。"
+      },
+      {
+        "text": "The idea for 'Voices of the Yangtze' came during a school field trip to the Three Gorges. Yutong was deeply moved by the power and beauty of the river. 'I wanted to capture the sound of water, the feeling of history flowing through the land,' she explained. She spent six months composing the 25-minute piece, often working late into the night after finishing her homework. Her music teacher helped her connect with an online community of musicians who agreed to perform it.",
+        "translation": "《长江之声》的灵感来自一次学校组织去三峡的实地考察。雨桐被长江的力量和美丽深深打动。「我想捕捉水的声音，历史在这片土地上流淌的感觉，」她解释说。她花了六个月创作了这首25分钟的曲子，经常在做完作业后工作到深夜。她的音乐老师帮助她联系了一个线上音乐家社群，他们同意演奏这部作品。"
+      },
+      {
+        "text": "The online premiere was watched by people from over 80 countries. Music critics praised the composition for its emotional depth and original style. 'For a composer of any age, this would be impressive. For a 14-year-old, it is extraordinary,' wrote one critic. Yutong is now working on her second symphony and hopes to study at a conservatory in the future. 'Music is a language that everyone understands,' she said. 'I want to use it to connect people across cultures.'",
+        "translation": "线上首演被来自80多个国家的观众观看。音乐评论家赞扬了这部作品的情感深度和原创风格。「对任何年龄的作曲家来说，这都是令人印象深刻的。对一个14岁的孩子来说，这是非凡的，」一位评论家写道。雨桐现在正在创作她的第二部交响乐，并希望将来能在音乐学院学习。「音乐是一种人人都能理解的语言，」她说。「我想用它来连接不同文化的人们。」"
+      }
+    ],
+    "topic": "文化"
+  },
+  {
+    "id": 18,
+    "title": "Scientists Find That Dancing Can Make Your Brain Stronger Than Many Other Forms of Exercise",
+    "source": "健康日报",
+    "url": "https://example.com/dancing-brain-study",
+    "date": "2026-05-15",
+    "comprehension": [
+      {
+        "question": "The study found that dancing improved memory more than treadmill exercise.",
+        "answer": true
+      },
+      {
+        "question": "The research only studied elderly people aged over 70.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "If you want to keep your brain healthy and strong, you might want to put on some music and start dancing. A new study published in the journal Brain Science has found that dancing is one of the best forms of exercise for brain health — better than running, swimming, or cycling. Researchers from the University of Tokyo studied 450 people aged 10 to 70 over a period of three years, comparing the effects of different types of physical activity on memory, learning ability, and brain structure.",
+        "translation": "如果你想保持大脑健康和强壮，你可能想放点音乐开始跳舞。发表在《脑科学》杂志上的一项新研究发现，跳舞是对大脑健康最好的运动形式之一——比跑步、游泳或骑自行车更好。东京大学的研究人员在三年时间里研究了450名年龄在10岁到70岁之间的人，比较了不同类型的体育活动对记忆力、学习能力和大脑结构的影响。"
+      },
+      {
+        "text": "The study divided participants into four groups: a dancing group, a running group, a swimming group, and a control group that did only gentle stretching. After one year, the dancing group showed significantly greater improvements in memory tests than the other groups. Brain scans also revealed that dancers had increased the size of their hippocampus — a brain region crucial for learning and memory — by an average of 3%, while runners showed only a 1% increase.",
+        "translation": "研究将参与者分为四组：舞蹈组、跑步组、游泳组和只做轻度拉伸的对照组。一年后，舞蹈组在记忆测试中表现出比其他组显著更大的改善。大脑扫描还显示，舞者的海马体——一个对学习和记忆至关重要的大脑区域——平均增大了3%，而跑步者只增加了1%。"
+      },
+      {
+        "text": "Why is dancing so effective? The researchers believe it is because dancing combines physical exercise with several other brain-boosting activities. When you dance, you have to remember steps and sequences, coordinate your body to music, stay aware of space around you, and interact with a partner — all at the same time. This multitasking challenge forces the brain to create new neural connections. 'Dancing is like a full-body workout and a brain puzzle combined,' explained Professor Tanaka, who led the study.",
+        "translation": "为什么跳舞如此有效？研究人员认为，这是因为跳舞将身体锻炼与其他几种促进大脑的活动结合起来。当你跳舞时，你必须记住舞步和顺序、协调身体与音乐、保持对周围空间的感知、与舞伴互动——所有这些都要同时进行。这种多任务挑战迫使大脑创建新的神经连接。「跳舞就像全身锻炼和大脑谜题结合在一起，」领导这项研究的田中教授解释说。"
+      },
+      {
+        "text": "The good news is that you don't need to be a professional dancer to get the brain benefits. Even simple social dancing — like ballroom, Latin, or just dancing freely at home — showed positive results. The key factor was learning new movements, not perfecting old ones. This means that challenging your brain with new dance styles is more effective than repeating the same familiar dance. So if you want a sharper mind, maybe it's time to sign up for that dance class you have been thinking about.",
+        "translation": "好消息是，你不需要成为专业舞者就能获得大脑的益处。即使是简单的社交舞——如交谊舞、拉丁舞，或只是在家自由跳舞——都显示出积极的效果。关键因素是学习新动作，而不是完善旧动作。这意味着用新的舞蹈风格挑战你的大脑，比重复同样熟悉的舞蹈更有效。所以，如果你想要更敏锐的头脑，也许是时候报名参加你一直想去的舞蹈课了。"
+      }
+    ],
+    "topic": "健康"
   }
 ]

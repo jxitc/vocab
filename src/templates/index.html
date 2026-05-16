@@ -181,6 +181,42 @@
         }
 
         /* ── Article Switcher ────────────────────────── */
+        .topic-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .topic-filter-label {
+            font-size: 12px;
+            color: #999;
+            margin-right: 4px;
+        }
+        .topic-chip {
+            padding: 3px 11px;
+            font-size: 12px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 14px;
+            background: #fff;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .topic-chip:hover {
+            border-color: #a09888;
+            color: #555;
+            background: #faf9f7;
+        }
+        .topic-chip.active {
+            background: #2e7d32;
+            color: #fff;
+            border-color: #2e7d32;
+            font-weight: 600;
+        }
+
         .article-switcher {
             display: flex;
             gap: 10px;
@@ -1734,6 +1770,17 @@
         body.dark .fav-btn:hover { border-color: #b08020; color: #b08020; }
         body.dark .fav-btn.starred { color: #f0a020; border-color: #8a6a20; }
         body.dark .article-card-star { color: #f0a020; }
+        body.dark .topic-chip {
+            background: #252528;
+            border-color: #3a3a40;
+            color: #777;
+        }
+        body.dark .topic-chip:hover { border-color: #555; color: #aaa; }
+        body.dark .topic-chip.active {
+            background: #3a6b3a;
+            color: #81c784;
+            border-color: #4a8a4a;
+        }
         body.dark .word { color: #d0d0d0; }
         body.dark .word.difficult {
             background-color: #4a3a10;
@@ -2012,6 +2059,10 @@
         </div>
 
         <!-- Article Switcher -->
+        <div class="topic-filter" id="topicFilter" style="display:none;">
+            <span class="topic-filter-label">话题:</span>
+            <button class="topic-chip active" data-topic="">全部</button>
+        </div>
         <div class="article-switcher" id="articleSwitcher" style="display:none;">
         </div>
         <div style="text-align:center;margin-bottom:20px;" id="randomBtnWrap" hidden>
@@ -2208,7 +2259,8 @@
             fontSize: 'medium',
             darkMode: false,
             favoriteArticles: {},       // {articleId: true} for bookmarked articles
-            articleScrollPositions: {}  // {articleId: scrollY} for restore position
+            articleScrollPositions: {}, // {articleId: scrollY} for restore position
+            topicFilter: ''            // current topic filter ('' = all)
         };
 
         var currentSpeaker = null;
@@ -2265,6 +2317,7 @@
         var historyList = document.getElementById('historyList');
         var historyHeader = document.getElementById('historyHeader');
         var historyToggle = document.getElementById('historyToggle');
+        var topicFilterEl = document.getElementById('topicFilter');
         var myWordsSearch = document.getElementById('myWordsSearch');
         var reviewBtn = document.getElementById('reviewBtn');
         var flashcardArea = document.getElementById('flashcardArea');
@@ -3542,12 +3595,48 @@
             loadArticleContent(state.articleId);
         }
 
+        // ── Topic Filter ────────────────────────────────
+        function renderTopicFilter() {
+            if (!topicFilterEl) return;
+            if (state.articles.length <= 1) {
+                topicFilterEl.style.display = 'none';
+                return;
+            }
+            topicFilterEl.style.display = 'flex';
+
+            // Collect unique topics
+            var topics = {};
+            for (var i = 0; i < state.articles.length; i++) {
+                var t = state.articles[i].topic;
+                if (t) topics[t] = true;
+            }
+
+            // Rebuild chips
+            topicFilterEl.innerHTML = '<span class="topic-filter-label">话题:</span>';
+            var allActive = !state.topicFilter ? ' active' : '';
+            topicFilterEl.innerHTML += '<button class="topic-chip' + allActive + '" data-topic="">全部</button>';
+
+            var topicNames = Object.keys(topics).sort();
+            for (var j = 0; j < topicNames.length; j++) {
+                var name = topicNames[j];
+                var active = state.topicFilter === name ? ' active' : '';
+                topicFilterEl.innerHTML += '<button class="topic-chip' + active + '" data-topic="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+            }
+        }
+
+        function filterByTopic(topic) {
+            state.topicFilter = topic;
+            renderTopicFilter();
+            renderArticleSwitcher();
+        }
+
         // ── Article Switcher ───────────────────────────
         function renderArticleSwitcher() {
             var randomWrap = document.getElementById('randomBtnWrap');
             if (state.articles.length <= 1) {
                 articleSwitcher.style.display = 'none';
                 if (randomWrap) randomWrap.hidden = true;
+                topicFilterEl.style.display = 'none';
                 return;
             }
 
@@ -3555,8 +3644,16 @@
             if (randomWrap) randomWrap.hidden = false;
             articleSwitcher.innerHTML = '';
 
-            for (var i = 0; i < state.articles.length; i++) {
-                var a = state.articles[i];
+            // Filter articles by topic
+            var visibleArticles = state.articles;
+            if (state.topicFilter) {
+                visibleArticles = state.articles.filter(function(a) {
+                    return a.topic === state.topicFilter;
+                });
+            }
+
+            for (var i = 0; i < visibleArticles.length; i++) {
+                var a = visibleArticles[i];
                 var card = document.createElement('div');
                 card.className = 'article-card' + (a.id === state.articleId ? ' active' : '');
                 card.setAttribute('data-article-id', a.id);
@@ -3607,6 +3704,7 @@
                     }
                 }
 
+                renderTopicFilter();
                 renderArticleSwitcher();
                 renderReadingHistory();
             } catch(err) {
@@ -3950,6 +4048,14 @@
             } else {
                 historyToggle.classList.add('open');
             }
+        });
+
+        // ── Event Delegation: Topic Filter ───────────
+        topicFilterEl.addEventListener('click', function(e) {
+            var chip = e.target.closest('.topic-chip');
+            if (!chip) return;
+            var topic = chip.getAttribute('data-topic') || '';
+            filterByTopic(topic);
         });
 
         // ── Event Delegation: Level Selector ──────────
