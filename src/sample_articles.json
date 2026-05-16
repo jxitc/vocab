@@ -754,5 +754,77 @@
       }
     ],
     "topic": "自然"
+  },
+  {
+    "id": 21,
+    "title": "Teenagers Build an AI App That Helps Farmers Protect Their Crops from Pests",
+    "source": "科技日报",
+    "url": "https://example.com/ai-farming-app",
+    "date": "2026-05-16",
+    "comprehension": [
+      {
+        "question": "The app uses artificial intelligence to identify crop diseases from photos.",
+        "answer": true
+      },
+      {
+        "question": "The app was created by professional software engineers at a technology company.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A group of high school students from a small town in Henan province has created a smartphone app that could change the way farmers protect their crops. The app, called 'CropGuard', uses artificial intelligence to identify plant diseases and pests from a simple photograph. A farmer just needs to take a picture of a suspicious leaf or insect, and the app immediately tells them what the problem is and how to fix it. CropGuard can currently identify over 50 common crop diseases with 94% accuracy.",
+        "translation": "一组来自河南小镇的高中生创造了一个可能改变农民保护庄稼方式的智能手机应用。这个名为「作物卫士」的应用使用人工智能从简单的照片中识别植物病害和害虫。农民只需拍一张可疑叶子或昆虫的照片，应用就会立即告诉他们问题是什么以及如何解决。作物卫士目前可以识别50多种常见作物病害，准确率达94%。"
+      },
+      {
+        "text": "The idea was born when 16-year-old Liu Yang visited his grandparents' farm during summer break. 'My grandfather lost almost half of his wheat crop because he didn't recognize a disease early enough,' Liu recalled. 'I realized that many farmers, especially older ones in rural areas, don't have access to agricultural experts. But almost everyone has a smartphone now.' He gathered four friends from the school computer club, and they began working on the app during weekends and holidays.",
+        "translation": "这个想法是在16岁的刘洋暑假去祖父母的农场时诞生的。「我爷爷因为没有及早识别出一种病害，损失了将近一半的小麦收成，」刘洋回忆道。「我意识到许多农民，特别是农村地区的老年人，无法接触到农业专家。但现在几乎每个人都有智能手机。」他召集了学校计算机俱乐部的四位朋友，他们开始在周末和假期开发这个应用。"
+      },
+      {
+        "text": "Building the AI was the hardest part. The team collected thousands of photos of healthy and diseased crops from local farms and agricultural websites. They then used an open-source machine learning library to train their AI model. 'None of us knew anything about machine learning when we started,' said team member Wang Xia. 'We learned everything from online courses and tutorials. There were many nights when the AI gave us completely wrong answers, and we had to figure out why.' After six months of work, they finally had a working model.",
+        "translation": "构建人工智能是最困难的部分。团队从当地农场和农业网站收集了数千张健康和患病作物的照片。然后他们使用开源机器学习库来训练他们的人工智能模型。「开始时我们对机器学习一无所知，」团队成员王霞说。「我们从在线课程和教程中学到了一切。有很多个夜晚，人工智能给我们完全错误的答案，我们必须找出原因。」经过六个月的努力，他们终于有了一个可用的模型。"
+      },
+      {
+        "text": "CropGuard won second place at the National Youth Science and Innovation Fair, and several agricultural companies have shown interest in developing it further. The local government has also started a pilot program where 200 farmers are testing the app. 'The best moment was when an old farmer told us our app saved his entire vegetable field,' Liu said. 'That's when I knew we were doing something that really matters.' The team plans to keep improving the app and make it available for free to small farmers across China.",
+        "translation": "作物卫士在全国青少年科技创新博览会上获得第二名，几家农业公司表示有兴趣进一步开发它。当地政府还启动了一个试点项目，200名农民正在测试该应用。「最棒的时刻是一位老农告诉我们，我们的应用拯救了他的整片菜地，」刘洋说。「那时我知道我们正在做真正重要的事情。」团队计划继续改进该应用，并免费提供给中国各地的小农户。"
+      }
+    ],
+    "topic": "科技"
+  },
+  {
+    "id": 22,
+    "title": "A 15-Year-Old Photographer's Pictures of Endangered Animals Won a World Press Photo Award",
+    "source": "艺术日报",
+    "url": "https://example.com/young-photographer-endangered",
+    "date": "2026-05-16",
+    "comprehension": [
+      {
+        "question": "The photographer used a professional camera borrowed from a photography studio.",
+        "answer": false
+      },
+      {
+        "question": "Her photos focused on endangered animals in their natural habitats.",
+        "answer": true
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "A 15-year-old girl from Chengdu has become the youngest winner of the World Press Photo Youth Award, one of the most important photography competitions in the world. Lin Xiaowei's photo series, titled 'The Last Ones', captures endangered animals in their natural habitats across China, including the snow leopard in Tibet, the crested ibis in Shaanxi, and the Yangtze finless porpoise. The judges called her work 'breathtakingly beautiful and deeply moving.'",
+        "translation": "一位来自成都的15岁女孩成为世界新闻摄影青年奖最年轻的获奖者，这是世界上最重要的摄影比赛之一。林小薇的系列照片《最后的它们》捕捉了中国各地自然栖息地中的濒危动物，包括西藏的雪豹、陕西的朱鹮和长江江豚。评委称她的作品「美得令人窒息，且深深打动人心」。"
+      },
+      {
+        "text": "Xiaowei's love for wildlife photography began when she was 11, after her father gave her an old second-hand camera. 'At first, I just took pictures of birds in our neighborhood park,' she said. 'But then I watched a documentary about endangered species, and I realized that many animals might not exist when I grow up. I wanted to capture their beauty before it's too late.' She saved her pocket money for two years to buy better camera equipment and convinced her parents to take her to nature reserves during school holidays.",
+        "translation": "小薇对野生动物摄影的热爱始于11岁，当时父亲给了她一个二手旧相机。「起初，我只是在我们社区公园里拍鸟，」她说。「但后来我看了一部关于濒危物种的纪录片，我意识到许多动物在我长大后可能就不存在了。我想在为时已晚之前捕捉它们的美丽。」她攒了两年的零花钱购买更好的相机设备，并说服父母在学校假期带她去自然保护区。"
+      },
+      {
+        "text": "Taking pictures of endangered animals is extremely difficult. Xiaowei often had to wait for hours or even days in cold and uncomfortable conditions just to catch a glimpse of an animal. For the snow leopard photo, she spent five days at an altitude of over 4,000 meters in freezing weather. 'On the fourth day, I was so cold and tired that I almost gave up,' she admitted. 'But on the fifth morning, a snow leopard appeared on a rock just 50 meters away. It looked at me for maybe three seconds, and I took the shot. That moment made everything worth it.'",
+        "translation": "拍摄濒危动物极其困难。小薇经常需要在寒冷和不适的条件下等待数小时甚至数天，只为一瞥动物。为了拍摄雪豹照片，她在海拔4000米以上的严寒天气中待了五天。「第四天，我又冷又累，几乎要放弃了，」她承认。「但第五天早上，一只雪豹出现在仅50米外的岩石上。它看了我大概三秒钟，我按下了快门。那一刻让一切都值得。」"
+      },
+      {
+        "text": "The award has brought international attention to China's endangered species. Xiaowei's photos have been published in magazines around the world, and she has been invited to speak at environmental conferences. 'I'm just a teenager with a camera,' she said. 'But I hope my photos can make people care about these animals. When people see how beautiful they are, maybe they will want to protect them.' She is now planning her next project: documenting the wildlife of the Qinghai-Tibet Plateau.",
+        "translation": "这个奖项为中国的濒危物种带来了国际关注。小薇的照片已在世界各地杂志上发表，她还被邀请在环保会议上演讲。「我只是一个拿着相机的少年，」她说。「但我希望我的照片能让人们关心这些动物。当人们看到它们有多美时，也许就会想要保护它们。」她正在计划下一个项目：记录青藏高原的野生动物。"
+      }
+    ],
+    "topic": "艺术"
   }
 ]

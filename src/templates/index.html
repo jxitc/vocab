@@ -2168,6 +2168,7 @@
             <div class="article-meta">
                 <span id="articleSource">来源: —</span>
                 <span id="articleDate">日期: —</span>
+                <span id="articleWordCount" style="color:#999;font-size:12px;"></span>
                 <button class="fav-btn" id="favBtn" title="收藏文章" style="display:none;">☆</button>
             </div>
             <!-- Difficulty Level Selector -->
@@ -3788,6 +3789,14 @@
             document.getElementById('articleTitle').textContent = article.title;
             document.getElementById('articleSource').textContent = '来源: ' + article.source;
             document.getElementById('articleDate').textContent = '日期: ' + article.date;
+            var wc = 0;
+            if (article.paragraphs) {
+                for (var i = 0; i < article.paragraphs.length; i++) {
+                    wc += article.paragraphs[i].text.split(/\s+/).length;
+                }
+            }
+            var rt = Math.max(1, Math.round(wc / 150));
+            document.getElementById('articleWordCount').textContent = wc + '词 · ' + rt + '分钟';
             document.title = article.title + ' - Vocab in News';
             updateFavButton();
         }
