@@ -26,6 +26,7 @@ from vocab_service import (
     count_vocab_by_level,
     filter_known_words,
     filter_known_words_from_tokens,
+    stem_word,
     LEVEL_NAMES,
     MAX_HIGHLIGHTS,
     LEVEL_HIGHLIGHT_RANGES,
@@ -661,6 +662,67 @@ class TestKnownWordPipeline:
         filtered = filter_known_words(all_words, {"extraordinary"})
         filtered_lowers = [w["lower"] for w in filtered]
         assert filtered_lowers == ["planet", "discovery", "evidence"]
+
+
+class TestStemWord:
+    """Tests for the stem_word function used in deduplication."""
+
+    def test_plural_to_singular(self):
+        """Plural forms should stem."""
+        assert stem_word("experiments") == "experiment"
+        assert stem_word("discoveries") == "discovery"
+        assert stem_word("abilities") == "ability"
+
+    def test_ing_to_base(self):
+        """-ing forms should stem to base."""
+        assert stem_word("protecting") == "protect"
+        assert stem_word("playing") == "play"
+
+    def test_ed_to_base(self):
+        """-ed forms should stem to base."""
+        assert stem_word("confirmed") == "confirm"
+        assert stem_word("published") == "publish"
+        assert stem_word("studied") == "study"
+
+    def test_ly_adverb(self):
+        """-ly adverbs should stem."""
+        assert stem_word("nearly") == "near"
+        assert stem_word("extremely") == "extreme"
+
+    def test_ment_noun(self):
+        """-ment nouns should stem (ement rule matches first)."""
+        assert stem_word("achievement") == "achiev"
+        assert stem_word("replacement") == "replac"
+
+    def test_er_agent(self):
+        """-er agent nouns should stem."""
+        assert stem_word("teacher") == "teach"
+
+    def test_short_words_unchanged(self):
+        """Words with 1-2 letters should stay unchanged."""
+        assert stem_word("a") == "a"
+        assert stem_word("is") == "is"
+
+    def test_no_change_for_base_form(self):
+        """Words already in base form should not change."""
+        assert stem_word("planet") == "planet"
+        assert stem_word("strategy") == "strategy"
+
+    def test_stem_unifies_inflected_forms(self):
+        """Stemming groups: confirm/confirmed, protect/protecting, play/played."""
+        assert stem_word("confirm") == stem_word("confirmed")
+        assert stem_word("protect") == stem_word("protecting")
+        assert stem_word("play") == stem_word("played")
+
+    def test_s_rule_blocks_deeper_stem(self):
+        """Plural s-rule fires first, preventing ment/other stemming."""
+        assert stem_word("experiments") == "experiment"  # s-rule
+        assert stem_word("experiment") == "experi"       # ment-rule
+        # These don't unify — known limitation of single-pass stemmer
+
+    def test_case_insensitive_handled_by_caller(self):
+        """stem_word expects lowercase input."""
+        assert stem_word("PROTECTING") != "protect"
 
 
 if __name__ == "__main__":

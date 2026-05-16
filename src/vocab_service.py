@@ -42,7 +42,7 @@ _SUFFIX_RULES = [
 ]
 
 
-def _stem(word: str) -> str:
+def stem_word(word: str) -> str:
     """Return a simple stem of the given lowercase word."""
     if len(word) < 3:
         return word
@@ -52,6 +52,11 @@ def _stem(word: str) -> str:
             if len(stemmed) >= 3:
                 return stemmed
     return word
+
+
+def _stem(word: str) -> str:
+    """Backward compat wrapper."""
+    return stem_word(word)
 
 
 def _lookup(word_lower: str) -> Optional[Tuple[str, str, int]]:

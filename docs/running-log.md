@@ -112,5 +112,12 @@
 - [x] 每日阅读目标 — 可设置1/2/3/5篇目标，阅读统计栏显示进度 (如 1/2 篇)
 - [x] 目标达成庆祝 — 完成每日目标后弹出 🎉 动画提示
 - [x] localStorage 持久化目标设置和今日进度，跨天自动重置
-- [x] 67 tests passing
+- [x] 78 tests passing
+
+## Iter 12
+### 已实现
+- [x] 词干去重 — 使用 stem_word() 替代精确匹配合并词形变体 (confirmed/confirm, protecting/protect)
+- [x] stem_word() 公有化 + 10个新测试
+- [x] 已知局限: 单轮词干提取 -s规则优先，experiments/experiment 暂不合并
+- [x] 78 tests passing
 
