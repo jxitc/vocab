@@ -821,6 +821,102 @@
             font-size: 12px;
         }
 
+        /* ── Quiz ────────────────────────────────────── */
+        .quiz-section {
+            margin-top: 24px;
+            padding: 24px 20px;
+            background: #faf9f7;
+            border: 1.5px solid #e8e4dc;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .quiz-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #e8e4dc;
+        }
+
+        .quiz-question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .quiz-word {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px 14px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            text-align: left;
+        }
+
+        .quiz-option:hover {
+            border-color: #a09888;
+            background: #f8f6f2;
+        }
+
+        .quiz-option.correct {
+            border-color: #66bb6a;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+            cursor: default;
+        }
+
+        .quiz-option.wrong {
+            border-color: #ef5350;
+            background: #ffebee;
+            color: #c62828;
+            cursor: default;
+        }
+
+        .quiz-option.answered {
+            pointer-events: none;
+        }
+
+        .quiz-result {
+            text-align: center;
+            padding: 16px 0 4px;
+        }
+
+        .quiz-score {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .quiz-message {
+            font-size: 15px;
+            color: #666;
+            margin-top: 6px;
+        }
+
         /* ── Footer ───────────────────────────────────── */
         footer {
             text-align: center;
@@ -999,6 +1095,13 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Quiz Section -->
+            <div class="quiz-section" id="quizSection" style="display:none;">
+                <h3 class="quiz-title">📝 小测验 — 看看你记住了几个词？</h3>
+                <div class="quiz-questions" id="quizQuestions"></div>
+                <div class="quiz-result" id="quizResult" style="display:none;"></div>
+            </div>
         </div>
 
         <footer>
@@ -1094,6 +1197,9 @@
         var statArticles = document.getElementById('statArticles');
         var statWordsTotal = document.getElementById('statWordsTotal');
         var statStreak = document.getElementById('statStreak');
+        var quizSection = document.getElementById('quizSection');
+        var quizQuestions = document.getElementById('quizQuestions');
+        var quizResult = document.getElementById('quizResult');
         var levelBtns = document.querySelectorAll('.level-btn');
 
         // ── localStorage: Preferences ────────────────────
@@ -1878,6 +1984,7 @@
             loadingEl.style.display = 'block';
             errorEl.style.display = 'none';
             wordPanel.style.display = 'none';
+            quizSection.style.display = 'none';
 
             try {
                 var url = '/api/article?id=' + articleId + '&level=' + state.userLevel;
@@ -2135,7 +2242,198 @@
             recordArticleRead();
 
             finishMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Show quiz after finishing
+            showQuiz();
         });
+
+        // ── Quiz ───────────────────────────────────────
+        function buildQuizQuestions() {
+            // Collect difficult words from the current article
+            var words = [];
+            var seen = {};
+            if (!state.article || !state.article.paragraphs) return words;
+            var paragraphs = state.article.paragraphs;
+            for (var pi = 0; pi < paragraphs.length; pi++) {
+                var tokens = paragraphs[pi].tokens;
+                for (var ti = 0; ti < tokens.length; ti++) {
+                    var t = tokens[ti];
+                    if (t.is_difficult && t.is_word && t.definition && !seen[t.word.toLowerCase()]) {
+                        seen[t.word.toLowerCase()] = true;
+                        words.push({ word: t.word, definition: t.definition, pos: t.pos });
+                    }
+                }
+            }
+            return words;
+        }
+
+        function shuffleArray(arr) {
+            var a = arr.slice();
+            for (var i = a.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+            }
+            return a;
+        }
+
+        function showQuiz() {
+            var words = buildQuizQuestions();
+            if (words.length < 2) return; // Need at least 2 words for a quiz
+
+            // Pick up to 5 words, randomize
+            words = shuffleArray(words).slice(0, 5);
+
+            // Build question data: each question needs 1 correct + 3 distractors
+            var allDefs = [];
+            for (var i = 0; i < words.length; i++) {
+                allDefs.push(words[i].definition);
+            }
+
+            var questions = [];
+            for (var i = 0; i < words.length; i++) {
+                var correctDef = words[i].definition;
+                // Pick 3 distractors from other words in this set
+                var distractors = [];
+                for (var j = 0; j < allDefs.length; j++) {
+                    if (allDefs[j] !== correctDef) {
+                        distractors.push(allDefs[j]);
+                    }
+                }
+                // If not enough distractors from this set, use hardcoded fallbacks
+                while (distractors.length < 3) {
+                    var fallbacks = ['重要的', '特别的', '不同的', '可能的', '基本的', '国际的', '系统', '方法', '研究'];
+                    var fb = fallbacks[distractors.length];
+                    if (distractors.indexOf(fb) === -1 && fb !== correctDef) {
+                        distractors.push(fb);
+                    } else {
+                        distractors.push(fallbacks[distractors.length + 2] || '内容');
+                    }
+                }
+                distractors = shuffleArray(distractors).slice(0, 3);
+
+                var options = shuffleArray([correctDef].concat(distractors));
+                questions.push({
+                    word: words[i].word,
+                    correct: correctDef,
+                    pos: words[i].pos,
+                    options: options
+                });
+            }
+
+            state.quizQuestions = questions;
+            state.quizAnswers = [];
+            state.quizScore = 0;
+
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            quizQuestions.innerHTML = '';
+            quizResult.style.display = 'none';
+            quizSection.style.display = 'block';
+
+            var qs = state.quizQuestions;
+            for (var i = 0; i < qs.length; i++) {
+                var q = qs[i];
+                var div = document.createElement('div');
+                div.className = 'quiz-question';
+                div.setAttribute('data-qindex', String(i));
+
+                var wordEl = document.createElement('div');
+                wordEl.className = 'quiz-word';
+                wordEl.textContent = (i + 1) + '. ' + q.word;
+                if (q.pos) {
+                    var posSpan = document.createElement('span');
+                    posSpan.style.cssText = 'font-size:13px;color:#999;font-weight:400;margin-left:6px;';
+                    posSpan.textContent = q.pos;
+                    wordEl.appendChild(posSpan);
+                }
+                div.appendChild(wordEl);
+
+                var optsDiv = document.createElement('div');
+                optsDiv.className = 'quiz-options';
+                for (var j = 0; j < q.options.length; j++) {
+                    var opt = document.createElement('button');
+                    opt.className = 'quiz-option';
+                    opt.textContent = q.options[j];
+                    opt.setAttribute('data-value', q.options[j]);
+                    opt.addEventListener('click', function(e) {
+                        var btn = e.target;
+                        var qDiv = btn.closest('.quiz-question');
+                        var qIdx = parseInt(qDiv.getAttribute('data-qindex'));
+                        handleQuizAnswer(qIdx, btn.getAttribute('data-value'), qDiv);
+                    });
+                    optsDiv.appendChild(opt);
+                }
+                div.appendChild(optsDiv);
+                quizQuestions.appendChild(div);
+            }
+            quizSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function handleQuizAnswer(qIndex, selected, qDiv) {
+            var q = state.quizQuestions[qIndex];
+            var isCorrect = (selected === q.correct);
+            var buttons = qDiv.querySelectorAll('.quiz-option');
+
+            // Mark all options
+            for (var i = 0; i < buttons.length; i++) {
+                var btn = buttons[i];
+                var val = btn.getAttribute('data-value');
+                btn.classList.add('answered');
+                if (val === q.correct) {
+                    btn.classList.add('correct');
+                } else if (val === selected && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            }
+
+            if (isCorrect) {
+                state.quizScore++;
+            }
+            state.quizAnswers[qIndex] = isCorrect;
+
+            // Check if all answered
+            var allAnswered = true;
+            for (var i = 0; i < state.quizQuestions.length; i++) {
+                if (state.quizAnswers[i] === undefined) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            if (allAnswered) {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            var total = state.quizQuestions.length;
+            var score = state.quizScore;
+            var pct = Math.round(score / total * 100);
+
+            var message = '';
+            var emoji = '';
+            if (pct === 100) {
+                message = '全部正确！你太厉害了，这些生词都记住了！';
+                emoji = '🏆';
+            } else if (pct >= 60) {
+                message = '做得不错！大部分词都掌握了，继续加油！';
+                emoji = '👏';
+            } else if (pct >= 30) {
+                message = '还可以，多读几遍文章会记得更牢哦！';
+                emoji = '💪';
+            } else {
+                message = '别灰心！学习新词需要时间，再读一遍文章试试吧！';
+                emoji = '📖';
+            }
+
+            quizResult.style.display = 'block';
+            quizResult.innerHTML =
+                '<div class="quiz-score">' + emoji + ' ' + score + ' / ' + total + '</div>' +
+                '<div class="quiz-message">' + message + '</div>';
+
+            quizResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         // ── Bootstrap ──────────────────────────────────
         init();
