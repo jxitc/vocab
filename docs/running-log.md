@@ -82,6 +82,9 @@
 - [x] 阅读统计 — 已读篇数/已学词数/连续天数 (localStorage + 显示)
 - [x] 2篇新文章 — 跳水奥运冠军 (体育周刊) + 乌鸦智力研究 (自然探索)
 - [x] 67 tests passing
+### 测试结果 (Iter 7 test)
+- All 4 features PASS, zero regressions
+- Minor: experiments/experiment 未合并词形；"重新学习"后的自动补充可能困惑用户
 
 ## Iter 8
 ### 已实现
