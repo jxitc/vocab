@@ -251,6 +251,45 @@
             display: block;
         }
 
+        .my-words-search {
+            width: 100%;
+            padding: 8px 14px;
+            font-size: 14px;
+            border: 1.5px solid #e0dcd4;
+            border-radius: 8px;
+            background: #faf9f7;
+            color: #333;
+            margin-bottom: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .my-words-search:focus {
+            border-color: #a09888;
+            background: #fff;
+        }
+
+        .my-words-search::placeholder {
+            color: #ccc;
+        }
+
+        body.dark .my-words-search {
+            background: #2a2a30;
+            border-color: #3a3a40;
+            color: #d0d0d0;
+        }
+
+        body.dark .my-words-search:focus {
+            border-color: #666;
+            background: #333;
+        }
+
+        .my-words-item.hidden-by-search {
+            display: none;
+        }
+
         .my-words-section {
             margin-bottom: 16px;
         }
@@ -1585,6 +1624,8 @@
 
         <!-- My Words Panel (collapsible) -->
         <div class="my-words-panel" id="myWordsPanel">
+            <input type="text" class="my-words-search" id="myWordsSearch"
+                   placeholder="🔍 搜索词库..." autocomplete="off">
             <div class="my-words-section" id="knownWordsSection">
                 <h3 class="my-words-section-title known">我认识的词 <span class="section-count" id="knownWordsCount">(0)</span></h3>
                 <div class="my-words-list" id="knownWordsList">
@@ -1838,6 +1879,7 @@
         var quizSection = document.getElementById('quizSection');
         var quizQuestions = document.getElementById('quizQuestions');
         var quizResult = document.getElementById('quizResult');
+        var myWordsSearch = document.getElementById('myWordsSearch');
         var reviewBtn = document.getElementById('reviewBtn');
         var flashcardArea = document.getElementById('flashcardArea');
         var flashcardCard = document.getElementById('flashcardCard');
@@ -3129,15 +3171,50 @@
             }
         });
 
+        // ── Word Bank Search ──────────────────────────
+        myWordsSearch.addEventListener('input', function() {
+            var query = myWordsSearch.value.toLowerCase().trim();
+            var allItems = myWordsPanel.querySelectorAll('.my-words-item');
+            for (var i = 0; i < allItems.length; i++) {
+                var item = allItems[i];
+                var text = item.textContent.toLowerCase();
+                if (query === '' || text.indexOf(query) !== -1) {
+                    item.classList.remove('hidden-by-search');
+                } else {
+                    item.classList.add('hidden-by-search');
+                }
+            }
+            // Hide section if all items hidden
+            updateSectionVisibility('knownWordsList', 'knownWordsSection');
+            updateSectionVisibility('learnedWordsList', 'learnedWordsSection');
+        });
+
+        function updateSectionVisibility(listId, sectionId) {
+            var list = document.getElementById(listId);
+            var section = document.getElementById(sectionId);
+            var visibleItems = list.querySelectorAll('.my-words-item:not(.hidden-by-search)');
+            var emptyMsg = list.querySelector('.my-words-empty');
+            if (visibleItems.length === 0 && !emptyMsg) {
+                var msg = document.createElement('span');
+                msg.className = 'my-words-empty';
+                msg.textContent = '未找到匹配词';
+                list.appendChild(msg);
+            } else if (visibleItems.length > 0 && emptyMsg) {
+                emptyMsg.remove();
+            }
+        }
+
         // ── My Words Toggle ───────────────────────────
         myWordsToggle.addEventListener('click', function() {
             state.myWordsVisible = !state.myWordsVisible;
             if (state.myWordsVisible) {
                 myWordsPanel.classList.add('visible');
                 myWordsToggle.textContent = '收起词库';
+                myWordsSearch.value = '';
                 renderMyWordsPanel();
             } else {
                 myWordsPanel.classList.remove('visible');
+                myWordsSearch.value = '';
                 updateMyWordsToggle();
             }
         });
