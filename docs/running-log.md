@@ -76,3 +76,10 @@
 - All 5 features PASS, zero regressions
 - Minor: "professional" 出现5次全部高亮 (冗余)，自动补充生词可能让用户困惑
 
+## Iter 7
+### 已实现
+- [x] 生词去重 — 同一词只高亮首次出现 (server.py 首现跟踪)
+- [x] 阅读统计 — 已读篇数/已学词数/连续天数 (localStorage + 显示)
+- [x] 2篇新文章 — 跳水奥运冠军 (体育周刊) + 乌鸦智力研究 (自然探索)
+- [x] 67 tests passing
+

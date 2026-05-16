@@ -1,5 +1,5 @@
 """
-Vocab in News - Web Server (Iteration 6)
+Vocab in News - Web Server (Iteration 7)
 Flask app serving interactive article reading page with
 word annotation, paragraph-level Chinese translations,
 multiple difficulty levels, and multiple articles.
@@ -65,16 +65,25 @@ def build_paragraphs_with_tokens(article: dict, user_level: int = 2,
     # Only highlight the first N words; rest are shown as normal
     highlighted_lowers = {w["lower"] for w in all_difficult[:max_highlights]}
 
+    # Track first occurrence — only highlight each word the first time it appears
+    seen_highlighted = set()
+
     enriched = []
     for para in article.get("paragraphs", []):
         text = para["text"]
         tokens = tokenize(text, user_level)
         # Clear known words from token difficulty flags
         tokens = filter_known_words_from_tokens(tokens, known_words)
-        # Downgrade words that exceed the highlight limit
+        # Downgrade words that exceed the highlight limit or are repeat occurrences
         for t in tokens:
-            if t["is_difficult"] and t["word"] and t["word"].lower() not in highlighted_lowers:
-                t["is_difficult"] = False
+            if t["is_difficult"] and t["word"]:
+                wl = t["word"].lower()
+                if wl not in highlighted_lowers:
+                    t["is_difficult"] = False
+                elif wl in seen_highlighted:
+                    t["is_difficult"] = False
+                else:
+                    seen_highlighted.add(wl)
         difficult_words = [w for w in find_difficult_words(text, user_level)
                           if w["lower"] in highlighted_lowers]
         difficult_words = filter_known_words(difficult_words, known_words)
