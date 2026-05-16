@@ -180,6 +180,42 @@
             font-size: 13px;
         }
 
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid #d5cfc6;
+            background: #fff;
+            color: #999;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            pointer-events: none;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .back-to-top:hover {
+            border-color: #a09888;
+            color: #555;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+            transform: translateY(-2px);
+        }
+        .back-to-top.visible:hover {
+            transform: translateY(-2px);
+        }
+
         /* ── Level Selector ──────────────────────────── */
         .level-selector {
             display: flex;
@@ -1869,6 +1905,12 @@
             border-color: #3a3a40;
             color: #aaa;
         }
+        body.dark .back-to-top {
+            background: #252528;
+            border-color: #3a3a40;
+            color: #777;
+        }
+        body.dark .back-to-top:hover { border-color: #555; color: #aaa; }
         body.dark .topic-chip {
             background: #252528;
             border-color: #3a3a40;
@@ -2092,6 +2134,7 @@
     </style>
 </head>
 <body>
+    <button class="back-to-top" id="backToTop" title="返回顶部">↑</button>
     <div class="container">
         <!-- Header -->
         <header>
@@ -2449,6 +2492,7 @@
         var achievementsCount = document.getElementById('achievementsCount');
         var achievementToast = null;
         var favBtn = document.getElementById('favBtn');
+        var backToTopBtn = document.getElementById('backToTop');
 
         // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
@@ -4928,6 +4972,24 @@
                 state.articleReadPct[state.articleId] = calcReadPct();
                 savePreferences();
             }
+        });
+
+        // ── Back to Top ────────────────────────────────
+        var backToTopTimer = null;
+        window.addEventListener('scroll', function() {
+            if (backToTopTimer) return;
+            backToTopTimer = setTimeout(function() {
+                backToTopTimer = null;
+                if (window.scrollY > 400) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            }, 100);
+        }, { passive: true });
+
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     })();
     </script>

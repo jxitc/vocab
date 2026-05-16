@@ -1,5 +1,5 @@
 """
-Vocab in News - Web Server (Iteration 31)
+Vocab in News - Web Server (Iteration 32)
 Flask app serving interactive article reading page with
 word annotation, paragraph-level Chinese translations,
 multiple difficulty levels, and multiple articles.
