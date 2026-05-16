@@ -88,6 +88,47 @@
             background: #faf9f7;
         }
 
+        .focus-mode-toggle {
+            padding: 5px 10px;
+            font-size: 15px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 14px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .focus-mode-toggle:hover {
+            border-color: #a09888;
+            background: #faf9f7;
+        }
+        .focus-mode-toggle.active {
+            background: #e8f5e9;
+            border-color: #66bb6a;
+            color: #2e7d32;
+        }
+
+        /* Focus mode: hide non-essential elements */
+        body.focus-mode .article-switcher,
+        body.focus-mode .topic-filter,
+        body.focus-mode .level-selector,
+        body.focus-mode .reading-stats,
+        body.focus-mode .achievements-section,
+        body.focus-mode .reading-history-section,
+        body.focus-mode #randomBtnWrap,
+        body.focus-mode .help-hint,
+        body.focus-mode .my-words-panel { display: none !important; }
+
+        body.focus-mode .container {
+            max-width: 780px;
+        }
+        body.focus-mode header {
+            border-bottom-color: transparent;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+        }
+
         .article-title {
             font-size: 28px;
             font-weight: 700;
@@ -1787,6 +1828,17 @@
         body.dark .fav-btn:hover { border-color: #b08020; color: #b08020; }
         body.dark .fav-btn.starred { color: #f0a020; border-color: #8a6a20; }
         body.dark .article-card-star { color: #f0a020; }
+        body.dark .focus-mode-toggle {
+            background: #252528;
+            border-color: #3a3a40;
+            color: #999;
+        }
+        body.dark .focus-mode-toggle:hover { border-color: #555; color: #ccc; }
+        body.dark .focus-mode-toggle.active {
+            background: #1a2e1a;
+            border-color: #3a6b3a;
+            color: #81c784;
+        }
         body.dark .topic-chip {
             background: #252528;
             border-color: #3a3a40;
@@ -2016,6 +2068,7 @@
             <div class="site-name">
                 <span>新闻词汇学习</span>
                 <button class="my-words-toggle" id="myWordsToggle">我的词库</button>
+                <button class="focus-mode-toggle" id="focusModeToggle" title="专注阅读模式">📖</button>
                 <button class="dark-mode-toggle" id="darkModeToggle" title="切换深色模式">🌙</button>
             </div>
             <h1 class="article-title" id="articleTitle">加载中...</h1>
@@ -2280,7 +2333,8 @@
             favoriteArticles: {},       // {articleId: true} for bookmarked articles
             articleScrollPositions: {}, // {articleId: scrollY} for restore position
             articleReadPct: {},        // {articleId: percent (0-100)} reading progress
-            topicFilter: ''            // current topic filter ('' = all)
+            topicFilter: '',           // current topic filter ('' = all)
+            focusMode: false           // distraction-free reading mode
         };
 
         var currentSpeaker = null;
@@ -2338,6 +2392,7 @@
         var historyHeader = document.getElementById('historyHeader');
         var historyToggle = document.getElementById('historyToggle');
         var topicFilterEl = document.getElementById('topicFilter');
+        var focusModeToggle = document.getElementById('focusModeToggle');
         var myWordsSearch = document.getElementById('myWordsSearch');
         var reviewBtn = document.getElementById('reviewBtn');
         var flashcardArea = document.getElementById('flashcardArea');
@@ -2376,6 +2431,9 @@
                 if (typeof data.favoriteArticles === 'object') {
                     state.favoriteArticles = data.favoriteArticles;
                 }
+                if (typeof data.focusMode === 'boolean') {
+                    state.focusMode = data.focusMode;
+                }
             } catch(e) { /* ignore */ }
             // Load scroll positions and read percentages
             try {
@@ -2404,6 +2462,28 @@
             }
         }
 
+        function applyFocusMode() {
+            if (state.focusMode) {
+                document.body.classList.add('focus-mode');
+                if (focusModeToggle) {
+                    focusModeToggle.textContent = '📖✓';
+                    focusModeToggle.classList.add('active');
+                }
+            } else {
+                document.body.classList.remove('focus-mode');
+                if (focusModeToggle) {
+                    focusModeToggle.textContent = '📖';
+                    focusModeToggle.classList.remove('active');
+                }
+            }
+        }
+
+        function toggleFocusMode() {
+            state.focusMode = !state.focusMode;
+            applyFocusMode();
+            savePreferences();
+        }
+
         function applyFontSize() {
             var fs = state.fontSize || 'medium';
             articleBody.className = 'article-body fs-' + fs;
@@ -2426,6 +2506,7 @@
                     articleId: state.articleId,
                     fontSize: state.fontSize,
                     darkMode: state.darkMode,
+                    focusMode: state.focusMode,
                     favoriteArticles: state.favoriteArticles,
                     timestamp: new Date().toISOString()
                 };
@@ -3805,6 +3886,7 @@
                 }
             }
             applyDarkMode();
+            applyFocusMode();
             loadProgress();
             loadKnownWords();
             loadStats();
@@ -4072,6 +4154,11 @@
             state.darkMode = !state.darkMode;
             applyDarkMode();
             savePreferences();
+        });
+
+        // ── Focus Mode Toggle ─────────────────────────
+        focusModeToggle.addEventListener('click', function() {
+            toggleFocusMode();
         });
 
         // ── Favorite Button ────────────────────────────
