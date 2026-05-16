@@ -300,3 +300,8 @@
 - [x] 仅当天有阅读记录时显示，暗色模式适配
 - [x] 78 tests passing
 
+## Iter 37
+### 已实现
+- [x] 帮助提示增加F键快捷键 — "· <strong>F</strong> 专注模式"
+- [x] 78 tests passing
+
