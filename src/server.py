@@ -16,6 +16,8 @@ from vocab_service import (
     tokenize,
     get_levels_for_user,
     get_max_highlights,
+    filter_known_words,
+    filter_known_words_from_tokens,
     LEVEL_NAMES,
 )
 
@@ -41,16 +43,25 @@ def get_article_by_id(article_id: int):
     return None
 
 
-def build_paragraphs_with_tokens(article: dict, user_level: int = 2) -> list:
+def build_paragraphs_with_tokens(article: dict, user_level: int = 2,
+                                  known_words: set = None) -> list:
     """Process article paragraphs, adding tokenization and difficult-word data.
 
     Limits highlighted words based on level-specific MAX_HIGHLIGHTS.
+    Excludes words in known_words set from being highlighted.
     """
+    if known_words is None:
+        known_words = set()
+
     max_highlights = get_max_highlights(user_level)
 
     # Collect all difficult words across the whole article, sorted by first appearance
     full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
     all_difficult = find_difficult_words_sorted(full_text, user_level)
+
+    # Exclude known words from difficult list
+    all_difficult = filter_known_words(all_difficult, known_words)
+
     # Only highlight the first N words; rest are shown as normal
     highlighted_lowers = {w["lower"] for w in all_difficult[:max_highlights]}
 
@@ -58,12 +69,15 @@ def build_paragraphs_with_tokens(article: dict, user_level: int = 2) -> list:
     for para in article.get("paragraphs", []):
         text = para["text"]
         tokens = tokenize(text, user_level)
+        # Clear known words from token difficulty flags
+        tokens = filter_known_words_from_tokens(tokens, known_words)
         # Downgrade words that exceed the highlight limit
         for t in tokens:
             if t["is_difficult"] and t["word"] and t["word"].lower() not in highlighted_lowers:
                 t["is_difficult"] = False
         difficult_words = [w for w in find_difficult_words(text, user_level)
                           if w["lower"] in highlighted_lowers]
+        difficult_words = filter_known_words(difficult_words, known_words)
         enriched.append({
             "text": text,
             "translation": para["translation"],
@@ -111,6 +125,12 @@ def api_article():
     elif user_level > 4:
         user_level = 4
 
+    # Known words filtering (client sends comma-separated lowercase words)
+    known_raw = request.args.get("known", "")
+    known_words = set()
+    if known_raw:
+        known_words = {w.strip().lower() for w in known_raw.split(",") if w.strip()}
+
     article = get_article_by_id(article_id)
     if article is None:
         # Fall back to first article
@@ -120,7 +140,7 @@ def api_article():
         else:
             return jsonify({"error": "No articles found"}), 404
 
-    paragraphs = build_paragraphs_with_tokens(article, user_level)
+    paragraphs = build_paragraphs_with_tokens(article, user_level, known_words)
 
     return jsonify({
         "id": article.get("id", 0),

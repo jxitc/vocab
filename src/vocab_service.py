@@ -559,6 +559,27 @@ def find_difficult_words_sorted(text: str, user_level: int = 4) -> List[Dict]:
     return result
 
 
+def filter_known_words(word_list: List[Dict], known_set: set) -> List[Dict]:
+    """Remove words whose 'lower' is in known_set from the word list."""
+    return [w for w in word_list if w.get("lower", "") not in known_set]
+
+
+def filter_known_words_from_tokens(tokens: List[Dict], known_set: set) -> List[Dict]:
+    """Return tokens with is_difficult cleared for words in known_set."""
+    result = []
+    for t in tokens:
+        if t.get("is_difficult") and t.get("word"):
+            lower = t["word"].lower()
+            if lower in known_set:
+                t = dict(t)
+                t["is_difficult"] = False
+                t["definition"] = None
+                t["pos"] = None
+                t["level"] = None
+        result.append(t)
+    return result
+
+
 def count_vocab_by_level() -> Dict[int, int]:
     """Return count of words per level."""
     counts = {1: 0, 2: 0, 3: 0, 4: 0}

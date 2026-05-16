@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新闻词汇学习 - Vocab in News</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -38,7 +39,36 @@
             font-size: 13px;
             color: #a09888;
             letter-spacing: 2px;
-            margin-bottom: 14px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .my-words-toggle {
+            padding: 5px 15px;
+            font-size: 12px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 14px;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+
+        .my-words-toggle:hover {
+            border-color: #a09888;
+            color: #333;
+            background: #faf9f7;
+        }
+
+        .my-words-toggle.has-items {
+            background: #e8f5e9;
+            border-color: #66bb6a;
+            color: #2e7d32;
+            font-weight: 600;
         }
 
         .article-title {
@@ -47,6 +77,7 @@
             line-height: 1.4;
             color: #1a1a1a;
             margin-bottom: 14px;
+            margin-top: 8px;
         }
 
         .article-meta {
@@ -158,6 +189,118 @@
             color: #1b5e20;
         }
 
+        /* ── My Words Panel ───────────────────────────── */
+        .my-words-panel {
+            display: none;
+            margin-bottom: 24px;
+            padding: 18px 22px;
+            background: #ffffff;
+            border: 1px solid #e8e4dc;
+            border-radius: 12px;
+        }
+
+        .my-words-panel.visible {
+            display: block;
+        }
+
+        .my-words-section {
+            margin-bottom: 16px;
+        }
+
+        .my-words-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .my-words-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0ebe4;
+        }
+
+        .my-words-section-title .section-count {
+            font-weight: 400;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .my-words-section-title.known {
+            color: #2e7d32;
+        }
+
+        .my-words-section-title.learned {
+            color: #1a1a1a;
+        }
+
+        .my-words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .my-words-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            position: relative;
+        }
+
+        .my-words-item.known-item {
+            background: #d4edda;
+            border: 1px solid #a3d5a7;
+        }
+
+        .my-words-item.learned-item {
+            background: #fff8e1;
+            border: 1px solid #e6c960;
+        }
+
+        .my-words-item .item-word {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .my-words-item .item-def {
+            color: #c0392b;
+            font-size: 12px;
+        }
+
+        .my-words-item .item-level {
+            font-size: 10px;
+            color: #999;
+            background: #f5f5f5;
+            padding: 1px 6px;
+            border-radius: 8px;
+        }
+
+        .my-words-item .item-remove {
+            cursor: pointer;
+            color: #bbb;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0 2px;
+            margin-left: 2px;
+            border: none;
+            background: none;
+            font-family: inherit;
+            transition: color 0.15s;
+        }
+
+        .my-words-item .item-remove:hover {
+            color: #e53935;
+        }
+
+        .my-words-empty {
+            font-size: 13px;
+            color: #bbb;
+            font-style: italic;
+        }
+
         /* ── Help hint ────────────────────────────────── */
         .help-hint {
             background: #fff9e6;
@@ -263,6 +406,13 @@
         .word.clicked-before {
             background-color: #d4edda !important;
             border-bottom-color: #28a745 !important;
+        }
+
+        .word.known-word {
+            background-color: transparent !important;
+            border-bottom: none !important;
+            font-weight: 400 !important;
+            cursor: default;
         }
 
         /* ── Speaker icon in article ──────────────────── */
@@ -489,6 +639,7 @@
             border-top: 1px solid #f0f0f0;
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .popup-speak-btn {
@@ -515,6 +666,39 @@
             border-color: #e6a817;
             color: #8d6e00;
             animation: speakerPulse 0.35s infinite alternate;
+        }
+
+        .popup-known-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2e7d32;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+
+        .popup-known-btn:hover {
+            background: #c8e6c9;
+            border-color: #66bb6a;
+            color: #1b5e20;
+        }
+
+        .popup-known-btn.is-known {
+            background: #fff3cd;
+            border-color: #e6a817;
+            color: #8d6e00;
+        }
+
+        .popup-known-btn.is-known:hover {
+            background: #ffe69c;
+            border-color: #cc8c00;
+            color: #664d00;
         }
 
         /* ── Completion Section ───────────────────────── */
@@ -654,6 +838,14 @@
             .article-card-title {
                 font-size: 13px;
             }
+
+            .my-words-panel {
+                padding: 14px 16px;
+            }
+            .my-words-item {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -661,7 +853,10 @@
     <div class="container">
         <!-- Header -->
         <header>
-            <div class="site-name">新闻词汇学习</div>
+            <div class="site-name">
+                <span>新闻词汇学习</span>
+                <button class="my-words-toggle" id="myWordsToggle">我的词库</button>
+            </div>
             <h1 class="article-title" id="articleTitle">加载中...</h1>
             <div class="article-meta">
                 <span id="articleSource">来源: —</span>
@@ -677,6 +872,22 @@
             </div>
         </header>
 
+        <!-- My Words Panel (collapsible) -->
+        <div class="my-words-panel" id="myWordsPanel">
+            <div class="my-words-section" id="knownWordsSection">
+                <h3 class="my-words-section-title known">我认识的词 <span class="section-count" id="knownWordsCount">(0)</span></h3>
+                <div class="my-words-list" id="knownWordsList">
+                    <span class="my-words-empty">暂无</span>
+                </div>
+            </div>
+            <div class="my-words-section" id="learnedWordsSection">
+                <h3 class="my-words-section-title learned">我的生词本 <span class="section-count" id="learnedWordsCount">(0)</span></h3>
+                <div class="my-words-list" id="learnedWordsList">
+                    <span class="my-words-empty">暂无</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Article Switcher -->
         <div class="article-switcher" id="articleSwitcher" style="display:none;">
         </div>
@@ -685,12 +896,14 @@
         <div class="help-hint">
             提示：<strong>黄色高亮</strong> = 本节课重点生词（点击看中文释义）。
             点过的生词会<strong style="color:#28a745;">变绿</strong>表示已学。
+            点击弹窗中的「<strong style="color:#2e7d32;">我认识这个词</strong>」可移除已知词。
             每段下方有「显示翻译」按钮可以看中文。
             点击旁边的 <span style="display:inline-flex;vertical-align:middle;">🔊</span> 图标可以听发音。
             切换上方<strong>难度</strong>可以调整生词范围。
+            右上角「<strong style="color:#2e7d32;">我的词库</strong>」查看个人词汇。
         </div>
 
-        <!-- Loading & Error states (outside articleBody to persist across renders) -->
+        <!-- Loading & Error states -->
         <div class="loading" id="loadingState">
             <span class="spinner"></span>正在为你准备今天的新闻...
         </div>
@@ -745,6 +958,9 @@
                 </svg>
                 朗读
             </button>
+            <button class="popup-known-btn" id="popupKnownBtn">
+                我认识这个词
+            </button>
         </div>
     </div>
 
@@ -753,10 +969,13 @@
         // ── Constants ─────────────────────────────────
         var PROGRESS_KEY = 'vocab_in_news_progress';
         var PREF_KEY = 'vocab_in_news_prefs';
+        var KNOWN_KEY = 'vocab_in_news_user_vocab';
 
         var SPEAKER_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 
         var PANEL_SPEAKER_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+
+        var LEVEL_NAMES = {1: '小学', 2: '初中', 3: '高中', 4: '大学'};
 
         // ── State ──────────────────────────────────────
         var state = {
@@ -764,10 +983,12 @@
             articles: [],
             articleId: 0,
             userLevel: 2,
-            learnedWords: {},     // { "wordlower": true }
+            learnedWords: {},     // { "wordlower": {definition, pos, level} | true (legacy) }
+            knownWords: {},       // { "wordlower": {word, definition, pos, level} }
             totalClicks: 0,
             isFinished: false,
-            currentPopupWord: null
+            currentPopupWord: null,
+            myWordsVisible: false
         };
 
         var currentSpeaker = null;
@@ -785,19 +1006,26 @@
         var wordPanel = document.getElementById('wordPanel');
         var wordPanelTitle = document.getElementById('wordPanelTitle');
         var wordPanelList = document.getElementById('wordPanelList');
+        var myWordsPanel = document.getElementById('myWordsPanel');
+        var myWordsToggle = document.getElementById('myWordsToggle');
+        var knownWordsList = document.getElementById('knownWordsList');
+        var knownWordsCount = document.getElementById('knownWordsCount');
+        var learnedWordsList = document.getElementById('learnedWordsList');
+        var learnedWordsCount = document.getElementById('learnedWordsCount');
         var popup = document.getElementById('wordPopup');
         var popupWord = document.getElementById('popupWord');
         var popupPos = document.getElementById('popupPos');
         var popupDef = document.getElementById('popupDef');
         var popupClose = document.getElementById('popupClose');
         var popupSpeakBtn = document.getElementById('popupSpeakBtn');
+        var popupKnownBtn = document.getElementById('popupKnownBtn');
         var finishBtn = document.getElementById('finishBtn');
         var finishMsg = document.getElementById('finishMsg');
         var learnedCountEl = document.getElementById('learnedCount');
         var totalClicksEl = document.getElementById('totalClicks');
         var levelBtns = document.querySelectorAll('.level-btn');
 
-        // ── localStorage Persistence ────────────────────
+        // ── localStorage: Preferences ────────────────────
         function loadPreferences() {
             if (!storageAvailable) return;
             try {
@@ -825,6 +1053,7 @@
             } catch(e) { /* ignore */ }
         }
 
+        // ── localStorage: Progress (learned words) ────────
         function loadProgress() {
             if (!storageAvailable) return;
             try {
@@ -854,6 +1083,35 @@
                 };
                 localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
             } catch(e) { /* ignore */ }
+        }
+
+        // ── localStorage: Known Words ────────────────────
+        function loadKnownWords() {
+            if (!storageAvailable) return;
+            try {
+                var raw = localStorage.getItem(KNOWN_KEY);
+                if (!raw) return;
+                var data = JSON.parse(raw);
+                if (data && typeof data.knownWords === 'object') {
+                    state.knownWords = data.knownWords;
+                }
+            } catch(e) { /* ignore */ }
+        }
+
+        function saveKnownWords() {
+            if (!storageAvailable) return;
+            try {
+                var data = {
+                    knownWords: state.knownWords,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(KNOWN_KEY, JSON.stringify(data));
+            } catch(e) { /* ignore */ }
+        }
+
+        // ── Get known words as comma-separated string ─────
+        function getKnownWordsParam() {
+            return Object.keys(state.knownWords).join(',');
         }
 
         // ── Audio / Speech ─────────────────────────────
@@ -920,6 +1178,16 @@
         }
 
         // ── Popup ──────────────────────────────────────
+        function updateKnownBtn(wordLower) {
+            if (state.knownWords[wordLower]) {
+                popupKnownBtn.textContent = '重新学习';
+                popupKnownBtn.classList.add('is-known');
+            } else {
+                popupKnownBtn.textContent = '我认识这个词';
+                popupKnownBtn.classList.remove('is-known');
+            }
+        }
+
         function showPopup(el, word, pos, def) {
             if (state.currentPopupWord === el) {
                 hidePopup();
@@ -932,7 +1200,10 @@
             popupDef.textContent = def || '';
             popupSpeakBtn.classList.remove('speaking');
 
-            document.getElementById('popupActions').style.display = speechSupported ? 'flex' : 'none';
+            var wordLower = word.toLowerCase();
+            updateKnownBtn(wordLower);
+
+            document.getElementById('popupActions').style.display = 'flex';
 
             var rect = el.getBoundingClientRect();
             var popupRect = popup.getBoundingClientRect();
@@ -977,11 +1248,103 @@
             }
         });
 
-        // ── Mark word as learned ───────────────────────
-        function markWordAsLearned(wordLower) {
+        popupKnownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!state.currentPopupWord) return;
+            var word = state.currentPopupWord.getAttribute('data-word');
+            if (!word) return;
+            var lower = word.toLowerCase();
+
+            if (state.knownWords[lower]) {
+                // Un-mark: remove from known list and reload
+                removeKnownWord(lower);
+            } else {
+                // Mark as known
+                markWordAsKnown(lower, word);
+            }
+            updateKnownBtn(lower);
+        });
+
+        // ── Mark word as known ────────────────────────
+        function markWordAsKnown(wordLower, wordDisplay) {
+            // Get definition info from the article data
+            var def = '', pos = '', level = 0;
+            if (state.currentPopupWord) {
+                def = state.currentPopupWord.getAttribute('data-definition') || '';
+                pos = state.currentPopupWord.getAttribute('data-pos') || '';
+            }
+
+            // Try to find level from vocab data in the article
+            if (state.article && state.article.paragraphs) {
+                for (var pi = 0; pi < state.article.paragraphs.length; pi++) {
+                    var tokens = state.article.paragraphs[pi].tokens;
+                    for (var ti = 0; ti < tokens.length; ti++) {
+                        var t = tokens[ti];
+                        if (t.is_word && t.word && t.word.toLowerCase() === wordLower && t.is_difficult) {
+                            def = def || t.definition || '';
+                            pos = pos || t.pos || '';
+                            level = t.level || 0;
+                            break;
+                        }
+                    }
+                    if (level) break;
+                }
+            }
+
+            state.knownWords[wordLower] = {
+                word: wordDisplay,
+                definition: def,
+                pos: pos,
+                level: level
+            };
+
+            // Remove highlighting from all instances in the article
+            var allWords = articleBody.querySelectorAll('.word');
+            for (var i = 0; i < allWords.length; i++) {
+                var w = allWords[i];
+                if (w.getAttribute('data-word') && w.getAttribute('data-word').toLowerCase() === wordLower) {
+                    w.classList.remove('difficult', 'clicked-before');
+                    w.classList.add('normal', 'known-word');
+                    w.setAttribute('data-difficult', 'false');
+                }
+            }
+
+            // Remove from word panel
+            var panelItem = wordPanelList.querySelector('.word-panel-item[data-word-lower="' + wordLower + '"]');
+            if (panelItem) {
+                panelItem.remove();
+            }
+
+            // Update word panel count
+            updateWordPanelCount();
+
+            saveKnownWords();
+            renderMyWordsPanel();
+
+            // Update known button on popup
+            if (state.currentPopupWord) {
+                updateKnownBtn(wordLower);
+            }
+        }
+
+        function removeKnownWord(wordLower) {
+            delete state.knownWords[wordLower];
+            saveKnownWords();
+            renderMyWordsPanel();
+            // Reload the article so the word appears as difficult again
+            loadArticleContent(state.articleId);
+        }
+
+        // ── Mark word as learned (clicked) ──────────────
+        function markWordAsLearned(wordLower, definition, pos, level) {
             if (state.learnedWords[wordLower]) return;
 
-            state.learnedWords[wordLower] = true;
+            // Store with metadata
+            state.learnedWords[wordLower] = {
+                definition: definition || '',
+                pos: pos || '',
+                level: level || 0
+            };
 
             var allDifficultWords = articleBody.querySelectorAll('.word.difficult');
             for (var i = 0; i < allDifficultWords.length; i++) {
@@ -997,6 +1360,97 @@
             }
 
             saveProgress();
+            renderMyWordsPanel();
+        }
+
+        // Helper: extract learned word metadata from entry (handles old format)
+        function getLearnedMeta(wordLower) {
+            var entry = state.learnedWords[wordLower];
+            if (!entry) return null;
+            if (entry === true) {
+                // Legacy format: just marked as true
+                return { definition: '', pos: '', level: 0 };
+            }
+            return {
+                definition: entry.definition || '',
+                pos: entry.pos || '',
+                level: entry.level || 0
+            };
+        }
+
+        // ── My Words Panel ──────────────────────────────
+        function renderMyWordsPanel() {
+            // Known words section
+            var knownKeys = Object.keys(state.knownWords);
+            knownWordsCount.textContent = '(' + knownKeys.length + ')';
+
+            if (knownKeys.length === 0) {
+                knownWordsList.innerHTML = '<span class="my-words-empty">暂无</span>';
+            } else {
+                knownWordsList.innerHTML = '';
+                for (var i = 0; i < knownKeys.length; i++) {
+                    var kw = state.knownWords[knownKeys[i]];
+                    var levelName = LEVEL_NAMES[kw.level] || '';
+                    var item = document.createElement('div');
+                    item.className = 'my-words-item known-item';
+                    item.innerHTML =
+                        '<span class="item-word">' + escapeHtml(kw.word) + '</span>' +
+                        '<span class="item-def">' + escapeHtml(kw.definition) + '</span>' +
+                        (levelName ? '<span class="item-level">' + levelName + '</span>' : '') +
+                        '<button class="item-remove" data-action="remove-known" data-word-lower="' + knownKeys[i] + '">&times;</button>';
+                    knownWordsList.appendChild(item);
+                }
+            }
+
+            // Learned words section
+            var learnedKeys = Object.keys(state.learnedWords);
+            learnedWordsCount.textContent = '(' + learnedKeys.length + ')';
+
+            if (learnedKeys.length === 0) {
+                learnedWordsList.innerHTML = '<span class="my-words-empty">暂无</span>';
+            } else {
+                learnedWordsList.innerHTML = '';
+                for (var j = 0; j < learnedKeys.length; j++) {
+                    var lk = learnedKeys[j];
+                    var meta = getLearnedMeta(lk);
+                    if (!meta) continue;
+                    var lLevelName = LEVEL_NAMES[meta.level] || '';
+                    var item = document.createElement('div');
+                    item.className = 'my-words-item learned-item';
+                    item.innerHTML =
+                        '<span class="item-word">' + escapeHtml(lk) + '</span>' +
+                        (meta.definition ? '<span class="item-def">' + escapeHtml(meta.definition) + '</span>' : '') +
+                        (lLevelName ? '<span class="item-level">' + lLevelName + '</span>' : '') +
+                        '<button class="item-remove" data-action="remove-learned" data-word-lower="' + lk + '">&times;</button>';
+                    learnedWordsList.appendChild(item);
+                }
+            }
+
+            updateMyWordsToggle();
+        }
+
+        function updateMyWordsToggle() {
+            var totalWords = Object.keys(state.knownWords).length + Object.keys(state.learnedWords).length;
+            if (totalWords > 0) {
+                myWordsToggle.classList.add('has-items');
+                myWordsToggle.textContent = '我的词库 (' + totalWords + ')';
+            } else {
+                myWordsToggle.classList.remove('has-items');
+                myWordsToggle.textContent = '我的词库';
+            }
+        }
+
+        // ── Update word panel count after removals ────────
+        function updateWordPanelCount() {
+            var remaining = wordPanelList.querySelectorAll('.word-panel-item');
+            if (remaining.length === 0) {
+                wordPanel.style.display = 'none';
+            } else {
+                var countEl = wordPanelTitle.querySelector('.count');
+                if (countEl) {
+                    countEl.textContent = '(' + remaining.length + '个)';
+                }
+            }
         }
 
         // ── Article Rendering ──────────────────────────
@@ -1089,7 +1543,8 @@
                                 word: token.word,
                                 lower: lower,
                                 definition: token.definition,
-                                pos: token.pos
+                                pos: token.pos,
+                                level: token.level
                             });
                         }
                     }
@@ -1117,6 +1572,7 @@
                 item.setAttribute('data-word', uw.word);
                 item.setAttribute('data-definition', uw.definition || '');
                 item.setAttribute('data-pos', uw.pos || '');
+                item.setAttribute('data-level', uw.level || '');
 
                 var wordSpan = document.createElement('span');
                 wordSpan.className = 'word-panel-word';
@@ -1181,7 +1637,6 @@
             state.userLevel = newLevel;
             updateLevelButtons();
             savePreferences();
-            // Reload current article with new level
             loadArticleContent(state.articleId);
         }
 
@@ -1225,7 +1680,6 @@
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 state.articles = await resp.json();
 
-                // If saved articleId exists, use it; otherwise default to first article
                 if (state.articles.length > 0) {
                     var validIds = state.articles.map(function(a) { return a.id; });
                     if (validIds.indexOf(state.articleId) === -1) {
@@ -1240,13 +1694,16 @@
         }
 
         async function loadArticleContent(articleId) {
-            // Show loading state (elements are outside articleBody and persist)
             loadingEl.style.display = 'block';
             errorEl.style.display = 'none';
             wordPanel.style.display = 'none';
 
             try {
                 var url = '/api/article?id=' + articleId + '&level=' + state.userLevel;
+                var knownParam = getKnownWordsParam();
+                if (knownParam) {
+                    url += '&known=' + encodeURIComponent(knownParam);
+                }
                 var resp = await fetch(url);
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var article = await resp.json();
@@ -1259,8 +1716,7 @@
                 renderWordPanel(article);
                 restoreFinishedState();
                 renderArticleSwitcher();
-
-                // Update level buttons to stay in sync
+                updateMyWordsToggle();
                 updateLevelButtons();
             } catch(err) {
                 console.error('Failed to load article:', err);
@@ -1272,9 +1728,10 @@
         async function init() {
             loadPreferences();
             loadProgress();
+            loadKnownWords();
             updateLevelButtons();
+            renderMyWordsPanel();
 
-            // Load article list, then load the selected article
             await loadArticleList();
             await loadArticleContent(state.articleId);
         }
@@ -1330,7 +1787,22 @@
                     var lower = word.toLowerCase();
 
                     if (!state.learnedWords[lower]) {
-                        markWordAsLearned(lower);
+                        // Find level from article data
+                        var level = 0;
+                        if (state.article && state.article.paragraphs) {
+                            for (var pi2 = 0; pi2 < state.article.paragraphs.length; pi2++) {
+                                var toks = state.article.paragraphs[pi2].tokens;
+                                for (var ti2 = 0; ti2 < toks.length; ti2++) {
+                                    var t2 = toks[ti2];
+                                    if (t2.is_word && t2.word && t2.word.toLowerCase() === lower && t2.is_difficult) {
+                                        level = t2.level || 0;
+                                        break;
+                                    }
+                                }
+                                if (level) break;
+                            }
+                        }
+                        markWordAsLearned(lower, definition, pos, level);
                     }
 
                     showPopup(wordEl, word, pos, definition);
@@ -1366,13 +1838,50 @@
                 var word = panelItem.getAttribute('data-word');
                 var def = panelItem.getAttribute('data-definition');
                 var pos = panelItem.getAttribute('data-pos');
+                var level = parseInt(panelItem.getAttribute('data-level'), 10) || 0;
 
                 if (!state.learnedWords[lower]) {
-                    markWordAsLearned(lower);
+                    markWordAsLearned(lower, def, pos, level);
                 }
 
                 showPopup(panelItem, word, pos, def);
                 return;
+            }
+        });
+
+        // ── Event Delegation: My Words Panel ──────────
+        myWordsPanel.addEventListener('click', function(e) {
+            var removeBtn = e.target.closest('.item-remove');
+            if (!removeBtn) return;
+            e.stopPropagation();
+
+            var action = removeBtn.getAttribute('data-action');
+            var wordLower = removeBtn.getAttribute('data-word-lower');
+
+            if (action === 'remove-known') {
+                removeKnownWord(wordLower);
+            } else if (action === 'remove-learned') {
+                delete state.learnedWords[wordLower];
+                saveProgress();
+                renderMyWordsPanel();
+                // Re-render article to update clicked-before status
+                if (state.article) {
+                    renderArticle(state.article);
+                    renderWordPanel(state.article);
+                }
+            }
+        });
+
+        // ── My Words Toggle ───────────────────────────
+        myWordsToggle.addEventListener('click', function() {
+            state.myWordsVisible = !state.myWordsVisible;
+            if (state.myWordsVisible) {
+                myWordsPanel.classList.add('visible');
+                myWordsToggle.textContent = '收起词库';
+                renderMyWordsPanel();
+            } else {
+                myWordsPanel.classList.remove('visible');
+                updateMyWordsToggle();
             }
         });
 
@@ -1396,7 +1905,6 @@
             state.articleId = newArticleId;
             savePreferences();
 
-            // Reset finished state for new article
             state.isFinished = false;
             finishMsg.classList.remove('visible');
             finishBtn.classList.remove('done');

@@ -1,6 +1,7 @@
 """
-Unit tests for vocab_service.py (Iteration 5).
-Tests updated vocabulary format with levels and level-based filtering.
+Unit tests for vocab_service.py (Iteration 6).
+Tests updated vocabulary format with levels, level-based filtering,
+and known-word filtering functions.
 """
 
 import sys
@@ -23,6 +24,8 @@ from vocab_service import (
     find_difficult_words,
     find_difficult_words_sorted,
     count_vocab_by_level,
+    filter_known_words,
+    filter_known_words_from_tokens,
     LEVEL_NAMES,
     MAX_HIGHLIGHTS,
     LEVEL_HIGHLIGHT_RANGES,
@@ -483,6 +486,181 @@ class TestIntegrationWithArticle:
         assert l1 <= l2, f"L1({l1}) should be <= L2({l2})"
         assert l2 <= l3, f"L2({l2}) should be <= L3({l3})"
         assert l3 <= l4, f"L3({l3}) should be <= L4({l4})"
+
+
+class TestFilterKnownWords:
+    """Tests for filter_known_words()."""
+
+    def test_filters_out_known_words(self):
+        """Known words should be removed from the word list."""
+        word_list = [
+            {"word": "Planet", "lower": "planet", "definition": "行星", "pos": "n.", "level": 1},
+            {"word": "Telescope", "lower": "telescope", "definition": "望远镜", "pos": "n.", "level": 3},
+            {"word": "Discover", "lower": "discover", "definition": "发现", "pos": "v.", "level": 1},
+        ]
+        known_set = {"planet"}
+        result = filter_known_words(word_list, known_set)
+        assert len(result) == 2
+        lowers = {w["lower"] for w in result}
+        assert "planet" not in lowers
+        assert "telescope" in lowers
+        assert "discover" in lowers
+
+    def test_empty_known_set_returns_all(self):
+        """An empty known set should return all words unchanged."""
+        word_list = [
+            {"word": "Planet", "lower": "planet", "definition": "行星", "pos": "n.", "level": 1},
+        ]
+        result = filter_known_words(word_list, set())
+        assert len(result) == 1
+        assert result[0]["lower"] == "planet"
+
+    def test_empty_word_list_returns_empty(self):
+        """An empty word list should return an empty list."""
+        result = filter_known_words([], {"planet"})
+        assert result == []
+
+    def test_multiple_known_words_filtered(self):
+        """Multiple known words should all be removed."""
+        word_list = [
+            {"word": "Planet", "lower": "planet", "definition": "行星", "pos": "n.", "level": 1},
+            {"word": "Evidence", "lower": "evidence", "definition": "证据", "pos": "n.", "level": 2},
+            {"word": "Telescope", "lower": "telescope", "definition": "望远镜", "pos": "n.", "level": 3},
+        ]
+        known_set = {"planet", "telescope"}
+        result = filter_known_words(word_list, known_set)
+        assert len(result) == 1
+        assert result[0]["lower"] == "evidence"
+
+    def test_no_match_returns_all(self):
+        """If no words match the known set, all should be returned."""
+        word_list = [
+            {"word": "Planet", "lower": "planet", "definition": "行星", "pos": "n.", "level": 1},
+        ]
+        known_set = {"nonexistent"}
+        result = filter_known_words(word_list, known_set)
+        assert len(result) == 1
+
+
+class TestFilterKnownWordsFromTokens:
+    """Tests for filter_known_words_from_tokens()."""
+
+    def test_clears_difficulty_for_known_words(self):
+        """Tokens for known words should have is_difficult cleared."""
+        tokens = [
+            {"text": "The", "is_word": True, "word": "The", "is_difficult": False, "definition": None, "pos": None, "level": None},
+            {"text": " ", "is_word": False, "word": None, "is_difficult": False, "definition": None, "pos": None, "level": None},
+            {"text": "planet", "is_word": True, "word": "planet", "is_difficult": True, "definition": "行星", "pos": "n.", "level": 1},
+            {"text": " ", "is_word": False, "word": None, "is_difficult": False, "definition": None, "pos": None, "level": None},
+            {"text": "is", "is_word": True, "word": "is", "is_difficult": False, "definition": None, "pos": None, "level": None},
+            {"text": ".", "is_word": False, "word": None, "is_difficult": False, "definition": None, "pos": None, "level": None},
+        ]
+        result = filter_known_words_from_tokens(tokens, {"planet"})
+        assert len(result) == len(tokens)
+        # Check that "planet" token is no longer difficult
+        planet_tokens = [t for t in result if t.get("word") == "planet"]
+        assert len(planet_tokens) == 1
+        assert planet_tokens[0]["is_difficult"] is False
+        assert planet_tokens[0]["definition"] is None
+        assert planet_tokens[0]["pos"] is None
+        assert planet_tokens[0]["level"] is None
+        # Other tokens should be unchanged
+        assert result[0]["is_difficult"] is False  # "The" was never difficult
+        assert result[2]["is_difficult"] is False  # "planet" cleared
+        # Non-word tokens should be unchanged
+        assert result[1]["is_word"] is False
+
+    def test_non_known_words_unchanged(self):
+        """Tokens not in known set should remain as they were."""
+        tokens = [
+            {"text": "evidence", "is_word": True, "word": "evidence", "is_difficult": True, "definition": "证据", "pos": "n.", "level": 2},
+            {"text": "cat", "is_word": True, "word": "cat", "is_difficult": False, "definition": None, "pos": None, "level": None},
+        ]
+        result = filter_known_words_from_tokens(tokens, {"planet"})
+        assert result[0]["is_difficult"] is True  # evidence is NOT in known set
+        assert result[1]["is_difficult"] is False  # cat was never difficult
+
+    def test_empty_known_set_returns_unchanged(self):
+        """An empty known set should return tokens unchanged."""
+        tokens = [
+            {"text": "planet", "is_word": True, "word": "planet", "is_difficult": True, "definition": "行星", "pos": "n.", "level": 1},
+        ]
+        result = filter_known_words_from_tokens(tokens, set())
+        assert result[0]["is_difficult"] is True
+
+    def test_empty_tokens_returns_empty(self):
+        """An empty token list should return empty."""
+        result = filter_known_words_from_tokens([], {"planet"})
+        assert result == []
+
+    def test_original_tokens_not_mutated(self):
+        """The original token list should not be modified (no side effects)."""
+        tokens = [
+            {"text": "planet", "is_word": True, "word": "planet", "is_difficult": True, "definition": "行星", "pos": "n.", "level": 1},
+        ]
+        result = filter_known_words_from_tokens(tokens, {"planet"})
+        # Original should still be difficult
+        assert tokens[0]["is_difficult"] is True
+        assert tokens[0]["definition"] == "行星"
+        # Result should be cleared
+        assert result[0]["is_difficult"] is False
+
+    def test_case_insensitive_matching(self):
+        """Known words matching should be case-insensitive via lowercase comparison."""
+        tokens = [
+            {"text": "Planet", "is_word": True, "word": "Planet", "is_difficult": True, "definition": "行星", "pos": "n.", "level": 1},
+        ]
+        result = filter_known_words_from_tokens(tokens, {"planet"})
+        assert result[0]["is_difficult"] is False
+
+
+class TestTokenizeWithIntegration:
+    """Integration tests for known-word filtering with the tokenize pipeline."""
+
+    def test_tokenize_then_filter_known(self):
+        """Tokenize then filter known words - known words should not be difficult."""
+        text = "The planet and the telescope were amazing."
+        tokens = tokenize(text, user_level=4)
+        # Both planet (L1) and telescope (L3) should be difficult at level 4
+        filtered = filter_known_words_from_tokens(tokens, {"planet"})
+        planet_tokens = [t for t in filtered if t.get("word") == "planet"]
+        telescope_tokens = [t for t in filtered if t.get("word") == "telescope"]
+        assert planet_tokens[0]["is_difficult"] is False  # filtered out
+        assert telescope_tokens[0]["is_difficult"] is True  # still difficult
+
+
+class TestKnownWordPipeline:
+    """Tests for the full known-word filtering pipeline mimicking server behavior."""
+
+    def test_find_difficult_words_excludes_known(self):
+        """find_difficult_words followed by filter_known_words excludes known words."""
+        text = "The discovery was confirmed by telescope evidence."
+        all_words = find_difficult_words(text, user_level=4)
+        filtered = filter_known_words(all_words, {"discovery", "telescope"})
+        filtered_lowers = {w["lower"] for w in filtered}
+        assert "discovery" not in filtered_lowers
+        assert "telescope" not in filtered_lowers
+        assert "confirmed" in filtered_lowers  # still there if not known
+        assert "evidence" in filtered_lowers
+
+    def test_find_difficult_words_sorted_excludes_known(self):
+        """find_difficult_words_sorted followed by filter_known_words preserves order."""
+        text = "The discovery was confirmed by telescope evidence."
+        all_words = find_difficult_words_sorted(text, user_level=4)
+        filtered = filter_known_words(all_words, {"discovery"})
+        filtered_lowers = [w["lower"] for w in filtered]
+        # Should maintain first-appearance order, minus discovery
+        assert "discovery" not in filtered_lowers
+        assert filtered_lowers[0] == "confirmed"  # was second, now first
+        assert filtered_lowers[-1] == "evidence"
+
+    def test_known_words_do_not_affect_ordering(self):
+        """After filtering known words, remaining words stay in original order."""
+        text = "The planet was an extraordinary discovery with evidence."
+        all_words = find_difficult_words_sorted(text, user_level=4)
+        filtered = filter_known_words(all_words, {"extraordinary"})
+        filtered_lowers = [w["lower"] for w in filtered]
+        assert filtered_lowers == ["planet", "discovery", "evidence"]
 
 
 if __name__ == "__main__":
