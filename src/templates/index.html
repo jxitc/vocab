@@ -1021,6 +1021,21 @@
             font-weight: 500;
         }
 
+        .word-popup .popup-ctx {
+            font-size: 13px;
+            color: #888;
+            margin: 8px 0 4px;
+            padding-top: 8px;
+            border-top: 1px dotted #e0dbd0;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .word-popup .popup-ctx b {
+            color: #333;
+            font-style: normal;
+        }
+
         .word-popup .popup-close {
             position: absolute;
             top: 8px;
@@ -1732,6 +1747,8 @@
         body.dark .popup-word { color: #e8e8e8; }
         body.dark .popup-pos { color: #888; }
         body.dark .popup-def { color: #d08070; }
+        body.dark .popup-ctx { color: #888; border-top-color: #3a3a40; }
+        body.dark .popup-ctx b { color: #ccc; }
         body.dark .popup-close { color: #888; }
         body.dark .popup-close:hover { color: #ccc; background: #3a3a40; }
         body.dark .popup-speak-btn { background: #333; border-color: #4a4a50; color: #ccc; }
@@ -2097,6 +2114,7 @@
         <div class="popup-word" id="popupWord"></div>
         <div class="popup-pos" id="popupPos"></div>
         <div class="popup-def" id="popupDef"></div>
+        <div class="popup-ctx" id="popupCtx" style="display:none;"></div>
         <div class="popup-actions" id="popupActions">
             <button class="popup-speak-btn" id="popupSpeakBtn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2180,6 +2198,7 @@
         var popupWord = document.getElementById('popupWord');
         var popupPos = document.getElementById('popupPos');
         var popupDef = document.getElementById('popupDef');
+        var popupCtx = document.getElementById('popupCtx');
         var popupClose = document.getElementById('popupClose');
         var popupSpeakBtn = document.getElementById('popupSpeakBtn');
         var popupKnownBtn = document.getElementById('popupKnownBtn');
@@ -2852,6 +2871,57 @@
             }
         }
 
+        function extractSentence(el, word) {
+            // Walk up to parent paragraph block
+            var block = el.closest('.paragraph-block');
+            if (!block) {
+                // Fallback: find enclosing paragraph
+                var p = el.closest('p');
+                if (!p) return null;
+                block = p;
+            }
+            // Get full text of the block
+            var fullText = block.textContent || '';
+            // Find the word in the text (case-insensitive)
+            var idx = fullText.toLowerCase().indexOf(word.toLowerCase());
+            if (idx === -1) return null;
+
+            // Find sentence boundaries: split on . ! ? but preserve the punctuation
+            var before = fullText.substring(0, idx);
+            var after = fullText.substring(idx + word.length);
+
+            // Find start of sentence (last .!? before the word, or start)
+            var sentStart = Math.max(
+                before.lastIndexOf('. '),
+                before.lastIndexOf('! '),
+                before.lastIndexOf('? '),
+                before.lastIndexOf('.”'),  // period + right quote
+                before.lastIndexOf('.’')
+            );
+            if (sentStart === -1) sentStart = 0;
+            else sentStart += 2; // skip the period+space
+
+            // Find end of sentence (next .!? after the word, or end)
+            var minEnd = after.length;
+            var endMarkers = ['. ', '! ', '? '];
+            for (var i = 0; i < endMarkers.length; i++) {
+                var pos = after.indexOf(endMarkers[i]);
+                if (pos !== -1 && pos < minEnd) {
+                    minEnd = pos;
+                }
+            }
+            var sentEnd = (minEnd < after.length) ? idx + word.length + minEnd + 1 : fullText.length;
+
+            var sentence = fullText.substring(sentStart, sentEnd).trim();
+            if (!sentence) return null;
+
+            // Highlight the word in the sentence with a bold tag
+            var pattern = new RegExp('(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+            sentence = sentence.replace(pattern, '<b>$1</b>');
+
+            return sentence;
+        }
+
         function showPopup(el, word, pos, def) {
             if (state.currentPopupWord === el) {
                 hidePopup();
@@ -2862,6 +2932,16 @@
             popupWord.textContent = word;
             popupPos.textContent = pos || '';
             popupDef.textContent = def || '';
+
+            // Extract and show context sentence
+            var ctx = extractSentence(el, word);
+            if (ctx) {
+                popupCtx.innerHTML = ctx;
+                popupCtx.style.display = 'block';
+            } else {
+                popupCtx.style.display = 'none';
+            }
+
             popupSpeakBtn.classList.remove('speaking');
 
             var wordLower = word.toLowerCase();
@@ -2894,6 +2974,7 @@
         function hidePopup() {
             popup.classList.remove('active');
             state.currentPopupWord = null;
+            popupCtx.style.display = 'none';
         }
 
         popupClose.addEventListener('click', function(e) {
