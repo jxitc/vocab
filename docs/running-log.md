@@ -121,3 +121,10 @@
 - [x] 已知局限: 单轮词干提取 -s规则优先，experiments/experiment 暂不合并
 - [x] 78 tests passing
 
+## Iter 13
+### 已实现
+- [x] 文章阅读状态 — 已读/未读/当前阅读 标记
+- [x] 文章卡片显示"新"橙色徽章 (未读) / "已读"灰色徽章 / "阅读中"绿色徽章
+- [x] localStorage 持久化已读文章ID集合
+- [x] 78 tests passing
+

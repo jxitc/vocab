@@ -189,6 +189,37 @@
             color: #1b5e20;
         }
 
+        .article-badge {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-left: 6px;
+            font-weight: 600;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .article-badge.current {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .article-badge.new {
+            background: #fff3e0;
+            color: #e65100;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        .article-badge.done {
+            background: #f5f5f5;
+            color: #aaa;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         /* ── My Words Panel ───────────────────────────── */
         .my-words-panel {
             display: none;
@@ -1373,7 +1404,8 @@
             lastReadDates: [],    // ISO date strings for streak calculation
             readingStartTime: null, // timestamp when article loaded
             dailyGoal: 2,           // articles per day goal
-            todayReadCount: 0       // articles read today
+            todayReadCount: 0,      // articles read today
+            readArticleIds: {}      // set of article IDs the user has read
         };
 
         var currentSpeaker = null;
@@ -1540,6 +1572,9 @@
                 } else {
                     state.todayReadCount = 0; // new day
                 }
+                if (typeof data.readArticleIds === 'object') {
+                    state.readArticleIds = data.readArticleIds;
+                }
             } catch(e) { /* ignore */ }
         }
 
@@ -1552,7 +1587,8 @@
                     lastReadDates: state.lastReadDates,
                     dailyGoal: state.dailyGoal,
                     todayReadCount: state.todayReadCount,
-                    todayDate: new Date().toISOString().substring(0, 10)
+                    todayDate: new Date().toISOString().substring(0, 10),
+                    readArticleIds: state.readArticleIds
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(data));
             } catch(e) { /* ignore */ }
@@ -1623,6 +1659,10 @@
             }
             saveStats();
             updateStatsDisplay();
+
+            // Track article as read
+            state.readArticleIds[state.articleId] = true;
+            renderArticleSwitcher();
 
             // Check if daily goal met
             if (state.todayReadCount >= state.dailyGoal) {
@@ -2204,8 +2244,18 @@
                 card.className = 'article-card' + (a.id === state.articleId ? ' active' : '');
                 card.setAttribute('data-article-id', a.id);
 
+                var isRead = state.readArticleIds[a.id];
+                var badge = '';
+                if (a.id === state.articleId) {
+                    badge = '<span class="article-badge current">阅读中</span>';
+                } else if (!isRead) {
+                    badge = '<span class="article-badge new">新</span>';
+                } else {
+                    badge = '<span class="article-badge done">已读</span>';
+                }
+
                 card.innerHTML =
-                    '<div class="article-card-title">' + escapeHtml(a.title) + '</div>' +
+                    '<div class="article-card-title">' + escapeHtml(a.title) + badge + '</div>' +
                     '<div class="article-card-meta">' +
                         '<span>' + escapeHtml(a.source) + '</span>' +
                         '<span>' + escapeHtml(a.date) + '</span>' +
