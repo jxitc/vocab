@@ -237,6 +237,69 @@
             50% { opacity: 0.6; }
         }
 
+        .random-btn {
+            padding: 6px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1.5px dashed #c4b89e;
+            border-radius: 20px;
+            background: #faf9f7;
+            color: #8d7b5a;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .random-btn:hover {
+            border-style: solid;
+            border-color: #a09070;
+            background: #f0ebe4;
+            color: #6b5a3e;
+            transform: translateY(-1px);
+        }
+
+        body.dark .random-btn {
+            background: #252528;
+            border-color: #5a5040;
+            color: #a09070;
+        }
+        body.dark .random-btn:hover {
+            border-color: #807060;
+            background: #333;
+            color: #c0b090;
+        }
+
+        /* ── Progress Ring ──────────────────────────── */
+        .progress-ring-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: #e8e4dc;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: #66bb6a;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-ring-text {
+            font-size: 10px;
+            font-weight: 700;
+            fill: #2e7d32;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
         /* ── My Words Panel ───────────────────────────── */
         .my-words-panel {
             display: none;
@@ -1689,6 +1752,9 @@
         <!-- Article Switcher -->
         <div class="article-switcher" id="articleSwitcher" style="display:none;">
         </div>
+        <div style="text-align:center;margin-bottom:20px;" id="randomBtnWrap" hidden>
+            <button class="random-btn" id="randomArticleBtn" title="随机选一篇">🎲 换一篇看看</button>
+        </div>
 
         <!-- Help hint -->
         <div class="help-hint">
@@ -2624,6 +2690,7 @@
 
             saveProgress();
             renderMyWordsPanel();
+            updateProgressRing();
 
             // Track total words learned for stats
             var allLearnedNow = 0;
@@ -2648,6 +2715,50 @@
                 pos: entry.pos || '',
                 level: entry.level || 0
             };
+        }
+
+        // ── Progress Ring ────────────────────────────────
+        var RING_CIRCUMFERENCE = 69.12; // 2 * π * 11 (r=11)
+
+        function updateProgressRing() {
+            var fill = document.getElementById('progressRingFill');
+            var text = document.getElementById('progressRingText');
+            if (!fill || !text) return;
+
+            var items = wordPanelList.querySelectorAll('.word-panel-item');
+            var total = items.length;
+            if (total === 0) return;
+
+            var learned = 0;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].classList.contains('learned')) {
+                    learned++;
+                }
+            }
+            // Also check state.learnedWords to catch item updates before DOM refresh
+            for (var k in state.learnedWords) {
+                if (state.learnedWords.hasOwnProperty(k) && state.learnedWords[k]) {
+                    var item = wordPanelList.querySelector('.word-panel-item[data-word-lower="' + k + '"]');
+                    if (item && !item.classList.contains('learned')) {
+                        learned++;
+                    }
+                }
+            }
+            // Deduplicate: just count unique learned from state that exist in panel
+            var uniqueLearned = 0;
+            var seen = {};
+            for (var j = 0; j < items.length; j++) {
+                var lower = items[j].getAttribute('data-word-lower');
+                if (lower && state.learnedWords[lower] && !seen[lower]) {
+                    seen[lower] = true;
+                    uniqueLearned++;
+                }
+            }
+
+            var pct = Math.round((uniqueLearned / total) * 100);
+            var offset = RING_CIRCUMFERENCE * (1 - pct / 100);
+            fill.setAttribute('stroke-dashoffset', offset);
+            text.textContent = pct + '%';
         }
 
         // ── My Words Panel ──────────────────────────────
@@ -2850,7 +2961,13 @@
             }
 
             wordPanel.style.display = 'block';
-            wordPanelTitle.innerHTML = '本课生词 <span class="count">(' + count + '个)</span>';
+            wordPanelTitle.innerHTML = '本课生词 <span class="count">(' + count + '个)</span>' +
+                '<span class="progress-ring-wrap" style="float:right;">' +
+                '<svg class="progress-ring" width="28" height="28" viewBox="0 0 28 28">' +
+                '<circle class="progress-ring-bg" cx="14" cy="14" r="11" stroke-width="3"/>' +
+                '<circle class="progress-ring-fill" id="progressRingFill" cx="14" cy="14" r="11" stroke-width="3" stroke-dasharray="69.12" stroke-dashoffset="69.12"/>' +
+                '<text class="progress-ring-text" id="progressRingText" x="14" y="14">0%</text>' +
+                '</svg></span>';
 
             wordPanelList.innerHTML = '';
             for (var i = 0; i < uniqueWords.length; i++) {
@@ -2887,6 +3004,8 @@
 
                 wordPanelList.appendChild(item);
             }
+
+            updateProgressRing();
         }
 
         // ── Restore finished state ─────────────────────
@@ -2900,6 +3019,7 @@
                 finishBtn.textContent = '已完成 ✓';
                 finishBtn.disabled = true;
             }
+            updateProgressRing();
         }
 
         // ── Populate header ────────────────────────────
@@ -2936,12 +3056,15 @@
 
         // ── Article Switcher ───────────────────────────
         function renderArticleSwitcher() {
+            var randomWrap = document.getElementById('randomBtnWrap');
             if (state.articles.length <= 1) {
                 articleSwitcher.style.display = 'none';
+                if (randomWrap) randomWrap.hidden = true;
                 return;
             }
 
             articleSwitcher.style.display = 'flex';
+            if (randomWrap) randomWrap.hidden = false;
             articleSwitcher.innerHTML = '';
 
             for (var i = 0; i < state.articles.length; i++) {
@@ -3330,6 +3453,30 @@
                 }
                 return;
             }
+        });
+
+        // ── Random Article Button ─────────────────────
+        document.getElementById('randomArticleBtn').addEventListener('click', function() {
+            if (state.articles.length <= 1) return;
+            var curId = state.articleId;
+            var others = [];
+            for (var i = 0; i < state.articles.length; i++) {
+                if (state.articles[i].id !== curId) {
+                    others.push(state.articles[i].id);
+                }
+            }
+            if (others.length === 0) return;
+            var pick = others[Math.floor(Math.random() * others.length)];
+            state.articleId = pick;
+            savePreferences();
+            state.isFinished = false;
+            finishMsg.classList.remove('visible');
+            finishBtn.classList.remove('done');
+            finishBtn.textContent = '我读完了！';
+            finishBtn.disabled = false;
+            quizSection.style.display = 'none';
+            saveProgress();
+            loadArticleContent(state.articleId);
         });
 
         // ── Event Delegation: Article Switcher ────────

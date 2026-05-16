@@ -180,3 +180,10 @@
 - [x] 文章总数从11篇增至13篇，话题覆盖科技/自然/体育/环保/文化/太空/教育/健康/艺术/城市规划
 - [x] 78 tests passing
 
+## Iter 21
+### 已实现
+- [x] 随机文章按钮 — "🎲 换一篇看看"，随机切换到非当前文章
+- [x] 生词学习进度环 — 词面板标题旁SVG环形进度条，实时显示已学/总百分比
+- [x] updateProgressRing() 联动 markWordAsLearned/renderWordPanel/restoreFinishedState
+- [x] 78 tests passing
+
