@@ -64,11 +64,15 @@
 - [x] 文章切换UI + localStorage持久化
 - [x] 52 tests passing
 
-## Iter 6 (进行中)
-### 目标
-- "我认识这个词" 功能 — 标记已知词，不再高亮
-- "我的词库" 面板 — 个人词汇管理
-- 已知词过滤 (前后端协同)
-- 第三篇文章 (游戏/电竞话题)
-- 修复 favicon 404
+## Iter 6 (93e2936)
+### 已实现
+- [x] "我认识这个词" 按钮 — 标记已知词，词条不再高亮，可"重新学习"恢复
+- [x] "我的词库" 面板 — "我认识的词" + "我的生词本"，可移除
+- [x] 已知词过滤 — 前后端协同：localStorage + API ?known= 参数
+- [x] 第三篇文章 — 电竞产业 (环球时报)
+- [x] SVG favicon 防止404
+- [x] 67 tests passing
+### 测试结果 (Iter 6 test)
+- All 5 features PASS, zero regressions
+- Minor: "professional" 出现5次全部高亮 (冗余)，自动补充生词可能让用户困惑
 
