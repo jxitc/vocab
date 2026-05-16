@@ -301,6 +301,138 @@
             font-style: italic;
         }
 
+        .review-btn {
+            float: right;
+            padding: 3px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1.5px solid #66bb6a;
+            border-radius: 12px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .review-btn:hover {
+            background: #c8e6c9;
+        }
+
+        /* ── Flashcard Review ──────────────────────────── */
+        .flashcard-area {
+            margin-top: 14px;
+            padding: 16px;
+            background: #faf9f7;
+            border: 1.5px solid #e8e4dc;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .flashcard-card {
+            width: 100%;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .flashcard-card:hover {
+            border-color: #a09888;
+        }
+
+        .flashcard-card.flipped {
+            border-color: #2e7d32;
+            background: #f1f8e9;
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            padding: 24px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .flashcard-back {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .flashcard-hint {
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 8px;
+        }
+
+        .flashcard-progress {
+            font-size: 12px;
+            color: #999;
+            margin: 10px 0 6px;
+        }
+
+        .flashcard-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .flashcard-actions.hidden {
+            display: none;
+        }
+
+        .flashcard-btn {
+            padding: 8px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1.5px solid #d5cfc6;
+            background: #fff;
+            transition: all 0.15s;
+        }
+
+        .flashcard-btn.forgot {
+            border-color: #ef9a9a;
+            color: #c62828;
+        }
+        .flashcard-btn.forgot:hover {
+            background: #ffebee;
+        }
+
+        .flashcard-btn.remembered {
+            border-color: #81c784;
+            color: #2e7d32;
+        }
+        .flashcard-btn.remembered:hover {
+            background: #e8f5e9;
+        }
+
+        .flashcard-result {
+            padding: 12px 0;
+        }
+
+        .flashcard-result-score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .flashcard-result-msg {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
         /* ── Help hint ────────────────────────────────── */
         .help-hint {
             background: #fff9e6;
@@ -1018,9 +1150,25 @@
                 </div>
             </div>
             <div class="my-words-section" id="learnedWordsSection">
-                <h3 class="my-words-section-title learned">我的生词本 <span class="section-count" id="learnedWordsCount">(0)</span></h3>
+                <h3 class="my-words-section-title learned">
+                    我的生词本 <span class="section-count" id="learnedWordsCount">(0)</span>
+                    <button class="review-btn" id="reviewBtn" style="display:none;" title="复习生词">复习</button>
+                </h3>
                 <div class="my-words-list" id="learnedWordsList">
                     <span class="my-words-empty">暂无</span>
+                </div>
+                <!-- Flashcard review -->
+                <div class="flashcard-area" id="flashcardArea" style="display:none;">
+                    <div class="flashcard-card" id="flashcardCard">
+                        <div class="flashcard-front" id="flashcardFront"></div>
+                        <div class="flashcard-back" id="flashcardBack"></div>
+                    </div>
+                    <div class="flashcard-progress" id="flashcardProgress"></div>
+                    <div class="flashcard-actions" id="flashcardActions">
+                        <button class="flashcard-btn forgot" id="flashcardForgot">忘了 😅</button>
+                        <button class="flashcard-btn remembered" id="flashcardRemembered">记得 ✓</button>
+                    </div>
+                    <div class="flashcard-result" id="flashcardResult" style="display:none;"></div>
                 </div>
             </div>
         </div>
@@ -1200,6 +1348,14 @@
         var quizSection = document.getElementById('quizSection');
         var quizQuestions = document.getElementById('quizQuestions');
         var quizResult = document.getElementById('quizResult');
+        var reviewBtn = document.getElementById('reviewBtn');
+        var flashcardArea = document.getElementById('flashcardArea');
+        var flashcardCard = document.getElementById('flashcardCard');
+        var flashcardFront = document.getElementById('flashcardFront');
+        var flashcardBack = document.getElementById('flashcardBack');
+        var flashcardProgress = document.getElementById('flashcardProgress');
+        var flashcardActions = document.getElementById('flashcardActions');
+        var flashcardResult = document.getElementById('flashcardResult');
         var levelBtns = document.querySelectorAll('.level-btn');
 
         // ── localStorage: Preferences ────────────────────
@@ -1711,6 +1867,14 @@
                         '<button class="item-remove" data-action="remove-learned" data-word-lower="' + lk + '">&times;</button>';
                     learnedWordsList.appendChild(item);
                 }
+            }
+
+            // Show/hide review button
+            if (learnedKeys.length > 0) {
+                reviewBtn.style.display = 'inline-block';
+            } else {
+                reviewBtn.style.display = 'none';
+                flashcardArea.style.display = 'none';
             }
 
             updateMyWordsToggle();
@@ -2434,6 +2598,125 @@
 
             quizResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
+        // ── Flashcard Review ────────────────────────────
+        state.reviewWords = [];
+        state.reviewIndex = 0;
+        state.reviewRemembered = 0;
+        state.reviewFlipped = false;
+
+        function startReview() {
+            var words = [];
+            var keys = Object.keys(state.learnedWords);
+            for (var i = 0; i < keys.length; i++) {
+                var entry = state.learnedWords[keys[i]];
+                var meta = getLearnedMeta(keys[i]);
+                if (meta && meta.definition) {
+                    words.push({
+                        word: keys[i],
+                        definition: meta.definition,
+                        pos: meta.pos || '',
+                        level: meta.level || 0
+                    });
+                }
+            }
+            if (words.length < 1) return;
+
+            state.reviewWords = shuffleArray(words);
+            state.reviewIndex = 0;
+            state.reviewRemembered = 0;
+            state.reviewFlipped = false;
+
+            flashcardResult.style.display = 'none';
+            flashcardArea.style.display = 'block';
+
+            showReviewCard();
+        }
+
+        function showReviewCard() {
+            if (state.reviewIndex >= state.reviewWords.length) {
+                showReviewResult();
+                return;
+            }
+
+            state.reviewFlipped = false;
+            var w = state.reviewWords[state.reviewIndex];
+            flashcardCard.classList.remove('flipped');
+            flashcardFront.textContent = w.word;
+            if (w.pos) {
+                var posEl = document.createElement('span');
+                posEl.style.cssText = 'font-size:14px;color:#999;font-weight:400;margin-left:6px;';
+                posEl.textContent = w.pos;
+                flashcardFront.appendChild(posEl);
+            }
+            flashcardBack.textContent = w.definition;
+            flashcardActions.classList.remove('hidden');
+            flashcardProgress.textContent = (state.reviewIndex + 1) + ' / ' + state.reviewWords.length;
+        }
+
+        flashcardCard.addEventListener('click', function() {
+            if (state.reviewFlipped) return;
+            state.reviewFlipped = true;
+            flashcardCard.classList.add('flipped');
+            // Show back after brief delay for flip feel
+            setTimeout(function() {
+                flashcardFront.style.display = 'none';
+                flashcardBack.style.display = 'block';
+            }, 150);
+        });
+
+        document.getElementById('flashcardRemembered').addEventListener('click', function() {
+            if (!state.reviewFlipped) return;
+            state.reviewRemembered++;
+            state.reviewIndex++;
+            flashcardFront.style.display = 'block';
+            flashcardBack.style.display = 'none';
+            showReviewCard();
+        });
+
+        document.getElementById('flashcardForgot').addEventListener('click', function() {
+            if (!state.reviewFlipped) return;
+            state.reviewIndex++;
+            flashcardFront.style.display = 'block';
+            flashcardBack.style.display = 'none';
+            showReviewCard();
+        });
+
+        function showReviewResult() {
+            flashcardArea.querySelector('.flashcard-card').style.display = 'none';
+            flashcardProgress.style.display = 'none';
+            flashcardActions.classList.add('hidden');
+            flashcardResult.style.display = 'block';
+
+            var total = state.reviewWords.length;
+            var score = state.reviewRemembered;
+            var pct = Math.round(score / total * 100);
+            var msg = '', emoji = '';
+
+            if (pct === 100) { msg = '全部记住了！你复习得很棒！'; emoji = '🏆'; }
+            else if (pct >= 60) { msg = '大部分都记得，复习效果不错！'; emoji = '👏'; }
+            else if (pct >= 30) { msg = '还需要多复习几次，加油！'; emoji = '💪'; }
+            else { msg = '生词需要反复记忆，再来一次吧！'; emoji = '📖'; }
+
+            flashcardResult.innerHTML =
+                '<div class="flashcard-result-score">' + emoji + ' ' + score + ' / ' + total + '</div>' +
+                '<div class="flashcard-result-msg">' + msg + '</div>' +
+                '<button class="review-btn" style="float:none;margin-top:12px;" id="reviewAgainBtn">再复习一次</button>';
+
+            document.getElementById('reviewAgainBtn').addEventListener('click', function() {
+                flashcardCard.style.display = 'flex';
+                flashcardProgress.style.display = 'block';
+                startReview();
+            });
+        }
+
+        reviewBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            flashcardCard.style.display = 'flex';
+            flashcardProgress.style.display = 'block';
+            flashcardResult.style.display = 'none';
+            startReview();
+        });
 
         // ── Bootstrap ──────────────────────────────────
         init();
