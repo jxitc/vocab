@@ -71,6 +71,23 @@
             font-weight: 600;
         }
 
+        .dark-mode-toggle {
+            padding: 5px 10px;
+            font-size: 16px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 14px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            line-height: 1;
+        }
+
+        .dark-mode-toggle:hover {
+            border-color: #a09888;
+            background: #faf9f7;
+        }
+
         .article-title {
             font-size: 28px;
             font-weight: 700;
@@ -1322,6 +1339,160 @@
         }
 
         /* ── Mobile ───────────────────────────────────── */
+        /* ── Dark Mode ────────────────────────────────── */
+        body.dark {
+            background-color: #1a1a1e;
+            color: #d4d4d4;
+        }
+        body.dark header {
+            border-bottom-color: #3a3a40;
+        }
+        body.dark .site-name { color: #888; }
+        body.dark .article-title { color: #e8e8e8; }
+        body.dark .article-meta { color: #777; }
+        body.dark .article-body { color: #d0d0d0; }
+        body.dark .article-card {
+            background: #252528;
+            border-color: #3a3a40;
+        }
+        body.dark .article-card:hover { border-color: #666; }
+        body.dark .article-card.active {
+            background: #1a2e1a;
+            border-color: #3a6b3a;
+        }
+        body.dark .article-card-title { color: #d0d0d0; }
+        body.dark .article-card.active .article-card-title { color: #81c784; }
+        body.dark .article-card-meta { color: #777; }
+        body.dark .word { color: #d0d0d0; }
+        body.dark .word.difficult {
+            background-color: #4a3a10;
+            border-bottom-color: #a08020;
+            color: #e8d8a0;
+        }
+        body.dark .word.difficult:hover { background-color: #5a4820; }
+        body.dark .word.normal:hover { background-color: #333; }
+        body.dark .word.clicked-before {
+            background-color: #1a3a1a !important;
+            border-bottom-color: #4a8a4a !important;
+        }
+        body.dark .word.known-word { color: #999 !important; }
+        body.dark .word-speaker { color: #a08030; }
+        body.dark .word-speaker:hover { color: #c0a040; }
+        body.dark .translation-toggle { color: #7a9ac0; }
+        body.dark .translation-toggle:hover { color: #9ab8e0; }
+        body.dark .translation-text {
+            background: #252528;
+            border-left-color: #5a5040;
+            color: #aaa;
+        }
+        body.dark .word-panel, body.dark .my-words-panel,
+        body.dark .completion-section, body.dark .reading-stats,
+        body.dark .help-hint, body.dark .quiz-section, body.dark .achievements-section {
+            background: #252528;
+            border-color: #3a3a40;
+        }
+        body.dark .word-panel-title { color: #d0d0d0; border-bottom-color: #3a3a40; }
+        body.dark .word-panel-item {
+            background: #3a3010;
+            border-color: #a08020;
+        }
+        body.dark .word-panel-item:hover { background: #4a4020; }
+        body.dark .word-panel-item.learned {
+            background: #1a3a1a;
+            border-color: #4a8a4a;
+        }
+        body.dark .word-panel-word { color: #e0d8c0; }
+        body.dark .word-panel-def { color: #d08070; }
+        body.dark .word-popup {
+            background: #2a2a30;
+            border-color: #4a4a50;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+        }
+        body.dark .popup-word { color: #e8e8e8; }
+        body.dark .popup-pos { color: #888; }
+        body.dark .popup-def { color: #d08070; }
+        body.dark .popup-close { color: #888; }
+        body.dark .popup-close:hover { color: #ccc; background: #3a3a40; }
+        body.dark .popup-speak-btn { background: #333; border-color: #4a4a50; color: #ccc; }
+        body.dark .popup-speak-btn:hover { background: #444; color: #eee; }
+        body.dark .popup-speak-btn.speaking { background: #3a3010; border-color: #a08020; color: #c0a040; }
+        body.dark .popup-known-btn { background: #1a3a1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .popup-known-btn:hover { background: #2a4a2a; color: #a5d6a7; }
+        body.dark .popup-known-btn.is-known { background: #3a3010; border-color: #a08020; color: #c0a040; }
+        body.dark .popup-actions { border-top-color: #3a3a40; }
+        body.dark .level-btn { background: #252528; border-color: #3a3a40; color: #888; }
+        body.dark .level-btn:hover { border-color: #666; color: #bbb; }
+        body.dark .level-btn.active { background: #3a6b3a; border-color: #4a8a4a; color: #c8e6c9; }
+        body.dark .my-words-toggle { background: #252528; border-color: #3a3a40; color: #888; }
+        body.dark .my-words-toggle:hover { border-color: #666; color: #bbb; }
+        body.dark .my-words-toggle.has-items { background: #1a3a1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .dark-mode-toggle { background: #252528; border-color: #3a3a40; }
+        body.dark .dark-mode-toggle:hover { border-color: #666; background: #333; }
+        body.dark .font-size-btn { background: #252528; border-color: #3a3a40; color: #888; }
+        body.dark .font-size-btn:hover { border-color: #666; color: #bbb; }
+        body.dark .font-size-btn.active { background: #5a5040; border-color: #807060; color: #d0c8b0; }
+        body.dark .help-hint { background: #2a2818; border-color: #5a5020; color: #c0a840; }
+        body.dark .finish-btn { background: #3a6b3a; }
+        body.dark .finish-btn:hover { background: #2a5a2a; }
+        body.dark .finish-btn.done { background: #555; }
+        body.dark .finish-msg { background: #1a2e1a; }
+        body.dark .finish-msg .encouragement { color: #81c784; }
+        body.dark .finish-msg .stats { color: #7a9a7a; }
+        body.dark .counter-item { color: #888; }
+        body.dark .counter-item strong { color: #81c784; }
+        body.dark .stat-item { color: #888; }
+        body.dark .stat-item strong { color: #81c784; }
+        body.dark .goal-select { background: #252528; border-color: #3a3a40; color: #888; }
+        body.dark .goal-celebration { background: #1a2e1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .quiz-section { background: #232326; }
+        body.dark .quiz-title { color: #ccc; }
+        body.dark .quiz-word { color: #e0e0e0; }
+        body.dark .quiz-option { background: #2a2a30; border-color: #3a3a40; color: #ccc; }
+        body.dark .quiz-option:hover { background: #333; border-color: #666; }
+        body.dark .quiz-option.correct { background: #1a3a1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .quiz-option.wrong { background: #3a1a1a; border-color: #6a3a3a; color: #e08080; }
+        body.dark .quiz-question { border-bottom-color: #3a3a40; }
+        body.dark .quiz-score { color: #81c784; }
+        body.dark .quiz-message { color: #aaa; }
+        body.dark .my-words-section-title { color: #ccc; border-bottom-color: #3a3a40; }
+        body.dark .my-words-section-title.known { color: #81c784; }
+        body.dark .my-words-item.known-item { background: #1a3a1a; border-color: #4a8a4a; }
+        body.dark .my-words-item.learned-item { background: #3a3010; border-color: #806020; }
+        body.dark .my-words-item .item-word { color: #e0e0e0; }
+        body.dark .my-words-item .item-level { background: #333; color: #888; }
+        body.dark .my-words-item .item-remove { color: #888; }
+        body.dark .my-words-item .item-remove:hover { color: #e06060; }
+        body.dark .my-words-empty { color: #666; }
+        body.dark .review-btn { background: #1a3a1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .review-btn:hover { background: #2a4a2a; }
+        body.dark .flashcard-area { background: #232326; border-color: #3a3a40; }
+        body.dark .flashcard-card { background: #2a2a30; border-color: #4a4a50; }
+        body.dark .flashcard-card.flipped { background: #1a2e1a; border-color: #4a8a4a; }
+        body.dark .flashcard-front { color: #e0e0e0; }
+        body.dark .flashcard-back { color: #81c784; }
+        body.dark .flashcard-hint, body.dark .flashcard-progress { color: #888; }
+        body.dark .flashcard-btn { background: #2a2a30; border-color: #3a3a40; color: #ccc; }
+        body.dark .flashcard-btn.forgot { border-color: #6a3a3a; color: #e08080; }
+        body.dark .flashcard-btn.remembered { border-color: #4a8a4a; color: #81c784; }
+        body.dark .flashcard-result-score { color: #81c784; }
+        body.dark .flashcard-result-msg { color: #aaa; }
+        body.dark .achievement-badge.unlocked { background: #302820; border-color: #605030; }
+        body.dark .achievement-badge.unlocked .badge-name { color: #c0b090; }
+        body.dark .achievement-badge.locked { background: #222; border-color: #333; opacity: 0.4; }
+        body.dark .achievements-title, body.dark .achievements-count { color: #ccc; }
+        body.dark .achievement-toast { background: #2a2818; border-color: #a08020; }
+        body.dark .achievement-toast-title { color: #c0a840; }
+        body.dark .achievement-toast-sub { color: #888; }
+        body.dark .paragraph-speaker { color: #666; }
+        body.dark .paragraph-speaker:hover { color: #aaa; }
+        body.dark .paragraph-speaker.speaking { color: #81c784; background: #1a3a1a; }
+        body.dark .paragraph-block.speaking { background: #1a1e1a; border-left-color: #4a8a4a; }
+        body.dark footer { color: #555; }
+        body.dark .error-msg { background: #2a1818; border-color: #5a3030; color: #e08080; }
+        body.dark .error-msg button { background: #8b2020; }
+        body.dark .loading { color: #888; }
+        body.dark .loading .spinner { border-color: #3a3a40; border-top-color: #888; }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px 14px 60px;
@@ -1389,6 +1560,7 @@
             <div class="site-name">
                 <span>新闻词汇学习</span>
                 <button class="my-words-toggle" id="myWordsToggle">我的词库</button>
+                <button class="dark-mode-toggle" id="darkModeToggle" title="切换深色模式">🌙</button>
             </div>
             <h1 class="article-title" id="articleTitle">加载中...</h1>
             <div class="article-meta">
@@ -1616,7 +1788,8 @@
             usedLevels: {},           // {level: true}
             hasPerfectQuiz: false,
             hasSpeedRead: false,
-            fontSize: 'medium'
+            fontSize: 'medium',
+            darkMode: false
         };
 
         var currentSpeaker = null;
@@ -1695,7 +1868,21 @@
                 if (data && typeof data.fontSize === 'string') {
                     state.fontSize = data.fontSize;
                 }
+                if (typeof data.darkMode === 'boolean') {
+                    state.darkMode = data.darkMode;
+                }
             } catch(e) { /* ignore */ }
+        }
+
+        function applyDarkMode() {
+            var toggle = document.getElementById('darkModeToggle');
+            if (state.darkMode) {
+                document.body.classList.add('dark');
+                if (toggle) toggle.textContent = '☀️';
+            } else {
+                document.body.classList.remove('dark');
+                if (toggle) toggle.textContent = '🌙';
+            }
         }
 
         function applyFontSize() {
@@ -1719,6 +1906,7 @@
                     userLevel: state.userLevel,
                     articleId: state.articleId,
                     fontSize: state.fontSize,
+                    darkMode: state.darkMode,
                     timestamp: new Date().toISOString()
                 };
                 localStorage.setItem(PREF_KEY, JSON.stringify(data));
@@ -2774,6 +2962,13 @@
 
         async function init() {
             loadPreferences();
+            // System dark mode detection on first visit
+            if (!storageAvailable || !localStorage.getItem(PREF_KEY)) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    state.darkMode = true;
+                }
+            }
+            applyDarkMode();
             loadProgress();
             loadKnownWords();
             loadStats();
@@ -2945,6 +3140,13 @@
                 myWordsPanel.classList.remove('visible');
                 updateMyWordsToggle();
             }
+        });
+
+        // ── Dark Mode Toggle ──────────────────────────
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            state.darkMode = !state.darkMode;
+            applyDarkMode();
+            savePreferences();
         });
 
         // ── Event Delegation: Level Selector ──────────

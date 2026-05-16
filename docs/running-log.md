@@ -158,3 +158,11 @@
 - [x] 字号控制 — 小/中/大三档 (16px/19px/23px)，偏好持久化至localStorage
 - [x] 78 tests passing
 
+## Iter 18
+### 已实现
+- [x] 深色模式 — 🌙/☀️ 切换按钮，全局dark主题覆盖
+- [x] 系统偏好检测 — 首次访问自动跟随系统prefers-color-scheme
+- [x] 偏好持久化至localStorage
+- [x] 修复: applyFontSize函数头在编辑中丢失
+- [x] 78 tests passing
+
