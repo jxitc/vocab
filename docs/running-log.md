@@ -313,3 +313,10 @@
 - [x] 暗色模式适配
 - [x] 78 tests passing
 
+## Iter 39
+### 已实现
+- [x] 生词弹窗显示难度等级标签 — 小学(绿)/初中(蓝)/高中(橙)/大学(紫)
+- [x] 等级数据取自 vocab_service token level 字段
+- [x] 暗色模式适配
+- [x] 78 tests passing
+

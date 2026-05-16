@@ -1263,8 +1263,22 @@
         .word-popup .popup-pos {
             font-size: 12px;
             color: #999;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
         }
+        .popup-level-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            margin-left: 0;
+            letter-spacing: 0.5px;
+        }
+        .popup-level-badge.level-1 { background: #e8f5e9; color: #2e7d32; }
+        .popup-level-badge.level-2 { background: #e3f2fd; color: #1565c0; }
+        .popup-level-badge.level-3 { background: #fff3e0; color: #e65100; }
+        .popup-level-badge.level-4 { background: #f3e5f5; color: #7b1fa2; }
 
         .word-popup .popup-def {
             font-size: 15px;
@@ -2051,6 +2065,10 @@
         }
         body.dark .popup-word { color: #e8e8e8; }
         body.dark .popup-pos { color: #888; }
+        body.dark .popup-level-badge.level-1 { background: #1a3a1a; color: #81c784; }
+        body.dark .popup-level-badge.level-2 { background: #1a2a3a; color: #64b5f6; }
+        body.dark .popup-level-badge.level-3 { background: #3a2a1a; color: #ffb74d; }
+        body.dark .popup-level-badge.level-4 { background: #2a1a3a; color: #ce93d8; }
         body.dark .popup-def { color: #d08070; }
         body.dark .popup-ctx { color: #888; border-top-color: #3a3a40; }
         body.dark .popup-ctx b { color: #ccc; }
@@ -2441,6 +2459,7 @@
         <button class="popup-close" id="popupClose">&times;</button>
         <div class="popup-word" id="popupWord"></div>
         <div class="popup-pos" id="popupPos"></div>
+        <span class="popup-level-badge" id="popupLevel" style="display:none;"></span>
         <div class="popup-def" id="popupDef"></div>
         <div class="popup-ctx" id="popupCtx" style="display:none;"></div>
         <div class="popup-actions" id="popupActions">
@@ -2533,6 +2552,7 @@
         var popupWord = document.getElementById('popupWord');
         var popupPos = document.getElementById('popupPos');
         var popupDef = document.getElementById('popupDef');
+        var popupLevel = document.getElementById('popupLevel');
         var popupCtx = document.getElementById('popupCtx');
         var popupClose = document.getElementById('popupClose');
         var popupSpeakBtn = document.getElementById('popupSpeakBtn');
@@ -3330,8 +3350,17 @@
             }
             state.currentPopupWord = el;
 
+            var level = parseInt(el.getAttribute('data-level')) || 0;
+            var levelNames = {1:'小学', 2:'初中', 3:'高中', 4:'大学'};
             popupWord.textContent = word;
             popupPos.textContent = pos || '';
+            if (level && levelNames[level]) {
+                popupLevel.textContent = levelNames[level];
+                popupLevel.className = 'popup-level-badge level-' + level;
+                popupLevel.style.display = 'inline-block';
+            } else {
+                popupLevel.style.display = 'none';
+            }
             popupDef.textContent = def || '';
 
             // Extract and show context sentence
@@ -3690,6 +3719,7 @@
                             span.setAttribute('data-word', token.word);
                             span.setAttribute('data-definition', token.definition || '');
                             span.setAttribute('data-pos', token.pos || '');
+                            span.setAttribute('data-level', token.level || '');
                             span.setAttribute('data-difficult', 'true');
                             span.textContent = token.text;
 
