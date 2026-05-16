@@ -1241,6 +1241,76 @@
             display: none;
         }
 
+        /* ── Reading History ───────────────────────── */
+        .history-section {
+            margin: 0 0 16px;
+            padding: 14px 20px;
+            background: #fff;
+            border: 1.5px solid #e8e4dc;
+            border-radius: 12px;
+        }
+
+        .history-header {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-toggle {
+            font-size: 12px;
+            color: #888;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .history-toggle.open {
+            transform: rotate(90deg);
+        }
+
+        .history-list {
+            margin-top: 12px;
+            border-top: 1px solid #e8e4dc;
+            padding-top: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px dotted #f0ede6;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item-title {
+            color: #333;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 12px;
+        }
+
+        .history-item-date {
+            color: #999;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .history-empty {
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px 0;
+        }
+
         /* ── Quiz ────────────────────────────────────── */
         .quiz-section {
             margin-top: 24px;
@@ -1684,6 +1754,13 @@
         body.dark .comp-question { border-bottom-color: #3a3a40; }
         body.dark .comp-score { color: #81c784; }
         body.dark .comp-message { color: #aaa; }
+        body.dark .history-section { background: #232326; }
+        body.dark .history-header { color: #ccc; }
+        body.dark .history-list { border-top-color: #3a3a40; }
+        body.dark .history-item { border-bottom-color: #2a2a30; }
+        body.dark .history-item-title { color: #ccc; }
+        body.dark .history-item-date { color: #888; }
+        body.dark .history-empty { color: #888; }
         body.dark .my-words-section-title { color: #ccc; border-bottom-color: #3a3a40; }
         body.dark .my-words-section-title.known { color: #81c784; }
         body.dark .my-words-item.known-item { background: #1a3a1a; border-color: #4a8a4a; }
@@ -1924,6 +2001,15 @@
             </div>
         </div>
 
+        <!-- Reading History -->
+        <div class="history-section" id="historySection" style="display:none;">
+            <div class="history-header" id="historyHeader" style="cursor:pointer;">
+                <span>📖 阅读记录</span>
+                <span class="history-toggle" id="historyToggle">▶</span>
+            </div>
+            <div class="history-list" id="historyList" style="display:none;"></div>
+        </div>
+
         <!-- Achievements -->
         <div class="achievements-section" id="achievementsSection" style="display:none;">
             <div class="achievements-header">
@@ -2029,6 +2115,7 @@
             dailyGoal: 2,           // articles per day goal
             todayReadCount: 0,      // articles read today
             readArticleIds: {},     // set of article IDs the user has read
+            readArticleDates: {},  // {articleId: ISO date string} when each article was read
             unlockedAchievements: {}, // {achievementId: timestamp}
             usedLevels: {},           // {level: true}
             hasPerfectQuiz: false,
@@ -2086,6 +2173,10 @@
         var compSection = document.getElementById('compSection');
         var compQuestions = document.getElementById('compQuestions');
         var compResult = document.getElementById('compResult');
+        var historySection = document.getElementById('historySection');
+        var historyList = document.getElementById('historyList');
+        var historyHeader = document.getElementById('historyHeader');
+        var historyToggle = document.getElementById('historyToggle');
         var myWordsSearch = document.getElementById('myWordsSearch');
         var reviewBtn = document.getElementById('reviewBtn');
         var flashcardArea = document.getElementById('flashcardArea');
@@ -2245,6 +2336,9 @@
                 if (typeof data.readArticleIds === 'object') {
                     state.readArticleIds = data.readArticleIds;
                 }
+                if (typeof data.readArticleDates === 'object') {
+                    state.readArticleDates = data.readArticleDates;
+                }
             } catch(e) { /* ignore */ }
         }
 
@@ -2258,7 +2352,8 @@
                     dailyGoal: state.dailyGoal,
                     todayReadCount: state.todayReadCount,
                     todayDate: new Date().toISOString().substring(0, 10),
-                    readArticleIds: state.readArticleIds
+                    readArticleIds: state.readArticleIds,
+                    readArticleDates: state.readArticleDates
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(data));
             } catch(e) { /* ignore */ }
@@ -2317,6 +2412,102 @@
             statStreak.textContent = computeStreak();
             statGoal.textContent = state.todayReadCount + '/' + state.dailyGoal;
             goalSelect.value = String(state.dailyGoal);
+            renderReadingHistory();
+        }
+
+        function renderReadingHistory() {
+            var entries = [];
+            for (var id in state.readArticleDates) {
+                if (state.readArticleDates.hasOwnProperty(id)) {
+                    var article = null;
+                    for (var i = 0; i < state.articles.length; i++) {
+                        if (state.articles[i].id === parseInt(id)) {
+                            article = state.articles[i];
+                            break;
+                        }
+                    }
+                    entries.push({
+                        id: parseInt(id),
+                        title: article ? article.title : ('文章 #' + id),
+                        date: state.readArticleDates[id]
+                    });
+                }
+            }
+            // Also include articles in readArticleIds that don't have dates (legacy)
+            for (var rid in state.readArticleIds) {
+                if (state.readArticleIds.hasOwnProperty(rid) && state.readArticleIds[rid]) {
+                    if (!state.readArticleDates[rid]) {
+                        var art = null;
+                        for (var j = 0; j < state.articles.length; j++) {
+                            if (state.articles[j].id === parseInt(rid)) {
+                                art = state.articles[j];
+                                break;
+                            }
+                        }
+                        entries.push({
+                            id: parseInt(rid),
+                            title: art ? art.title : ('文章 #' + rid),
+                            date: null
+                        });
+                    }
+                }
+            }
+
+            if (entries.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            entries.sort(function(a, b) {
+                if (!a.date && !b.date) return 0;
+                if (!a.date) return 1;
+                if (!b.date) return -1;
+                return a.date < b.date ? 1 : -1;
+            });
+
+            historyList.innerHTML = '';
+            for (var k = 0; k < entries.length; k++) {
+                var e = entries[k];
+                var item = document.createElement('div');
+                item.className = 'history-item';
+                var dateStr = '';
+                if (e.date) {
+                    try {
+                        var d = new Date(e.date);
+                        dateStr = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+                                  String(d.getHours()).padStart(2, '0') + ':' +
+                                  String(d.getMinutes()).padStart(2, '0');
+                    } catch(_) {
+                        dateStr = e.date.substring(0, 10);
+                    }
+                } else {
+                    dateStr = '较早';
+                }
+                item.innerHTML =
+                    '<span class="history-item-title">' + escapeHtml(e.title) + '</span>' +
+                    '<span class="history-item-date">' + dateStr + '</span>';
+                // Click to navigate to article
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', (function(aid) {
+                    return function() {
+                        if (state.articleId !== aid) {
+                            state.articleId = aid;
+                            savePreferences();
+                            state.isFinished = false;
+                            finishMsg.classList.remove('visible');
+                            finishBtn.classList.remove('done');
+                            finishBtn.textContent = '我读完了！';
+                            finishBtn.disabled = false;
+                            quizSection.style.display = 'none';
+                            compSection.style.display = 'none';
+                            saveProgress();
+                            loadArticleContent(state.articleId);
+                        }
+                    };
+                })(e.id));
+                historyList.appendChild(item);
+            }
         }
 
         function recordArticleRead() {
@@ -2332,7 +2523,9 @@
 
             // Track article as read
             state.readArticleIds[state.articleId] = true;
+            state.readArticleDates[state.articleId] = new Date().toISOString();
             renderArticleSwitcher();
+            renderReadingHistory();
 
             // Check if daily goal met
             if (state.todayReadCount >= state.dailyGoal) {
@@ -3194,11 +3387,14 @@
                     badge = '<span class="article-badge done">已读</span>';
                 }
 
+                var wordCount = a.wordCount || 0;
+                var readTime = Math.max(1, Math.round(wordCount / 150));
                 card.innerHTML =
                     '<div class="article-card-title">' + escapeHtml(a.title) + badge + '</div>' +
                     '<div class="article-card-meta">' +
                         '<span>' + escapeHtml(a.source) + '</span>' +
                         '<span>' + escapeHtml(a.date) + '</span>' +
+                        '<span>' + wordCount + '词 · ' + readTime + '分钟</span>' +
                     '</div>';
 
                 articleSwitcher.appendChild(card);
@@ -3226,6 +3422,7 @@
                 }
 
                 renderArticleSwitcher();
+                renderReadingHistory();
             } catch(err) {
                 console.error('Failed to load article list:', err);
             }
@@ -3543,6 +3740,16 @@
             state.darkMode = !state.darkMode;
             applyDarkMode();
             savePreferences();
+        });
+
+        historyHeader.addEventListener('click', function() {
+            var open = historyList.style.display === 'block';
+            historyList.style.display = open ? 'none' : 'block';
+            if (open) {
+                historyToggle.classList.remove('open');
+            } else {
+                historyToggle.classList.add('open');
+            }
         });
 
         // ── Event Delegation: Level Selector ──────────

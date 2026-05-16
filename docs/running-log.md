@@ -196,3 +196,11 @@
 - [x] 文章总数从13篇增至15篇，话题覆盖科技/自然/体育/环保/文化/太空/教育/健康/艺术/城市规划/语言学习/社区
 - [x] 78 tests passing
 
+## Iter 23
+### 已实现
+- [x] 文章卡片字数统计 — 每张文章卡片显示词数和预估阅读时间 (如"251词 · 2分钟")
+- [x] server.py /api/articles 返回 wordCount 字段
+- [x] 阅读记录面板 — 📖 可折叠面板显示已读文章列表及阅读时间，点击可跳转
+- [x] readArticleDates 追踪 + localStorage 持久化，兼容旧数据
+- [x] 78 tests passing
+
