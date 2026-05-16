@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试 &mdash; Vocab in News</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="header-title">Vocab in News</a>
+    <nav class="nav">
+      <a href="/">阅读</a>
+      <a href="/words">单词本</a>
+      <a href="/quiz" class="active">测试</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Login prompt -->
+  <section id="login-section" class="hidden">
+    <div class="login-prompt">
+      <h2>请先登录</h2>
+      <p>输入你的名字来参加测试</p>
+      <div class="form-group">
+        <input type="text" id="username-input" placeholder="你的名字" maxlength="30">
+        <button class="btn btn-primary" onclick="doLogin()">登录</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section id="loading-section" class="hidden">
+    <div class="loading">正在准备测试题...</div>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz-section" class="hidden">
+
+    <div class="quiz-section" id="choice-section">
+      <div class="quiz-section-title">Part 1 &mdash; 选择正确的中文含义</div>
+      <div id="choice-questions"></div>
+    </div>
+
+    <div class="quiz-section" id="tf-section">
+      <div class="quiz-section-title">Part 2 &mdash; 判断对错</div>
+      <div id="tf-questions"></div>
+    </div>
+
+    <div class="quiz-submit-wrap">
+      <button class="btn btn-primary" id="submit-btn" onclick="submitQuiz()">提交答案</button>
+    </div>
+
+    <!-- Score result -->
+    <div class="score-display hidden" id="score-display">
+      <div class="score-number" id="score-number"></div>
+      <div class="score-message" id="score-message"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+var currentUser = null;
+var quizData = null;
+var userAnswers = {};
+
+/* ── Init ── */
+(async function init() {
+  try {
+    var r = await fetch('/api/session');
+    var d = await r.json();
+    if (d.user) { currentUser = d.user; loadQuiz(); }
+    else { document.getElementById('login-section').classList.remove('hidden'); }
+  } catch (_) {}
+})();
+
+/* ── Login ── */
+async function doLogin() {
+  var name = document.getElementById('username-input').value.trim();
+  if (!name) return;
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: name})
+  });
+  currentUser = name;
+  document.getElementById('login-section').classList.add('hidden');
+  loadQuiz();
+}
+
+/* ── Load quiz ── */
+async function loadQuiz() {
+  document.getElementById('loading-section').classList.remove('hidden');
+  document.getElementById('quiz-section').classList.add('hidden');
+
+  try {
+    // Try to get quiz for the last read article, fallback to no id
+    var r = await fetch('/api/quiz');
+    if (!r.ok) r = await fetch('/api/quiz?article_id=0');
+    quizData = await r.json();
+    userAnswers = {};
+    renderQuiz();
+    document.getElementById('loading-section').classList.add('hidden');
+    document.getElementById('quiz-section').classList.remove('hidden');
+    document.getElementById('score-display').classList.add('hidden');
+    document.getElementById('submit-btn').classList.remove('hidden');
+  } catch (_) {
+    document.getElementById('loading-section').innerHTML =
+      '<div class="loading">加载失败，请刷新重试</div>';
+  }
+}
+
+/* ── Render quiz ── */
+function renderQuiz() {
+  var choiceEl = document.getElementById('choice-questions');
+  var tfEl = document.getElementById('tf-questions');
+  var qi = 0;
+
+  // Multiple choice
+  choiceEl.innerHTML = '';
+  (quizData.choice_questions || []).forEach(function(q) {
+    var id = 'q' + qi;
+    choiceEl.innerHTML +=
+      '<div class="quiz-question">' +
+        '<div class="quiz-question-label">#' + (qi + 1) + '</div>' +
+        '<div class="quiz-question-text">' + escHtml(q.word) + ' 的中文意思是？</div>' +
+        (q.options || []).map(function(opt, oi) {
+          return '<div class="quiz-option" id="' + id + '_' + oi +
+            '" onclick="selectOption(\'' + id + '\',' + oi + ')">' +
+            escHtml(opt) + '</div>';
+        }).join('') +
+      '</div>';
+    qi++;
+  });
+
+  // True/false
+  tfEl.innerHTML = '';
+  (quizData.tf_questions || []).forEach(function(q) {
+    var id = 'q' + qi;
+    var qNum = qi + 1 - (quizData.choice_questions || []).length;
+    tfEl.innerHTML +=
+      '<div class="quiz-question">' +
+        '<div class="quiz-question-label">#' + qNum + '</div>' +
+        '<div class="quiz-question-text">' + escHtml(q.question) + '</div>' +
+        '<div class="tf-group">' +
+          '<div class="quiz-option" id="' + id + '_0" onclick="selectOption(\'' +
+            id + '\',0)">正确 / True</div>' +
+          '<div class="quiz-option" id="' + id + '_1" onclick="selectOption(\'' +
+            id + '\',1)">错误 / False</div>' +
+        '</div>' +
+      '</div>';
+    qi++;
+  });
+}
+
+/* ── Option selection ── */
+function selectOption(qid, oi) {
+  if (userAnswers[qid] !== undefined) return; // already answered
+  // Deselect siblings
+  var parent = document.getElementById(qid + '_0').parentElement.parentElement;
+  var opts = parent.querySelectorAll('.quiz-option');
+  for (var i = 0; i < opts.length; i++) opts[i].classList.remove('selected');
+  document.getElementById(qid + '_' + oi).classList.add('selected');
+  userAnswers[qid] = oi;
+}
+
+/* ── Submit and score ── */
+function submitQuiz() {
+  if (!quizData) return;
+
+  var total = 0;
+  var correct = 0;
+  var feedback = [];
+
+  // Score choices
+  (quizData.choice_questions || []).forEach(function(q, qi) {
+    var id = 'q' + qi;
+    var chosen = userAnswers[id];
+    var rightIdx = q.options.indexOf(q.correct);
+    total++;
+    if (chosen === rightIdx) {
+      correct++;
+      if (chosen !== undefined)
+        document.getElementById(id + '_' + chosen).classList.add('show-correct');
+    } else {
+      if (rightIdx >= 0)
+        document.getElementById(id + '_' + rightIdx).classList.add('show-correct');
+      if (chosen !== undefined)
+        document.getElementById(id + '_' + chosen).classList.add('show-wrong');
+    }
+  });
+
+  // Score T/F: answer is boolean true (正确) or false (错误)
+  var tfOffset = (quizData.choice_questions || []).length;
+  (quizData.tf_questions || []).forEach(function(q, qi) {
+    var id = 'q' + (tfOffset + qi);
+    var chosen = userAnswers[id];
+    var rightIdx = q.answer ? 0 : 1; // true=0(正确), false=1(错误)
+    total++;
+    if (chosen === rightIdx) {
+      correct++;
+      if (chosen !== undefined)
+        document.getElementById(id + '_' + chosen).classList.add('show-correct');
+    } else {
+      document.getElementById(id + '_' + rightIdx).classList.add('show-correct');
+      if (chosen !== undefined)
+        document.getElementById(id + '_' + chosen).classList.add('show-wrong');
+    }
+  });
+
+  // Disable submit
+  document.getElementById('submit-btn').classList.add('hidden');
+
+  // Show score
+  var scoreEl = document.getElementById('score-display');
+  scoreEl.classList.remove('hidden');
+  document.getElementById('score-number').textContent = correct + ' / ' + total;
+
+  var msg = '';
+  var pct = total > 0 ? correct / total : 0;
+  if (pct >= 0.9)      msg = '太厉害了！你已经掌握得很好了！';
+  else if (pct >= 0.7) msg = '很棒！继续加油！';
+  else if (pct >= 0.5) msg = '还不错，多复习生词会更好！';
+  else                 msg = '别灰心，多读几篇文章再来试试！';
+  document.getElementById('score-message').textContent = msg;
+
+  // POST result
+  fetch('/api/quiz/result', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      article_id: quizData.article_id || 0,
+      score: correct,
+      total: total
+    })
+  });
+}
+
+/* ── Helpers ── */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

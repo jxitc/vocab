@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单词本 &mdash; Vocab in News</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="header-title">Vocab in News</a>
+    <nav class="nav">
+      <a href="/">阅读</a>
+      <a href="/words" class="active">单词本</a>
+      <a href="/quiz">测试</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Login prompt -->
+  <section id="login-section" class="hidden">
+    <div class="login-prompt">
+      <h2>请先登录</h2>
+      <p>输入你的名字来查看单词本</p>
+      <div class="form-group">
+        <input type="text" id="username-input" placeholder="你的名字" maxlength="30">
+        <button class="btn btn-primary" onclick="doLogin()">登录</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section id="loading-section" class="hidden">
+    <div class="loading">加载中...</div>
+  </section>
+
+  <!-- Word bank -->
+  <section id="words-section" class="hidden">
+
+    <div class="tabs">
+      <span class="tab active" id="tab-learned" onclick="switchTab('learned')">我的生词本</span>
+      <span class="tab" id="tab-known" onclick="switchTab('known')">我认识的词</span>
+    </div>
+
+    <div class="tab-content active" id="content-learned">
+      <div id="list-learned"></div>
+    </div>
+    <div class="tab-content" id="content-known">
+      <div id="list-known"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- Word popup (same as reading page) -->
+<div id="word-popup-overlay" class="word-popup-overlay hidden" onclick="if(event.target===this)closePopup()">
+  <div class="word-popup">
+    <button class="popup-close" onclick="closePopup()">&times;</button>
+    <div class="popup-word" id="popup-word"></div>
+    <div class="popup-pos" id="popup-pos"></div>
+    <div class="popup-definition" id="popup-definition"></div>
+    <div class="popup-loading hidden" id="popup-loading">查询中...</div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var wordData = { learned: [], known: [] };
+
+/* ── Init ── */
+(async function init() {
+  try {
+    var r = await fetch('/api/session');
+    var d = await r.json();
+    if (d.user) { currentUser = d.user; loadWords(); }
+    else { document.getElementById('login-section').classList.remove('hidden'); }
+  } catch (_) {}
+})();
+
+/* ── Login ── */
+async function doLogin() {
+  var name = document.getElementById('username-input').value.trim();
+  if (!name) return;
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: name})
+  });
+  currentUser = name;
+  document.getElementById('login-section').classList.add('hidden');
+  loadWords();
+}
+
+/* ── Load word lists ── */
+async function loadWords() {
+  document.getElementById('loading-section').classList.remove('hidden');
+  document.getElementById('words-section').classList.add('hidden');
+
+  try {
+    var r = await fetch('/api/words');
+    wordData = await r.json();
+    wordData.learned = wordData.learned || [];
+    wordData.known   = wordData.known   || [];
+    renderList('learned');
+    renderList('known');
+    document.getElementById('loading-section').classList.add('hidden');
+    document.getElementById('words-section').classList.remove('hidden');
+  } catch (_) {
+    document.getElementById('loading-section').innerHTML =
+      '<div class="loading">加载失败，请刷新重试</div>';
+  }
+}
+
+/* ── Render word list ── */
+function renderList(type) {
+  var list = wordData[type] || [];
+  var el = document.getElementById('list-' + type);
+
+  if (!list.length) {
+    var msg = type === 'learned' ? '还没有生词，去阅读文章添加吧' : '还没有标记认识的词';
+    el.innerHTML = '<div class="empty-state">' + msg + '</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(function(w) {
+    return '<div class="word-card">' +
+      '<div class="word-card-main" onclick="lookupWord(\'' + escAttr(w.word) + '\')">' +
+        '<span class="word-card-word">' + escHtml(w.word) + '</span>' +
+        '<span class="word-card-pos">' + escHtml(w.pos || '') + '</span>' +
+        '<div class="word-card-def">' + escHtml(w.definition || '') + '</div>' +
+      '</div>' +
+      '<button class="btn btn-small btn-danger" onclick="event.stopPropagation(); removeWord(\'' +
+        escAttr(w.word) + '\',\'' + type + '\')">移除</button>' +
+    '</div>';
+  }).join('');
+}
+
+/* ── Tab switching ── */
+function switchTab(type) {
+  document.getElementById('tab-learned').classList.toggle('active', type === 'learned');
+  document.getElementById('tab-known').classList.toggle('active',   type === 'known');
+  document.getElementById('content-learned').classList.toggle('active', type === 'learned');
+  document.getElementById('content-known').classList.toggle('active',   type === 'known');
+}
+
+/* ── Remove word ── */
+async function removeWord(word, list) {
+  await fetch('/api/words/remove', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({word: word, list: list})
+  });
+  if (list === 'learned') {
+    wordData.learned = wordData.learned.filter(function(w) { return w.word !== word; });
+  } else {
+    wordData.known = wordData.known.filter(function(w) { return w.word !== word; });
+  }
+  renderList(list);
+}
+
+/* ── Word lookup popup ── */
+async function lookupWord(word) {
+  var ov = document.getElementById('word-popup-overlay');
+  ov.classList.remove('hidden');
+  document.getElementById('popup-word').textContent = word;
+  document.getElementById('popup-pos').textContent = '';
+  document.getElementById('popup-definition').textContent = '';
+  var ld = document.getElementById('popup-loading');
+  ld.classList.remove('hidden');
+
+  try {
+    var r = await fetch('/api/lookup?word=' + encodeURIComponent(word));
+    var d = await r.json();
+    ld.classList.add('hidden');
+    if (d.found) {
+      document.getElementById('popup-pos').textContent = d.pos || '';
+      document.getElementById('popup-definition').textContent = d.definition || '';
+    } else {
+      document.getElementById('popup-definition').textContent = '未找到该词的定义';
+    }
+  } catch (_) {
+    ld.classList.add('hidden');
+    document.getElementById('popup-definition').textContent = '查询失败，请重试';
+  }
+}
+
+function closePopup() {
+  document.getElementById('word-popup-overlay').classList.add('hidden');
+}
+
+/* ── Helpers ── */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    .replace(/"/g,'\\"').replace(/\n/g,'\\n');
+}
+</script>
+</body>
+</html>

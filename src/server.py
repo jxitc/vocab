@@ -1,81 +1,140 @@
 """
-Vocab in News - Web Server (Iteration 41)
-Flask app serving interactive article reading page with
-word annotation, paragraph-level Chinese translations,
-multiple difficulty levels, and multiple articles.
+Vocab in News - MVP Web Server
+Flask app serving interactive article reading with word annotation,
+user word bank, and quizzes.  Hardcoded to user_level=2 (初中).
 """
 
 import json
 import os
+import random
+import threading
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 
 from vocab_service import (
-    find_difficult_words,
-    find_difficult_words_sorted,
-    tokenize,
-    get_levels_for_user,
-    get_max_highlights,
+    _lookup,
+    VOCAB_DIFFICULTY,
     filter_known_words,
     filter_known_words_from_tokens,
+    find_difficult_words,
+    find_difficult_words_sorted,
+    get_levels_for_user,
+    get_max_highlights,
     stem_word,
+    tokenize,
     LEVEL_NAMES,
 )
 
+# ── App setup ──────────────────────────────────────────────────────────
 
 app = Flask(__name__)
+app.secret_key = "vocab-in-news-mvp-dev-secret-key"
 
 SAMPLE_ARTICLES_PATH = os.path.join(os.path.dirname(__file__), "sample_articles.json")
+DATA_DIR = Path(__file__).parent / "data" / "users"
+
+MVP_USER_LEVEL = 2  # 初中 — hardcoded for MVP
+
+# Per-user thread locks to serialise JSON file writes safely
+_locks: dict = {}
+_lock_registry = threading.Lock()
 
 
-def load_articles():
+def _get_user_lock(username: str) -> threading.Lock:
+    """Return or create a per-user Lock for safe concurrent writes."""
+    with _lock_registry:
+        if username not in _locks:
+            _locks[username] = threading.Lock()
+        return _locks[username]
+
+
+# ── Filesystem helpers ─────────────────────────────────────────────────
+
+def _user_dir(username: str) -> Path:
+    return DATA_DIR / username
+
+
+def _ensure_user_dir(username: str) -> Path:
+    d = _user_dir(username)
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _load_json(username: str, filename: str, default=None):
+    """Load JSON from a per-user file; return *default* if missing."""
+    path = _user_dir(username) / filename
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return default if default is not None else {}
+
+
+def _save_json(username: str, filename: str, data) -> None:
+    """Atomically save JSON to a per-user file."""
+    _ensure_user_dir(username)
+    path = _user_dir(username) / filename
+    tmp = path.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def _get_username() -> Optional[str]:
+    """Return the current session username, or None."""
+    return session.get("username")
+
+
+def _require_user():
+    """Return username or abort with a JSON error."""
+    user = _get_username()
+    if not user:
+        return None
+    return user
+
+
+# ── Article helpers (kept from previous iteration) ─────────────────────
+
+def load_articles() -> list:
     """Load all articles from the JSON array file."""
     with open(SAMPLE_ARTICLES_PATH, "r", encoding="utf-8") as f:
-        articles = json.load(f)
-    return articles
+        return json.load(f)
 
 
-def get_article_by_id(article_id: int):
-    """Load a specific article by id. Returns None if not found."""
-    articles = load_articles()
-    for a in articles:
+def get_article_by_id(article_id: int) -> Optional[dict]:
+    """Load a specific article by id.  Returns None if not found."""
+    for a in load_articles():
         if a.get("id") == article_id:
             return a
     return None
 
 
-def build_paragraphs_with_tokens(article: dict, user_level: int = 2,
-                                  known_words: set = None) -> list:
-    """Process article paragraphs, adding tokenization and difficult-word data.
+def build_paragraphs_with_tokens(article: dict,
+                                 known_words: Optional[set] = None) -> list:
+    """Process article paragraphs: tokenise + flag difficult words.
 
-    Limits highlighted words based on level-specific MAX_HIGHLIGHTS.
-    Excludes words in known_words set from being highlighted.
+    Hardcodes user_level = 2 (初中).  Excludes words in *known_words* from
+    being highlighted and limits highlights per MAX_HIGHLIGHTS for the level.
     """
     if known_words is None:
         known_words = set()
 
-    max_highlights = get_max_highlights(user_level)
+    max_highlights = get_max_highlights(MVP_USER_LEVEL)
 
-    # Collect all difficult words across the whole article, sorted by first appearance
     full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
-    all_difficult = find_difficult_words_sorted(full_text, user_level)
-
-    # Exclude known words from difficult list
+    all_difficult = find_difficult_words_sorted(full_text, MVP_USER_LEVEL)
     all_difficult = filter_known_words(all_difficult, known_words)
 
-    # Only highlight the first N words; rest are shown as normal
     highlighted_lowers = {w["lower"] for w in all_difficult[:max_highlights]}
-
-    # Track first occurrence by stem — group inflectional variants
-    seen_stems = set()
+    seen_stems: set = set()
 
     enriched = []
     for para in article.get("paragraphs", []):
         text = para["text"]
-        tokens = tokenize(text, user_level)
-        # Clear known words from token difficulty flags
+        tokens = tokenize(text, MVP_USER_LEVEL)
         tokens = filter_known_words_from_tokens(tokens, known_words)
-        # Downgrade words that exceed the highlight limit or are repeat stem occurrences
         for t in tokens:
             if t["is_difficult"] and t["word"]:
                 wl = t["word"].lower()
@@ -87,8 +146,10 @@ def build_paragraphs_with_tokens(article: dict, user_level: int = 2,
                         t["is_difficult"] = False
                     else:
                         seen_stems.add(ws)
-        difficult_words = [w for w in find_difficult_words(text, user_level)
-                          if w["lower"] in highlighted_lowers]
+        difficult_words = [
+            w for w in find_difficult_words(text, MVP_USER_LEVEL)
+            if w["lower"] in highlighted_lowers
+        ]
         difficult_words = filter_known_words(difficult_words, known_words)
         enriched.append({
             "text": text,
@@ -99,91 +160,395 @@ def build_paragraphs_with_tokens(article: dict, user_level: int = 2,
     return enriched
 
 
+# ── User bootstrap (before first request) ──────────────────────────────
+
+@app.before_request
+def _capture_user():
+    """Sniff ?user=xxx and store in session when not already logged in."""
+    if "username" not in session:
+        user = (request.args.get("user") or "").strip()
+        if user:
+            session["username"] = user
+            _ensure_user_dir(user)
+            if not (_user_dir(user) / "profile.json").exists():
+                _save_json(user, "profile.json", {
+                    "username": user,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                })
+            # Initialise empty word bank if missing
+            if not (_user_dir(user) / "words.json").exists():
+                _save_json(user, "words.json", {
+                    "learned": {},
+                    "known": {},
+                })
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# PAGE ROUTES
+# ═══════════════════════════════════════════════════════════════════════
+
 @app.route("/")
 def index():
-    """Serve the main reading page shell."""
+    """Reading page."""
     return render_template("index.html")
 
 
-@app.route("/api/articles")
-def api_articles():
-    """Return list of article summaries (title, source, date, id)."""
-    articles = load_articles()
-    summaries = []
-    for a in articles:
-        word_count = sum(len(p["text"].split()) for p in a.get("paragraphs", []))
-        summaries.append({
-            "id": a.get("id", 0),
-            "title": a.get("title", ""),
-            "source": a.get("source", ""),
-            "date": a.get("date", ""),
-            "wordCount": word_count,
-            "topic": a.get("topic", ""),
+@app.route("/words")
+def words_page():
+    """Word bank page."""
+    return render_template("words.html")
+
+
+@app.route("/quiz")
+def quiz_page():
+    """Quiz page."""
+    return render_template("quiz.html")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Session
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    """Set username in session from JSON body."""
+    data = request.get_json(silent=True) or {}
+    username = (data.get("username") or "").strip()
+    if not username:
+        return jsonify({"error": "username required"}), 400
+    session["username"] = username
+    _ensure_user_dir(username)
+    if not (_user_dir(username) / "profile.json").exists():
+        _save_json(username, "profile.json", {
+            "username": username,
+            "created_at": datetime.now(timezone.utc).isoformat(),
         })
-    return jsonify(summaries)
+    if not (_user_dir(username) / "words.json").exists():
+        _save_json(username, "words.json", {"learned": {}, "known": {}})
+    return jsonify({"user": username})
 
 
-@app.route("/api/article")
-def api_article():
-    """Return article as JSON with vocabulary annotations.
+@app.route("/api/logout", methods=["POST"])
+def api_logout():
+    """Clear the session."""
+    session.pop("username", None)
+    return jsonify({"ok": True})
 
-    Query params:
-        id: article id (default 0)
-        level: user difficulty level 1-4 (default 2 = 初中)
+
+@app.route("/api/session")
+def api_session():
+    """Return current user info, or null if not logged in."""
+    user = _get_username()
+    if not user:
+        return jsonify({"user": None})
+    return jsonify({"user": user})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Daily Article  (GET /api/today)
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/api/today")
+def api_today():
+    """Return a single article keyed on current date (day-of-year mod N).
+
+    Always returns the same article for the same day.  Hardcodes
+    user_level=2.  If a user is logged in, known words are loaded from
+    their word bank and excluded from highlights.
     """
-    article_id = request.args.get("id", 0, type=int)
-    user_level = request.args.get("level", 2, type=int)
+    articles = load_articles()
+    if not articles:
+        return jsonify({"error": "No articles found"}), 404
 
-    # Clamp level to valid range
-    if user_level < 1:
-        user_level = 1
-    elif user_level > 4:
-        user_level = 4
+    day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
+    article_id = day_of_year % len(articles)
+    article = articles[article_id]
 
-    # Known words filtering (client sends comma-separated lowercase words)
-    known_raw = request.args.get("known", "")
-    known_words = set()
-    if known_raw:
-        known_words = {w.strip().lower() for w in known_raw.split(",") if w.strip()}
+    # Load known words for logged-in user
+    known_words: set = set()
+    user = _get_username()
+    if user:
+        wb = _load_json(user, "words.json", {"learned": {}, "known": {}})
+        known_words = set(wb.get("learned", {}).keys()) | set(wb.get("known", {}).keys())
 
-    article = get_article_by_id(article_id)
-    if article is None:
-        # Fall back to first article
-        articles = load_articles()
-        if articles:
-            article = articles[0]
-        else:
-            return jsonify({"error": "No articles found"}), 404
-
-    paragraphs = build_paragraphs_with_tokens(article, user_level, known_words)
+    paragraphs = build_paragraphs_with_tokens(article, known_words)
 
     return jsonify({
-        "id": article.get("id", 0),
+        "id": article.get("id", article_id),
         "title": article["title"],
         "source": article["source"],
         "url": article.get("url", ""),
         "date": article["date"],
-        "level": user_level,
-        "levelName": LEVEL_NAMES.get(user_level, "初中"),
-        "maxHighlights": get_max_highlights(user_level),
+        "level": MVP_USER_LEVEL,
+        "levelName": LEVEL_NAMES.get(MVP_USER_LEVEL, "初中"),
+        "maxHighlights": get_max_highlights(MVP_USER_LEVEL),
         "paragraphs": paragraphs,
         "comprehension": article.get("comprehension", []),
         "topic": article.get("topic", ""),
     })
 
 
-@app.route("/api/levels")
-def api_levels():
-    """Return level configuration for the frontend."""
+# ═══════════════════════════════════════════════════════════════════════
+# API — Any-Word Lookup  (GET /api/lookup?word=xxx)
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/api/lookup")
+def api_lookup():
+    """Look up *any* English word.  Returns {definition, pos, level} or null.
+
+    Uses the vocab database with stemming fallback, so inflectional
+    forms (e.g. "discoveries") match their base entries.
+    """
+    word = (request.args.get("word") or "").strip().lower()
+    if not word or not word.isascii():
+        return jsonify(None)
+
+    entry = _lookup(word)
+    if entry is None:
+        return jsonify({"found": False})
+
+    definition, pos, level = entry
     return jsonify({
-        "levels": [
-            {"id": 1, "name": "小学", "maxHighlights": 3},
-            {"id": 2, "name": "初中", "maxHighlights": 6},
-            {"id": 3, "name": "高中", "maxHighlights": 8},
-            {"id": 4, "name": "大学", "maxHighlights": 10},
-        ],
+        "found": True,
+        "word": word,
+        "definition": definition,
+        "pos": pos,
+        "level": level,
+        "levelName": LEVEL_NAMES.get(level, ""),
     })
 
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Word Bank  (per user)
+# ═══════════════════════════════════════════════════════════════════════
+
+def _load_wordbank(username: str) -> dict:
+    """Load or create words.json for a user."""
+    default = {"learned": {}, "known": {}}
+    return _load_json(username, "words.json", default)
+
+
+@app.route("/api/words")
+def api_words():
+    """Return the user's full word bank (learned + known lists)."""
+    user = _require_user()
+    if not user:
+        return jsonify(None)
+    wb = _load_wordbank(user)
+    return jsonify(wb)
+
+
+@app.route("/api/words/learn", methods=["POST"])
+def api_words_learn():
+    """Mark a word as learned.
+
+    Body:  {"word": "...", "definition": "..."}
+    The server fills in pos/level from the vocab database (or null).
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    word = (body.get("word") or "").strip()
+    definition = (body.get("definition") or "").strip()
+    if not word:
+        return jsonify({"error": "word is required"}), 400
+
+    lock = _get_user_lock(user)
+    with lock:
+        wb = _load_wordbank(user)
+        wb.setdefault("learned", {})
+        wb.setdefault("known", {})
+
+        # Pull pos & level from vocab if available
+        entry = _lookup(word.lower())
+        pos, level = (entry[1], entry[2]) if entry else (None, None)
+
+        wb["learned"][word] = {
+            "definition": definition,
+            "pos": pos,
+            "level": level,
+            "added_at": datetime.now(timezone.utc).isoformat(),
+        }
+        # Remove from known if present
+        wb["known"].pop(word, None)
+
+        _save_json(user, "words.json", wb)
+
+    return jsonify({"ok": True, "word": word, "bank": wb})
+
+
+@app.route("/api/words/known", methods=["POST"])
+def api_words_known():
+    """Mark a word as known (no definition needed).
+
+    Body:  {"word": "..."}
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    word = (body.get("word") or "").strip()
+    if not word:
+        return jsonify({"error": "word is required"}), 400
+
+    lock = _get_user_lock(user)
+    with lock:
+        wb = _load_wordbank(user)
+        wb.setdefault("learned", {})
+        wb.setdefault("known", {})
+
+        wb["known"][word] = {
+            "added_at": datetime.now(timezone.utc).isoformat(),
+        }
+        # Remove from learned if present
+        wb["learned"].pop(word, None)
+
+        _save_json(user, "words.json", wb)
+
+    return jsonify({"ok": True, "word": word, "bank": wb})
+
+
+@app.route("/api/words/remove", methods=["POST"])
+def api_words_remove():
+    """Remove a word from both learned and known lists.
+
+    Body:  {"word": "..."}
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    word = (body.get("word") or "").strip()
+    if not word:
+        return jsonify({"error": "word is required"}), 400
+
+    lock = _get_user_lock(user)
+    with lock:
+        wb = _load_wordbank(user)
+        wb.setdefault("learned", {})
+        wb.setdefault("known", {})
+
+        wb["learned"].pop(word, None)
+        wb["known"].pop(word, None)
+
+        _save_json(user, "words.json", wb)
+
+    return jsonify({"ok": True, "word": word, "bank": wb})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Quiz  (per user, per article)
+# ═══════════════════════════════════════════════════════════════════════
+
+def _build_quiz(article: dict) -> list:
+    """Generate quiz questions for a single article.
+
+    Returns a list of question dicts:
+      - vocabulary choice questions (up to 5)
+      - comprehension T/F questions (up to 5, from article data)
+    """
+    questions = []
+
+    # ── Vocabulary choice questions ────────────────────────────────
+    full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
+    difficult = find_difficult_words_sorted(full_text, MVP_USER_LEVEL)
+
+    # Build a bank of all definitions for distractors
+    all_defs = [(w, entry[0]) for w, entry in VOCAB_DIFFICULTY.items()]
+
+    vocab_pool = difficult[:5]  # up to 5 vocab questions
+    for item in vocab_pool:
+        correct_word = item["word"]
+        correct_def = item["definition"]
+        # Pick 3 random wrong definitions (exclude the correct one)
+        others = [d for w, d in all_defs if d != correct_def]
+        if len(others) < 3:
+            continue  # not enough distractors; skip
+        wrongs = random.sample(others, 3)
+        options = wrongs + [correct_def]
+        random.shuffle(options)
+        correct_idx = options.index(correct_def)
+
+        questions.append({
+            "type": "choice",
+            "question": f"What does \"{correct_word}\" mean?",
+            "word": correct_word,
+            "options": options,
+            "correct": correct_idx,
+        })
+
+    # ── Comprehension T/F questions ────────────────────────────────
+    comp = article.get("comprehension", [])
+    for item in comp[:5]:  # up to 5 comprehension questions
+        questions.append({
+            "type": "tf",
+            "question": item.get("question", ""),
+            "correct": item.get("answer", False),
+        })
+
+    return questions
+
+
+@app.route("/api/quiz")
+def api_quiz():
+    """Generate quiz for an article.
+
+    Query:  ?article_id=N
+    Returns:  {article_id, questions: [...]}
+    """
+    article_id = request.args.get("article_id", 0, type=int)
+    article = get_article_by_id(article_id)
+    if not article:
+        return jsonify({"error": "Article not found"}), 404
+
+    questions = _build_quiz(article)
+
+    return jsonify({
+        "article_id": article.get("id", article_id),
+        "questions": questions,
+    })
+
+
+@app.route("/api/quiz/result", methods=["POST"])
+def api_quiz_result():
+    """Save a quiz result.
+
+    Body:  {"article_id": N, "score": N, "total": N, "answers": [...]}
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    article_id = body.get("article_id", 0)
+    score = body.get("score", 0)
+    total = body.get("total", 0)
+    answers = body.get("answers", [])
+
+    record = {
+        "article_id": article_id,
+        "score": score,
+        "total": total,
+        "date": datetime.now(timezone.utc).isoformat(),
+        "answers": answers,
+    }
+
+    lock = _get_user_lock(user)
+    with lock:
+        results = _load_json(user, "quiz_results.json", [])
+        results.append(record)
+        _save_json(user, "quiz_results.json", results)
+
+    return jsonify({"ok": True, "record": record})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Main
+# ═══════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001, debug=True)

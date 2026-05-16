@@ -73,6 +73,14 @@ def _lookup(word_lower: str) -> Optional[Tuple[str, str, int]]:
     return None
 
 
+def lookup_word(word_lower: str):
+    """Public: look up a word, returning {definition, pos, level} or None."""
+    result = _lookup(word_lower)
+    if result is None:
+        return None
+    return {"definition": result[0], "pos": result[1], "level": result[2]}
+
+
 def _lookup_entry(word_lower: str) -> Optional[Tuple[str, str]]:
     """Backward-compat: return (definition, pos) without level."""
     result = _lookup(word_lower)
