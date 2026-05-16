@@ -187,3 +187,12 @@
 - [x] updateProgressRing() 联动 markWordAsLearned/renderWordPanel/restoreFinishedState
 - [x] 78 tests passing
 
+## Iter 22
+### 已实现
+- [x] 阅读理解题 — 读后小测验后展示2道T/F判断题，测试文章内容理解
+- [x] 即时批改 + 总分鼓励语 (🌟/👍/🔍)
+- [x] server.py API响应含comprehension字段
+- [x] 2篇新文章 — 15岁女孩创建语言学习应用 (教育周刊) + 中学生社区花园改造 (城市日报)
+- [x] 文章总数从13篇增至15篇，话题覆盖科技/自然/体育/环保/文化/太空/教育/健康/艺术/城市规划/语言学习/社区
+- [x] 78 tests passing
+

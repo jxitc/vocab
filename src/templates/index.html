@@ -1337,6 +1337,97 @@
             margin-top: 6px;
         }
 
+        /* ── Comprehension ────────────────────────────── */
+        .comp-section {
+            margin-top: 24px;
+            padding: 24px 20px;
+            background: #faf9f7;
+            border: 1.5px solid #e8e4dc;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .comp-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .comp-question {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px dashed #e8e4dc;
+        }
+
+        .comp-question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .comp-statement {
+            font-size: 16px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .comp-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .comp-option {
+            padding: 10px 28px;
+            border: 1.5px solid #d5cfc6;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.15s ease;
+            font-weight: 600;
+        }
+
+        .comp-option:hover {
+            background: #f0ede6;
+            border-color: #b8a99a;
+        }
+
+        .comp-option.correct {
+            background: #e8f5e9;
+            border-color: #66bb6a;
+            color: #2e7d32;
+        }
+
+        .comp-option.wrong {
+            background: #fce4ec;
+            border-color: #ef5350;
+            color: #c62828;
+        }
+
+        .comp-option.answered {
+            pointer-events: none;
+        }
+
+        .comp-result {
+            text-align: center;
+            padding: 16px 0 4px;
+        }
+
+        .comp-score {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .comp-message {
+            font-size: 15px;
+            color: #666;
+            margin-top: 6px;
+        }
+
         /* ── Achievements ──────────────────────────────── */
         .achievements-section {
             margin: 24px 0 16px;
@@ -1516,7 +1607,7 @@
         }
         body.dark .word-panel, body.dark .my-words-panel,
         body.dark .completion-section, body.dark .reading-stats,
-        body.dark .help-hint, body.dark .quiz-section, body.dark .achievements-section {
+        body.dark .help-hint, body.dark .quiz-section, body.dark .comp-section, body.dark .achievements-section {
             background: #252528;
             border-color: #3a3a40;
         }
@@ -1583,6 +1674,16 @@
         body.dark .quiz-question { border-bottom-color: #3a3a40; }
         body.dark .quiz-score { color: #81c784; }
         body.dark .quiz-message { color: #aaa; }
+        body.dark .comp-section { background: #232326; }
+        body.dark .comp-title { color: #ccc; }
+        body.dark .comp-statement { color: #e0e0e0; }
+        body.dark .comp-option { background: #2a2a30; border-color: #3a3a40; color: #ccc; }
+        body.dark .comp-option:hover { background: #333; border-color: #666; }
+        body.dark .comp-option.correct { background: #1a3a1a; border-color: #4a8a4a; color: #81c784; }
+        body.dark .comp-option.wrong { background: #3a1a1a; border-color: #6a3a3a; color: #e08080; }
+        body.dark .comp-question { border-bottom-color: #3a3a40; }
+        body.dark .comp-score { color: #81c784; }
+        body.dark .comp-message { color: #aaa; }
         body.dark .my-words-section-title { color: #ccc; border-bottom-color: #3a3a40; }
         body.dark .my-words-section-title.known { color: #81c784; }
         body.dark .my-words-item.known-item { background: #1a3a1a; border-color: #4a8a4a; }
@@ -1859,6 +1960,13 @@
                 <div class="quiz-questions" id="quizQuestions"></div>
                 <div class="quiz-result" id="quizResult" style="display:none;"></div>
             </div>
+
+            <!-- Comprehension Section -->
+            <div class="comp-section" id="compSection" style="display:none;">
+                <h3 class="comp-title">🤔 阅读理解 — 你读懂了吗？</h3>
+                <div class="comp-questions" id="compQuestions"></div>
+                <div class="comp-result" id="compResult" style="display:none;"></div>
+            </div>
         </div>
 
         <footer>
@@ -1975,6 +2083,9 @@
         var quizSection = document.getElementById('quizSection');
         var quizQuestions = document.getElementById('quizQuestions');
         var quizResult = document.getElementById('quizResult');
+        var compSection = document.getElementById('compSection');
+        var compQuestions = document.getElementById('compQuestions');
+        var compResult = document.getElementById('compResult');
         var myWordsSearch = document.getElementById('myWordsSearch');
         var reviewBtn = document.getElementById('reviewBtn');
         var flashcardArea = document.getElementById('flashcardArea');
@@ -3125,6 +3236,7 @@
             errorEl.style.display = 'none';
             wordPanel.style.display = 'none';
             quizSection.style.display = 'none';
+            compSection.style.display = 'none';
 
             try {
                 var url = '/api/article?id=' + articleId + '&level=' + state.userLevel;
@@ -3475,6 +3587,7 @@
             finishBtn.textContent = '我读完了！';
             finishBtn.disabled = false;
             quizSection.style.display = 'none';
+            compSection.style.display = 'none';
             saveProgress();
             loadArticleContent(state.articleId);
         });
@@ -3761,6 +3874,129 @@
                 saveAchievements();
                 checkAchievements();
             }
+
+            // Show comprehension after a short delay
+            setTimeout(function() {
+                showComprehension();
+            }, 600);
+        }
+
+        // ── Comprehension Questions ─────────────────────
+        var state_compAnswers = [];
+        var state_compScore = 0;
+
+        function showComprehension() {
+            var comps = state.article.comprehension;
+            if (!comps || comps.length === 0) return;
+
+            state_compAnswers = [];
+            state_compScore = 0;
+            compResult.style.display = 'none';
+            compSection.style.display = 'block';
+            compQuestions.innerHTML = '';
+
+            for (var i = 0; i < comps.length; i++) {
+                var c = comps[i];
+                var div = document.createElement('div');
+                div.className = 'comp-question';
+                div.setAttribute('data-cindex', String(i));
+
+                var stmtEl = document.createElement('div');
+                stmtEl.className = 'comp-statement';
+                stmtEl.textContent = (i + 1) + '. ' + c.question;
+
+                var optsDiv = document.createElement('div');
+                optsDiv.className = 'comp-options';
+
+                var trueBtn = document.createElement('button');
+                trueBtn.className = 'comp-option';
+                trueBtn.textContent = '✓ 对 (True)';
+                trueBtn.setAttribute('data-value', 'true');
+                trueBtn.addEventListener('click', function(idx) {
+                    return function() { answerCompQuestion(idx, true); };
+                }(i));
+
+                var falseBtn = document.createElement('button');
+                falseBtn.className = 'comp-option';
+                falseBtn.textContent = '✗ 错 (False)';
+                falseBtn.setAttribute('data-value', 'false');
+                falseBtn.addEventListener('click', function(idx) {
+                    return function() { answerCompQuestion(idx, false); };
+                }(i));
+
+                optsDiv.appendChild(trueBtn);
+                optsDiv.appendChild(falseBtn);
+                div.appendChild(stmtEl);
+                div.appendChild(optsDiv);
+                compQuestions.appendChild(div);
+            }
+
+            compSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function answerCompQuestion(cIndex, userAnswer) {
+            var qDiv = compQuestions.querySelector('.comp-question[data-cindex="' + cIndex + '"]');
+            if (!qDiv) return;
+
+            var comps = state.article.comprehension;
+            var c = comps[cIndex];
+            var isCorrect = (userAnswer === c.answer);
+            var buttons = qDiv.querySelectorAll('.comp-option');
+
+            for (var i = 0; i < buttons.length; i++) {
+                var btn = buttons[i];
+                var val = btn.getAttribute('data-value') === 'true';
+                btn.classList.add('answered');
+                if (val === c.answer) {
+                    btn.classList.add('correct');
+                } else if (val === userAnswer && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            }
+
+            if (isCorrect) {
+                state_compScore++;
+            }
+            state_compAnswers[cIndex] = isCorrect;
+
+            // Check if all answered
+            var allAnswered = true;
+            for (var j = 0; j < comps.length; j++) {
+                if (state_compAnswers[j] === undefined) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            if (allAnswered) {
+                showCompResult();
+            }
+        }
+
+        function showCompResult() {
+            var comps = state.article.comprehension;
+            var total = comps.length;
+            var score = state_compScore;
+            var pct = Math.round(score / total * 100);
+
+            var message = '';
+            var emoji = '';
+            if (pct === 100) {
+                message = '全部正确！你完全理解了这篇文章！';
+                emoji = '🌟';
+            } else if (pct >= 50) {
+                message = '大部分理解了，可以再读一遍看看细节！';
+                emoji = '👍';
+            } else {
+                message = '有些地方没读明白，试试打开翻译再读一遍？';
+                emoji = '🔍';
+            }
+
+            compResult.style.display = 'block';
+            compResult.innerHTML =
+                '<div class="comp-score">' + emoji + ' ' + score + ' / ' + total + '</div>' +
+                '<div class="comp-message">' + message + '</div>';
+
+            compResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         // ── Flashcard Review ────────────────────────────

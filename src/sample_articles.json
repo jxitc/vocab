@@ -22,6 +22,16 @@
         "text": "NASA has invited Jack to visit their space center this summer. He will meet real astronomers and learn more about how to explore the universe. Jack said he plans to study physics in college and hopes to discover more planets in the future. 'I just wanted to finish my school project,' he said with a smile. 'I never thought I would find a whole new world.'",
         "translation": "美国宇航局已邀请Jack今年夏天参观他们的航天中心。他将见到真正的天文学家，并学习更多关于如何探索宇宙的知识。Jack说他计划在大学学习物理学，希望将来能发现更多的行星。他笑着说：\"我只是想完成学校项目，从没想过会发现一个全新的世界。\""
       }
+    ],
+    "comprehension": [
+      {
+        "question": "The student who discovered the planet was 17 years old.",
+        "answer": true
+      },
+      {
+        "question": "The planet is very cold, below freezing.",
+        "answer": false
+      }
     ]
   },
   {
@@ -46,6 +56,16 @@
       {
         "text": "However, experts warn that the job is not finished. Climate change could destroy large areas of bamboo in the future. If the bamboo forests disappear, the pandas will lose their main source of food. Scientists estimate that climate change could reduce panda habitat by more than 35% by the end of this century. We need to continue our efforts to protect these beautiful animals and the environment they live in.",
         "translation": "然而，专家们警告说这场战斗还没有结束。气候变化在未来可能会摧毁大面积的竹林。如果竹林消失，大熊猫将失去主要的食物来源。科学家估计，到本世纪末，气候变化可能会使大熊猫的栖息地减少超过35%。我们需要继续努力保护这些美丽的动物以及它们赖以生存的环境。"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "Giant pandas have been moved from 'endangered' to 'vulnerable'.",
+        "answer": true
+      },
+      {
+        "question": "Pandas eat mainly meat and fish.",
+        "answer": false
       }
     ]
   },
@@ -72,6 +92,16 @@
         "text": "China has become one of the biggest markets for esports in the world. The country officially recognized esports as a professional sport in 2019, and many universities now offer degree programs in esports management. In 2025, China's national esports team won three gold medals at the Asian Games, further proving that competitive gaming deserves the same respect as traditional athletics. For millions of young Chinese gamers, esports represents not just entertainment, but a genuine career path and a source of national pride.",
         "translation": "中国已成为全球最大的电子竞技市场之一。该国于2019年正式承认电子竞技为职业体育项目，许多大学现在开设电子竞技管理学位课程。2025年，中国国家电竞队在亚运会上赢得三枚金牌，进一步证明了竞技游戏值得与传统体育同等的尊重。对数百万中国年轻游戏玩家来说，电子竞技不仅代表娱乐，更是一条真正的职业道路和国家自豪感的来源。"
       }
+    ],
+    "comprehension": [
+      {
+        "question": "Esports has grown into an industry worth more than 1.8 billion dollars.",
+        "answer": true
+      },
+      {
+        "question": "Esports players don't need any physical training.",
+        "answer": false
+      }
     ]
   },
   {
@@ -96,6 +126,16 @@
       {
         "text": "Her story has inspired millions of young athletes across China. Many schools now use her experience as an example of how determination and passion can help people overcome any challenge. When asked about her future plans, the young champion smiled and said: 'I want to keep improving and show the world what Chinese athletes can achieve.' Her victory proves that age is never an obstacle when you have enough dedication and courage.",
         "translation": "她的故事激励了中国数百万年轻运动员。许多学校现在用她的经历作为例子，说明决心和热情如何帮助人们克服任何挑战。当被问及未来计划时，这位年轻冠军微笑着说：\"我想继续进步，向世界展示中国运动员可以取得的成就。\"她的胜利证明，当你有足够的奉献和勇气时，年龄从来不是障碍。"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "The diver won a gold medal at the Olympic Games.",
+        "answer": true
+      },
+      {
+        "question": "She scored 400 points in the competition.",
+        "answer": false
       }
     ]
   },
@@ -122,6 +162,16 @@
         "text": "The discovery could change how we think about animal intelligence. For a long time, scientists believed that only primates like chimpanzees and gorillas had advanced problem-solving skills. This research suggests that intelligence may evolve in many different forms across the animal world. The lead scientist Professor James Morrison noted: 'We should not assume that a small bird brain cannot achieve great things. Nature constantly challenges our assumptions about intelligence.'",
         "translation": "这一发现可能改变我们对动物智力的看法。长期以来，科学家认为只有黑猩猩和大猩猩等灵长类动物才具有高级的问题解决能力。这项研究表明，智力可能在动物界以许多不同形式演化。首席科学家James Morrison教授指出：\"我们不应假设一个小的鸟脑不能取得伟大的成就。大自然不断挑战我们对智力的假设。\""
       }
+    ],
+    "comprehension": [
+      {
+        "question": "Crows can solve puzzles at a level similar to a seven-year-old child.",
+        "answer": true
+      },
+      {
+        "question": "Crows cannot use tools.",
+        "answer": false
+      }
     ]
   },
   {
@@ -146,6 +196,16 @@
       {
         "text": "Despite all the attention, the girl remains humble and focused on her goal. 'I don't think of myself as a genius,' she said. 'I just saw a problem and tried to solve it. Anyone can do that if they care enough.' She hopes her story will inspire other young people, especially girls, to pursue their interest in science and technology. 'The ocean belongs to everyone,' she added. 'And everyone can help protect it.'",
         "translation": "尽管备受关注，这个女孩仍然保持谦虚，专注于她的目标。她说：'我不认为自己是天才，我只是看到了一个问题并尝试解决它。只要足够关心，任何人都可以做到。'她希望自己的故事能激励其他年轻人，特别是女孩，去追求她们对科学和技术的兴趣。她补充道：'海洋属于每个人，每个人都可以帮助保护它。'"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "The girl invented a device that cleans ocean water using solar energy.",
+        "answer": true
+      },
+      {
+        "question": "Her invention is very expensive to build.",
+        "answer": false
       }
     ]
   },
@@ -172,6 +232,16 @@
         "text": "Chen's dream is to establish a music school for children with disabilities, where they can learn to express themselves through music regardless of their physical limitations. 'Being blind does not mean you cannot have a vision,' he said with a gentle smile. 'Music taught me that limitations exist only in our minds. If I can help even one child discover that truth, then everything I have gone through will be worth it.' Several music organizations have already offered to support his project.",
         "translation": "陈伟的梦想是为残疾儿童建立一所音乐学校，让他们无论身体有何限制都能通过音乐表达自己。他带着温和的微笑说：'失明并不意味着你不能有远见。音乐教会我，限制只存在于我们的思想中。如果我能帮助哪怕一个孩子发现这个真理，那么我所经历的一切都是值得的。'几个音乐组织已经表示愿意支持他的项目。"
       }
+    ],
+    "comprehension": [
+      {
+        "question": "The pianist lost his eyesight when he was three years old.",
+        "answer": true
+      },
+      {
+        "question": "He performed in London.",
+        "answer": false
+      }
     ]
   },
   {
@@ -196,6 +266,16 @@
       {
         "text": "Li's project has now attracted attention from technology companies and education organizations. A major Chinese tech firm donated 50 additional laptops and promised to help train volunteer teachers. Li plans to expand the program to ten more villages next year. 'Coding is not just about getting a job at a tech company,' he explained. 'It teaches you how to think logically and solve problems. Every child deserves that skill, no matter where they live.'",
         "translation": "李伟的项目现在已经吸引了科技公司和教育机构的关注。一家中国大型科技公司捐赠了50台额外的笔记本电脑，并承诺帮助培训志愿者教师。李伟计划明年将项目扩展到另外十个村庄。他解释说：'编程不只是为了在科技公司找到工作，它教你如何有逻辑地思考和解决问题。每个孩子都应该拥有这种能力，无论他们住在哪里。'"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "Li Wei built a free coding school for children in rural villages.",
+        "answer": true
+      },
+      {
+        "question": "The children in the village already had computers.",
+        "answer": false
       }
     ]
   },
@@ -222,6 +302,16 @@
         "text": "The space lesson was part of China's ongoing effort to inspire the next generation of scientists and engineers. Over 60 million students watched the live broadcast, and the hashtag related to the event was viewed more than 500 million times on social media. 'When I was their age, I looked up at the stars and dreamed of touching them,' Wang said at the end. 'Today, you are looking at the stars from a classroom that floats among them. Imagine what you will achieve when you grow up.'",
         "translation": "这堂太空课是中国持续激励下一代科学家和工程师的努力的一部分。超过6000万学生观看了直播，相关话题在社交媒体上的浏览量超过5亿次。王宇航员在结束时说：'我在你们这个年纪的时候，抬头看星星，梦想着触摸它们。今天，你们从一颗漂浮在星空中的教室里仰望星空。想象一下，当你们长大后会取得什么样的成就。'"
       }
+    ],
+    "comprehension": [
+      {
+        "question": "The physics lesson was taught from the Tiangong space station.",
+        "answer": true
+      },
+      {
+        "question": "The space station orbits at 100 kilometers above Earth.",
+        "answer": false
+      }
     ]
   },
   {
@@ -246,6 +336,16 @@
       {
         "text": "Now she plans to use the prize money to build 1,000 SunPure units and distribute them to villages in need across India. Several international organizations have also offered to help her scale up the production. 'I did not want to just read about water problems in a textbook and feel sad about them,' she said during her acceptance speech. 'I wanted to do something real that could actually change people's lives. Every child deserves clean water, and every child can be a scientist.'",
         "translation": "现在，她计划用奖金制造1000个SunPure装置，并将它们分发给印度各地有需要的村庄。几个国际组织也表示愿意帮助她扩大生产规模。她在获奖演讲中说：'我不想只是在课本上读到水问题然后感到难过，我想做一些真正能改变人们生活的实事。每个孩子都应该拥有干净的水，每个孩子都可以成为科学家。'"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "The water purification device costs less than five dollars to build.",
+        "answer": true
+      },
+      {
+        "question": "The girl who invented it is from China.",
+        "answer": false
       }
     ]
   },
@@ -272,6 +372,16 @@
         "text": "The lead researcher noted that language learning combines several brain-healthy activities into one: memorization, pattern recognition, sound processing, and social interaction. 'It is never too late to start,' she emphasized. 'Even modest progress in a new language can provide meaningful cognitive benefits. You do not need to become perfectly fluent — the learning process itself is what protects your brain.'",
         "translation": "首席研究员指出，语言学习将几种有益大脑健康的活动合为一体：记忆、模式识别、声音处理和社交互动。她强调：'开始学习永远不会太晚。即使是新语言中的适度进步也能提供有意义的认知益处。你不需要变得完全流利——学习过程本身就是在保护你的大脑。'"
       }
+    ],
+    "comprehension": [
+      {
+        "question": "Speaking two languages may help delay brain aging by up to five years.",
+        "answer": true
+      },
+      {
+        "question": "The study was published in the journal 'Science'.",
+        "answer": false
+      }
     ]
   },
   {
@@ -297,6 +407,16 @@
         "text": "Maya hopes her mural will inspire more young people to care about ocean conservation. Several schools have already organized field trips to visit the mural and learn about marine life. 'Art can reach people in ways that facts and statistics sometimes cannot,' Maya said. 'When you stand in front of a whale that is larger than a bus, painted with love and detail, you feel a connection to it. And when you feel connected to something, you want to protect it.'",
         "translation": "Maya希望她的壁画能激励更多年轻人关心海洋保护。几所学校已经组织了实地考察，参观壁画并学习海洋生物知识。Maya说：'艺术可以以事实和统计数据有时无法做到的方式触达人们。当你站在一头比公共汽车还大的鲸鱼面前，它被用爱和细节描绘出来，你会感受到与它的联系。当你与某物产生联系时，你就会想要保护它。'"
       }
+    ],
+    "comprehension": [
+      {
+        "question": "The mural shows ocean life and is 50 meters long.",
+        "answer": true
+      },
+      {
+        "question": "The artist used digital printing to create the mural.",
+        "answer": false
+      }
     ]
   },
   {
@@ -321,6 +441,86 @@
       {
         "text": "Although 'Green Steps City' is just a school project, the students have already received interest from a real urban planning company that wants to discuss their ideas further. 'We are not saying cars should disappear completely,' the team explained during their presentation. 'But we believe that cities should be designed for people first, and cars second. If twelve middle school students can imagine a better way to live, imagine what an entire society can do when we decide to make change happen.'",
         "translation": "虽然'绿步城'只是一个学校项目，但学生们已经收到了一家真正城市规划公司的兴趣，想要进一步讨论他们的想法。团队在演示中解释说：'我们不是说汽车应该完全消失，但我们相信城市应该首先为人设计，其次才是汽车。如果十二个中学生都能想象出更好的生活方式，想象一下当我们整个社会决定做出改变时能做什么。'"
+      }
+    ],
+    "comprehension": [
+      {
+        "question": "The students designed a city where cars are not allowed.",
+        "answer": true
+      },
+      {
+        "question": "The team was from Beijing.",
+        "answer": false
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "title": "A 15-Year-Old Girl Created a Language Learning App That Is Now Used by 500,000 Students",
+    "source": "教育周刊",
+    "url": "https://example.com/teen-language-app",
+    "date": "2026-05-14",
+    "comprehension": [
+      {
+        "question": "The app was created by a 15-year-old girl.",
+        "answer": true
+      },
+      {
+        "question": "The app is only used by 1,000 students.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "When 15-year-old Maria Chen moved from Beijing to California three years ago, she struggled with English every day. 'I knew some words from textbooks, but I couldn't understand what my classmates were saying,' she recalled. Instead of giving up, Maria decided to build something that could help others facing the same challenge. Last month, her language learning app 'LingoBuddy' reached a major milestone: 500,000 student users across 40 countries.",
+        "translation": "当15岁的陈玛利亚三年前从北京搬到加利福尼亚时，她每天都在与英语作斗争。「我从课本上学了一些单词，但我听不懂同学们在说什么，」她回忆道。玛利亚没有放弃，而是决定做一些能帮助面临同样挑战的人的事情。上个月，她的语言学习应用「LingoBuddy」达到了一个重要里程碑：在40个国家拥有50万学生用户。"
+      },
+      {
+        "text": "What makes LingoBuddy different from other language apps is its focus on real conversations. Users can record short voice messages and get feedback on their pronunciation within seconds. The app also connects learners from different countries, so a student in China learning English can chat with a student in America learning Chinese. 'The best way to learn a language is to actually use it with real people,' Maria explained.",
+        "translation": "LingoBuddy与其他语言应用的不同之处在于它专注于真实对话。用户可以录制简短的语音消息，并在几秒钟内获得发音反馈。该应用还连接了来自不同国家的学习者，因此学习英语的中国学生可以与学习中文的美国学生聊天。「学习语言的最好方法就是与真人实际使用它，」玛利亚解释道。"
+      },
+      {
+        "text": "Maria taught herself to code using free online courses after school. She spent about six months building the first version of LingoBuddy, working late into the night and on weekends. 'My parents were worried I was spending too much time on the computer,' she said with a laugh. 'But when they saw how many people were using it, they became my biggest supporters.' The app is completely free for students, and Maria has promised to keep it that way.",
+        "translation": "玛利亚利用免费的在线课程自学编程。她花了大约六个月的时间构建了LingoBuddy的第一个版本，工作到深夜和周末。「我父母担心我在电脑上花了太多时间，」她笑着说。「但当他们看到有多少人在使用它时，他们成了我最大的支持者。」该应用对学生完全免费，玛利亚承诺将保持这种状态。"
+      },
+      {
+        "text": "Education experts have praised LingoBuddy for its innovative approach. Professor James Liu, a language education researcher at Stanford University, said: 'Maria has created something that many professional companies have tried and failed to do — she made language practice feel natural and fun.' Maria plans to add more languages to the app next year, including Japanese, Korean, and Arabic.",
+        "translation": "教育专家赞扬了LingoBuddy的创新方法。斯坦福大学语言教育研究员刘詹姆斯教授说：「玛利亚创造了许多专业公司尝试但未能做到的事情——她让语言练习变得自然而有趣。」玛利亚计划明年为应用添加更多语言，包括日语、韩语和阿拉伯语。"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Middle School Students Turn an Empty City Lot into a Beautiful Community Garden",
+    "source": "城市日报",
+    "url": "https://example.com/community-garden-students",
+    "date": "2026-05-13",
+    "comprehension": [
+      {
+        "question": "The students turned an empty lot into a community garden.",
+        "answer": true
+      },
+      {
+        "question": "The garden is located in a rural village.",
+        "answer": false
+      }
+    ],
+    "paragraphs": [
+      {
+        "text": "For years, the empty lot on Maple Street in downtown Chicago was an eyesore — filled with weeds, old tires, and trash. Neighbors walked past it quickly, and children were told to stay away. But last spring, a group of eighth-grade students from nearby Lincoln Middle School had a bold idea: What if they could turn this forgotten space into something beautiful and useful for the community?",
+        "translation": "多年来，芝加哥市中心枫树街的空地一直是个丑陋的地方——杂草丛生，堆满了旧轮胎和垃圾。邻居们匆匆走过，孩子们被告诉要远离。但去年春天，附近林肯中学的一群八年级学生有了一个大胆的想法：如果他们能把这个被遗忘的空间变成对社区美丽而有用的东西呢？"
+      },
+      {
+        "text": "With the support of their science teacher, Mrs. Rodriguez, the students applied for a small grant from the city's Green Spaces program. They received 3,000 dollars to start their project. Over the summer break, more than 40 students volunteered their time to clean up the lot. They removed over 200 bags of trash, built raised planting beds from recycled wood, and planted vegetables, flowers, and even a few fruit trees.",
+        "translation": "在科学老师罗德里格斯夫人的支持下，学生们申请了该市「绿色空间」项目的一笔小额资助。他们获得了3000美元来启动项目。暑假期间，40多名学生自愿花时间清理空地。他们清理了200多袋垃圾，用回收木材建造了高架种植床，并种植了蔬菜、花卉，甚至几棵果树。"
+      },
+      {
+        "text": "The garden, now named 'Lincoln Green Haven', has become a beloved spot in the neighborhood. Local families come to pick fresh vegetables, elderly residents sit on the benches to enjoy the flowers, and younger children visit to learn about plants. The students also donate part of the harvest to a nearby food bank. 'This garden has brought our community together,' said neighborhood resident Tom Williams. 'Those kids have done something truly special.'",
+        "translation": "这个花园现在被命名为「林肯绿色避风港」，已成为社区中备受喜爱的地方。当地家庭来采摘新鲜蔬菜，老年居民坐在长椅上赏花，年幼的孩子们来学习植物知识。学生们还将部分收获捐赠给附近的食品银行。「这个花园让我们社区团结在一起，」社区居民汤姆·威廉姆斯说。「那些孩子做了真正特别的事情。」"
+      },
+      {
+        "text": "The project has received attention from city officials, and other schools are now planning similar garden projects. The Lincoln students have created a simple guide to help other schools get started. 'We learned that you don't have to wait until you're an adult to make a difference,' said Emma Davis, 13, one of the student leaders. 'If you see a problem in your neighborhood, you can be the one to fix it.'",
+        "translation": "该项目引起了市政官员的关注，其他学校正在规划类似的花园项目。林肯中学的学生们创建了一个简单的指南来帮助其他学校起步。「我们学到了，你不必等到成为成年人才去做出改变，」13岁的学生领袖之一艾玛·戴维斯说。「如果你看到社区中的问题，你可以成为解决它的人。」"
       }
     ]
   }
