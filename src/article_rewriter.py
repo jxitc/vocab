@@ -95,6 +95,7 @@ def rewrite_article(
     max_words: int = 8,
     *,
     api_key: str = DEEPSEEK_API_KEY,
+    cache_key: Optional[str] = None,
 ) -> Optional[dict]:
     """Rewrite an article to inject target vocabulary words.
 
@@ -103,17 +104,21 @@ def rewrite_article(
         target_words: List of word dicts [{word, definition, pos}, ...]
         max_words: Max number of target words to inject
         api_key: DeepSeek API key
+        cache_key: Optional override for cache key (used by wordlist-based calls)
 
     Returns:
         Dict with {rewritten_paragraphs: [...], injected_words: [...]} or None on failure.
     """
     article_id = article.get("id", 0)
 
-    # Build cache key (use first 10 target words for key stability)
-    words_sig = ",".join(sorted(w["word"] for w in target_words[:20]))
-    cache_key = _cache_key(article_id, words_sig, max_words)
+    # Build or use provided cache key
+    if cache_key:
+        ck = cache_key
+    else:
+        words_sig = ",".join(sorted(w["word"] for w in target_words[:20]))
+        ck = _cache_key(article_id, words_sig, max_words)
 
-    cached = _load_from_cache(cache_key)
+    cached = _load_from_cache(ck)
     if cached:
         return cached.get("result")
 
@@ -166,7 +171,7 @@ def rewrite_article(
         }
 
         # Cache the result
-        _save_to_cache(cache_key, {"result": output})
+        _save_to_cache(ck, {"result": output})
 
         return output
 
@@ -226,7 +231,9 @@ def rewrite_article_for_wordlist(
     if not target_words:
         return None
 
-    result = rewrite_article(article, target_words, min(max_words, len(target_words)))
+    n = min(max_words, len(target_words))
+    ck = _cache_key(article.get("id", 0), wordlist_filename, max_words)
+    result = rewrite_article(article, target_words, n, cache_key=ck)
     if result:
         mark_words_injected(username, wl["name"], result.get("injected_words", []))
 

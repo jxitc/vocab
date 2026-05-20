@@ -770,17 +770,24 @@ def api_rewrite():
     if article_id is None:
         return jsonify({"error": "article_id required"}), 400
 
+    # Check wordlist exists before doing anything expensive
+    wl = load_wordlist(wordlist_fn)
+    if not wl:
+        return jsonify({"error": "Word list not found"}), 404
+
     article = get_article_by_id(int(article_id))
     if not article:
         return jsonify({"error": "Article not found"}), 404
 
-    try:
-        from article_rewriter import rewrite_article_for_wordlist
-        result = rewrite_article_for_wordlist(
-            article, wordlist_fn, user, max_words=max_words
-        )
-    except Exception as e:
-        return jsonify({"error": f"Rewrite failed: {e}"}), 500
+    lock = _get_user_lock(user)
+    with lock:
+        try:
+            from article_rewriter import rewrite_article_for_wordlist
+            result = rewrite_article_for_wordlist(
+                article, wordlist_fn, user, max_words=max_words
+            )
+        except Exception as e:
+            return jsonify({"error": f"Rewrite failed: {e}"}), 500
 
     if not result:
         return jsonify({"error": "Rewrite failed — no words available or API error"}), 500
