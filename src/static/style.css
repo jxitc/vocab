@@ -264,6 +264,25 @@ input[type="text"]:focus {
 .login-prompt p { color: var(--text-light); margin-bottom: 12px; font-size: 15px; }
 .empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 15px; }
 
+/* Word list page */
+.wl-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px;
+  cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.wl-card:hover { border-color: var(--green); box-shadow: 0 0 0 2px rgba(46,125,50,0.08); }
+.wl-card.wl-active { border-color: var(--green); background: var(--green-light); }
+.wl-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.wl-card-header h4 { font-size: 17px; font-weight: 600; }
+.wl-badge {
+  font-size: 11px; font-weight: 600; background: var(--green);
+  color: white; padding: 1px 8px; border-radius: 8px;
+}
+.wl-desc { font-size: 14px; color: var(--text-light); margin-bottom: 10px; }
+.wl-stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--text-light); margin-bottom: 10px; }
+.wl-progress-bar { height: 4px; background: #e0dcd5; border-radius: 2px; overflow: hidden; }
+.wl-progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+
 .hidden { display: none !important; }
 
 /* Responsive */

@@ -27,6 +27,14 @@ from vocab_service import (
     tokenize,
     LEVEL_NAMES,
 )
+from wordlist import (
+    list_wordlists,
+    load_wordlist,
+    get_pending_words,
+    pick_words_to_inject,
+    mark_words_injected,
+    load_progress as wl_load_progress,
+)
 
 # ── App setup ──────────────────────────────────────────────────────────
 
@@ -197,6 +205,12 @@ def index():
 def home():
     """Dashboard page."""
     return render_template("home.html")
+
+
+@app.route("/wordlist")
+def wordlist_page():
+    """Word list management page."""
+    return render_template("wordlist.html")
 
 
 @app.route("/words")
@@ -674,6 +688,108 @@ def api_user_read_log():
         return jsonify({"error": "Not logged in"}), 401
 
     return jsonify(_load_json(user, "read_log.json", []))
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Word Lists
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/api/wordlists")
+def api_wordlists():
+    """Return available word lists with user progress."""
+    lists = list_wordlists()
+    user = _get_username()
+    progress = {}
+    if user:
+        p = wl_load_progress(user)
+        for wl in lists:
+            name = wl["name"]
+            entry = p.get(name, {})
+            progress[name] = {
+                "injected": len(entry.get("injected", [])),
+                "learned": len(entry.get("learned", [])),
+            }
+    return jsonify({"lists": lists, "progress": progress})
+
+
+@app.route("/api/wordlist/<filename>")
+def api_wordlist_detail(filename):
+    """Return a specific word list with per-word status for current user."""
+    wl = load_wordlist(filename)
+    if not wl:
+        return jsonify({"error": "Word list not found"}), 404
+
+    user = _get_username()
+    words = wl.get("words", [])
+
+    # Attach status per word
+    if user:
+        p = wl_load_progress(user)
+        entry = p.get(wl["name"], {})
+        injected_set = set(entry.get("injected", []))
+        learned_set = set(entry.get("learned", []))
+        for w in words:
+            if w["word"] in learned_set:
+                w["status"] = "learned"
+            elif w["word"] in injected_set:
+                w["status"] = "injected"
+            else:
+                w["status"] = "pending"
+    else:
+        for w in words:
+            w["status"] = "pending"
+
+    return jsonify({
+        "name": wl["name"],
+        "description": wl.get("description", ""),
+        "words": words,
+        "filename": filename,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# API — Article Rewriting
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/api/rewrite", methods=["POST"])
+def api_rewrite():
+    """Rewrite an article with injected target vocabulary.
+
+    Body: {"article_id": N, "wordlist": "ms_core.json", "max_words": 8}
+    Returns rewritten paragraphs + injected words list.
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    article_id = body.get("article_id")
+    wordlist_fn = body.get("wordlist", "ms_core.json")
+    max_words = body.get("max_words", 8)
+
+    if article_id is None:
+        return jsonify({"error": "article_id required"}), 400
+
+    article = get_article_by_id(int(article_id))
+    if not article:
+        return jsonify({"error": "Article not found"}), 404
+
+    try:
+        from article_rewriter import rewrite_article_for_wordlist
+        result = rewrite_article_for_wordlist(
+            article, wordlist_fn, user, max_words=max_words
+        )
+    except Exception as e:
+        return jsonify({"error": f"Rewrite failed: {e}"}), 500
+
+    if not result:
+        return jsonify({"error": "Rewrite failed — no words available or API error"}), 500
+
+    return jsonify({
+        "article_id": article_id,
+        "paragraphs": result["rewritten_paragraphs"],
+        "injected_words": result["injected_words"],
+    })
 
 
 # ═══════════════════════════════════════════════════════════════════════

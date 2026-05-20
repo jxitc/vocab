@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>词表 — Vocab in News</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/home" class="header-title">Vocab in News</a>
+    <nav class="nav">
+      <a href="/home">首页</a>
+      <a href="/">阅读</a>
+      <a href="/words">单词本</a>
+      <a href="/quiz">测试</a>
+      <a href="/wordlist" class="active">词表</a>
+    </nav>
+    <div class="user-info hidden" id="user-info">
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section id="login-section">
+    <div class="login-prompt">
+      <h2>请先登录</h2>
+      <p>输入你的名字来管理词表</p>
+      <div class="form-group">
+        <input type="text" id="username-input" placeholder="你的名字" maxlength="30">
+        <button class="btn btn-primary" onclick="doLogin()">登录</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="loading-section" class="hidden">
+    <div class="loading">加载中...</div>
+  </section>
+
+  <section id="content-section" class="hidden">
+
+    <h2 style="margin-bottom:6px;">📚 词汇学习计划</h2>
+    <p style="font-size:15px;color:var(--text-light);margin-bottom:24px;">
+      选择词表后，系统会通过LLM将目标词汇自然融入每日文章，让你在阅读中不知不觉掌握新词。
+    </p>
+
+    <!-- Active word list -->
+    <div id="active-list-info" class="today-card" style="margin-bottom:24px;">
+    </div>
+
+    <!-- All word lists -->
+    <div class="section-header">
+      <h3>可用词表</h3>
+    </div>
+    <div id="wordlist-grid"></div>
+
+  </section>
+
+</main>
+
+<script>
+var currentUser = null;
+var wordlists = [];
+var activeList = 'ms_core.json';  // default
+
+/* ── Init ── */
+(async function init() {
+  try {
+    var r = await fetch('/api/session');
+    var d = await r.json();
+    if (d.user) {
+      currentUser = d.user;
+      showUserInfo(d.user);
+      document.getElementById('login-section').classList.add('hidden');
+      loadWordlists();
+    }
+  } catch (_) {}
+})();
+
+async function doLogin() {
+  var name = document.getElementById('username-input').value.trim();
+  if (!name) return;
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: name})
+  });
+  currentUser = name;
+  showUserInfo(name);
+  document.getElementById('login-section').classList.add('hidden');
+  loadWordlists();
+}
+
+async function loadWordlists() {
+  document.getElementById('loading-section').classList.remove('hidden');
+  try {
+    var r = await fetch('/api/wordlists');
+    var d = await r.json();
+    wordlists = d.lists || [];
+    renderWordlists(d.progress || {});
+    document.getElementById('loading-section').classList.add('hidden');
+    document.getElementById('content-section').classList.remove('hidden');
+  } catch (_) {
+    document.getElementById('loading-section').innerHTML =
+      '<div class="loading">加载失败，请刷新重试</div>';
+  }
+}
+
+function renderWordlists(progress) {
+  var grid = document.getElementById('wordlist-grid');
+  if (!wordlists.length) {
+    grid.innerHTML = '<div class="empty-state">暂无词表，请联系管理员添加</div>';
+    showActiveInfo(null, progress);
+    return;
+  }
+
+  // Show active list info
+  var active = wordlists.find(function(wl) { return wl.filename === activeList; });
+  showActiveInfo(active || wordlists[0], progress);
+
+  // Render list cards
+  grid.innerHTML = wordlists.map(function(wl) {
+    var p = progress[wl.name] || {injected:0, learned:0};
+    var pending = wl.count - p.injected - p.learned;
+    var pct = wl.count > 0 ? Math.round((p.learned / wl.count) * 100) : 0;
+    var isActive = wl.filename === activeList;
+    return '<div class="wl-card' + (isActive ? ' wl-active' : '') + '" onclick="setActive(\'' +
+      escAttr(wl.filename) + '\')">' +
+      '<div class="wl-card-header">' +
+        '<h4>' + escHtml(wl.name) + (isActive ? ' <span class="wl-badge">当前</span>' : '') + '</h4>' +
+      '</div>' +
+      '<p class="wl-desc">' + escHtml(wl.description) + '</p>' +
+      '<div class="wl-stats">' +
+        '<span>📝 ' + wl.count + ' 词</span>' +
+        '<span>🔄 已注入 ' + p.injected + '</span>' +
+        '<span>✅ 已学 ' + p.learned + '</span>' +
+        '<span>⏳ 待学 ' + Math.max(0, pending) + '</span>' +
+      '</div>' +
+      '<div class="wl-progress-bar"><div class="wl-progress-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function showActiveInfo(wl, progress) {
+  var el = document.getElementById('active-list-info');
+  if (!wl) {
+    el.innerHTML = '';
+    return;
+  }
+  var p = progress[wl.name] || {injected:0, learned:0};
+  el.innerHTML =
+    '<span class="today-badge">当前词表</span>' +
+    '<h3 class="today-title">' + escHtml(wl.name) + '</h3>' +
+    '<div class="today-meta">' + escHtml(wl.description) + '</div>' +
+    '<div class="wl-stats">' +
+      '<span>共 ' + wl.count + ' 词</span>' +
+      '<span>✅ 已学 ' + p.learned + '</span>' +
+      '<span>⏳ 剩余 ' + Math.max(0, wl.count - p.learned - p.injected) + '</span>' +
+    '</div>';
+}
+
+function setActive(filename) {
+  activeList = filename;
+  loadWordlists();
+}
+
+function showUserInfo(name) {
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-name').textContent = '👤 ' + name;
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/home';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    .replace(/"/g,'\\"').replace(/\n/g,'\\n');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "初中核心词汇",
+  "description": "20个初中阶段高频核心词汇，适合通过阅读自然习得",
+  "words": [
+    {"word": "observe", "definition": "观察", "pos": "v.", "example": "Scientists observe the stars every night."},
+    {"word": "evidence", "definition": "证据", "pos": "n.", "example": "They found evidence of water on Mars."},
+    {"word": "environment", "definition": "环境", "pos": "n.", "example": "We must protect the environment."},
+    {"word": "solution", "definition": "解决方案", "pos": "n.", "example": "She found a solution to the problem."},
+    {"word": "challenge", "definition": "挑战", "pos": "n.", "example": "Learning a new language is a challenge."},
+    {"word": "opportunity", "definition": "机会", "pos": "n.", "example": "This is a great opportunity to learn."},
+    {"word": "community", "definition": "社区；团体", "pos": "n.", "example": "The community worked together to clean the park."},
+    {"word": "technology", "definition": "技术", "pos": "n.", "example": "Technology is changing how we live."},
+    {"word": "experience", "definition": "经历；经验", "pos": "n.", "example": "Traveling was an amazing experience."},
+    {"word": "purpose", "definition": "目的", "pos": "n.", "example": "What is the purpose of this meeting?"},
+    {"word": "recognize", "definition": "认出；认可", "pos": "v.", "example": "I didn't recognize him at first."},
+    {"word": "ancient", "definition": "古老的", "pos": "adj.", "example": "They discovered ancient ruins in the desert."},
+    {"word": "balance", "definition": "平衡", "pos": "n.", "example": "It's important to keep balance in life."},
+    {"word": "connect", "definition": "连接；联系", "pos": "v.", "example": "The bridge connects the two cities."},
+    {"word": "encourage", "definition": "鼓励", "pos": "v.", "example": "Teachers encourage students to ask questions."},
+    {"word": "independent", "definition": "独立的", "pos": "adj.", "example": "She became independent at a young age."},
+    {"word": "memory", "definition": "记忆", "pos": "n.", "example": "Good memory helps with learning."},
+    {"word": "ordinary", "definition": "普通的", "pos": "adj.", "example": "It was just an ordinary day."},
+    {"word": "prepare", "definition": "准备", "pos": "v.", "example": "You need to prepare for the exam."},
+    {"word": "respect", "definition": "尊重", "pos": "v.", "example": "We should respect different cultures."}
+  ]
+}
