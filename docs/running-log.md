@@ -365,3 +365,31 @@
 - [x] 暗色模式适配
 - [x] 78 tests passing
 
+## MVP v2 Bug Fix Round (22ea662)
+### 已修复 — 10 bugs across frontend + backend
+- [x] 3页面header统一显示用户身份 + 退出按钮
+- [x] index.html token渲染修复 — 非单词token转为纯文本节点
+- [x] "已学"按钮feedback — 重新fetch /api/today + 绿色disabled态
+- [x] 单词面板空态显示鼓励信息
+- [x] "我读完了" → POST /api/read/done
+- [x] words.html数组处理 — Array.isArray() 兼容
+- [x] quiz API格式 — choice_questions/tf_questions分离, answer字段统一
+- [x] 弹窗"我认识这个词"按钮 + markKnown()
+- [x] CSS缺失类补全 — .user-info, .btn-logout, .btn-learned, .word-panel-complete, .popup-known-btn
+- [x] Responsive header — flex-wrap, nav重排, 移动端适配
+- [x] 78 tests passing
+
+## Iter 42 — Dashboard + Word List + LLM Rewriter (b8cac92)
+### 已实现
+- [x] 首页仪表盘 /home — 用户问候, 阅读统计, 今日推荐, 所有文章网格
+- [x] 5页面导航统一 — 首页/阅读/单词本/测试/词表
+- [x] /?article_id=N 支持指定文章阅读 (修复falsy-0 bug)
+- [x] /api/user/stats + /api/user/read-log 用户统计端点
+- [x] wordlist.py — 词表管理系统, 可配置词库, 进度追踪
+- [x] 测试词表: 初中核心词汇 (20词)
+- [x] /wordlist 词表管理页面 — 当前词表信息 + 进度条 + 每词状态
+- [x] article_rewriter.py — DeepSeek API集成, 自然注入目标词汇
+- [x] POST /api/rewrite — LLM改写文章, 缓存7天, 已测成功注入evidence/environment
+- [x] Responsive CSS全面覆盖 — 移动端/平板/桌面, 仪表盘卡片/词表/导航
+- [x] 78 tests passing
+
