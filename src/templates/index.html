@@ -12,6 +12,7 @@
   <div class="header-inner">
     <a href="/" class="header-title">Vocab in News</a>
     <nav class="nav">
+      <a href="/home">首页</a>
       <a href="/" class="active">阅读</a>
       <a href="/words">单词本</a>
       <a href="/quiz">测试</a>
@@ -109,11 +110,14 @@ async function doLogin() {
   loadArticle();
 }
 
-/* ── Load today's article ── */
+/* ── Load article ── */
 async function loadArticle() {
   setSection('loading');
   try {
-    var r = await fetch('/api/today');
+    var params = new URLSearchParams(window.location.search);
+    var aid = params.get('article_id') || '';
+    var url = '/api/today' + (aid ? '?article_id=' + aid : '');
+    var r = await fetch(url);
     var art = await r.json();
     if (!art || !art.paragraphs) {
       document.getElementById('loading-section').innerHTML =

@@ -219,6 +219,44 @@ input[type="text"]:focus {
 .score-number { font-size: 48px; font-weight: 700; color: var(--green); line-height: 1.2; }
 .score-message { font-size: 17px; color: var(--text-light); margin-top: 6px; }
 
+/* Dashboard */
+.dashboard-header { margin-bottom: 28px; }
+.greeting { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.stats-bar { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--text-light); }
+.stats-bar strong { color: var(--text); }
+.today-card {
+  background: var(--white); border: 2px solid var(--green);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 32px;
+  position: relative;
+}
+.today-badge {
+  position: absolute; top: -10px; left: 20px;
+  background: var(--green); color: white; font-size: 12px; font-weight: 600;
+  padding: 2px 12px; border-radius: 10px;
+}
+.today-title { font-size: 19px; font-weight: 700; margin: 6px 0 6px; line-height: 1.5; padding-right: 80px; }
+.today-meta { font-size: 14px; color: var(--text-light); margin-bottom: 14px; }
+.today-btn { text-decoration: none; display: inline-flex; }
+.section-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.section-header h3 { font-size: 18px; font-weight: 700; }
+.section-count { font-size: 13px; color: var(--text-muted); }
+.article-grid { display: flex; flex-direction: column; gap: 0; }
+.article-card {
+  display: block; padding: 14px 0; border-bottom: 1px solid var(--border);
+  text-decoration: none; color: inherit; transition: background 0.12s;
+}
+.article-card:hover { background: #f8f7f4; margin: 0 -12px; padding-left: 12px; padding-right: 12px; border-radius: 4px; }
+.card-badges { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+.card-title { font-size: 17px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; }
+.card-meta { font-size: 13px; color: var(--text-muted); }
+.article-badge { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 8px; }
+.badge-new { background: #fff3e0; color: #e65100; }
+.badge-read { background: #e8e5df; color: var(--text-muted); }
+.topic-tag {
+  font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 6px;
+  background: #e8f5e9; color: var(--green); text-decoration: none;
+}
+
 /* States */
 .loading { text-align: center; padding: 48px 16px; color: var(--text-muted); font-size: 16px; }
 .login-prompt { text-align: center; padding: 32px 16px; }
@@ -240,4 +278,9 @@ input[type="text"]:focus {
   .btn { padding: 8px 14px; font-size: 14px; }
   .word-popup { padding: 20px 18px 22px; }
   .quiz-option { font-size: 15px; }
+  .greeting { font-size: 19px; }
+  .stats-bar { gap: 12px; }
+  .today-card { padding: 18px; }
+  .today-title { font-size: 17px; padding-right: 0; }
+  .card-title { font-size: 16px; }
 }

@@ -189,8 +189,14 @@ def _capture_user():
 
 @app.route("/")
 def index():
-    """Reading page."""
+    """Reading page — supports ?article_id=N to read a specific article."""
     return render_template("index.html")
+
+
+@app.route("/home")
+def home():
+    """Dashboard page."""
+    return render_template("home.html")
 
 
 @app.route("/words")
@@ -250,19 +256,24 @@ def api_session():
 
 @app.route("/api/today")
 def api_today():
-    """Return a single article keyed on current date (day-of-year mod N).
+    """Return a single article.  Defaults to day-of-year mod N.
 
-    Always returns the same article for the same day.  Hardcodes
-    user_level=2.  If a user is logged in, known words are loaded from
-    their word bank and excluded from highlights.
+    Query: ?article_id=N  to request a specific article.
+    Hardcodes user_level=2.  If a user is logged in, known words are
+    loaded from their word bank and excluded from highlights.
     """
     articles = load_articles()
     if not articles:
         return jsonify({"error": "No articles found"}), 404
 
-    day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
-    article_id = day_of_year % len(articles)
-    article = articles[article_id]
+    article_id = request.args.get("article_id", type=int)
+    if article_id is None:
+        day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
+        article_id = day_of_year % len(articles)
+
+    article = get_article_by_id(article_id)
+    if not article:
+        article = articles[article_id % len(articles)]  # fallback
 
     # Load known words for logged-in user
     known_words: set = set()
@@ -506,10 +517,10 @@ def api_quiz():
     Query:  ?article_id=N  (defaults to today's article when omitted or 0)
     Returns:  {article_id, choice_questions: [...], tf_questions: [...]}
     """
-    article_id = request.args.get("article_id", 0, type=int)
+    article_id = request.args.get("article_id", type=int)
 
-    # Default to today's article when article_id is 0 or not provided
-    if not article_id:
+    # Default to today's article when article_id not provided
+    if article_id is None:
         articles = load_articles()
         if articles:
             day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
@@ -605,6 +616,64 @@ def api_articles():
             "topic": a.get("topic", ""),
         })
     return jsonify(summaries)
+
+
+@app.route("/api/user/stats")
+def api_user_stats():
+    """Return reading stats for the logged-in user."""
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    read_log = _load_json(user, "read_log.json", [])
+    wb = _load_json(user, "words.json", {"learned": {}, "known": {}})
+
+    # Count unique articles read
+    articles_read = len(read_log) if isinstance(read_log, list) else 0
+
+    # Count learned words
+    words_learned = len(wb.get("learned", {}))
+
+    # Compute streak (consecutive days with reads)
+    streak = 0
+    if isinstance(read_log, list) and read_log:
+        read_dates = set()
+        for entry in read_log:
+            try:
+                ts = entry.get("finished_at", "")
+                if ts:
+                    d = ts[:10]
+                    read_dates.add(d)
+            except Exception:
+                pass
+        # Count backwards from today
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        check = datetime.now(timezone.utc)
+        while True:
+            ds = check.strftime("%Y-%m-%d")
+            if ds in read_dates:
+                streak += 1
+                check = check.replace(day=check.day - 1)
+            elif ds == today:
+                check = check.replace(day=check.day - 1)
+            else:
+                break
+
+    return jsonify({
+        "articlesRead": articles_read,
+        "wordsLearned": words_learned,
+        "streak": streak,
+    })
+
+
+@app.route("/api/user/read-log")
+def api_user_read_log():
+    """Return the read log for the logged-in user."""
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    return jsonify(_load_json(user, "read_log.json", []))
 
 
 # ═══════════════════════════════════════════════════════════════════════

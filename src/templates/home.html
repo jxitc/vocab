@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页 — Vocab in News</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/home" class="header-title">Vocab in News</a>
+    <nav class="nav">
+      <a href="/home" class="active">首页</a>
+      <a href="/">阅读</a>
+      <a href="/words">单词本</a>
+      <a href="/quiz">测试</a>
+    </nav>
+    <div class="user-info hidden" id="user-info">
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Login prompt -->
+  <section id="login-section">
+    <div class="login-prompt">
+      <h2>欢迎使用 Vocab in News</h2>
+      <p>输入你的名字，开始今天的阅读</p>
+      <div class="form-group">
+        <input type="text" id="username-input" placeholder="你的名字" maxlength="30">
+        <button class="btn btn-primary" onclick="doLogin()">开始阅读</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section id="loading-section" class="hidden">
+    <div class="loading">加载中...</div>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="dashboard-section" class="hidden">
+
+    <!-- Greeting + stats -->
+    <div class="dashboard-header">
+      <h2 class="greeting" id="greeting"></h2>
+      <div class="stats-bar" id="stats-bar"></div>
+    </div>
+
+    <!-- Today's article -->
+    <div class="today-card" id="today-card">
+      <span class="today-badge">今日推荐</span>
+      <h3 class="today-title" id="today-title"></h3>
+      <div class="today-meta" id="today-meta"></div>
+      <a class="btn btn-primary today-btn" id="today-link" href="/">开始阅读 →</a>
+    </div>
+
+    <!-- All articles -->
+    <div class="section-header">
+      <h3>所有文章</h3>
+      <span class="section-count" id="article-count"></span>
+    </div>
+    <div class="article-grid" id="article-grid"></div>
+
+  </section>
+
+</main>
+
+<script>
+var currentUser = null;
+var allArticles = [];
+var readLog = [];
+var stats = {};
+
+/* ── Init ── */
+(async function init() {
+  try {
+    var r = await fetch('/api/session');
+    var d = await r.json();
+    if (d.user) {
+      currentUser = d.user;
+      showUserInfo(d.user);
+      document.getElementById('login-section').classList.add('hidden');
+      loadDashboard();
+    }
+  } catch (_) {}
+})();
+
+async function doLogin() {
+  var name = document.getElementById('username-input').value.trim();
+  if (!name) return;
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: name})
+  });
+  currentUser = name;
+  showUserInfo(name);
+  document.getElementById('login-section').classList.add('hidden');
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  document.getElementById('loading-section').classList.remove('hidden');
+  try {
+    var statsR = await fetch('/api/user/stats');
+    stats = await statsR.json();
+
+    var artsR = await fetch('/api/articles');
+    allArticles = await artsR.json();
+
+    var logR = await fetch('/api/user/read-log');
+    readLog = await logR.json();
+
+    renderDashboard();
+    document.getElementById('loading-section').classList.add('hidden');
+    document.getElementById('dashboard-section').classList.remove('hidden');
+  } catch (_) {
+    document.getElementById('loading-section').innerHTML =
+      '<div class="loading">加载失败，请刷新重试</div>';
+  }
+}
+
+function renderDashboard() {
+  // Greeting
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+  document.getElementById('greeting').textContent =
+    '👋 ' + greet + '，' + currentUser + '！';
+
+  // Stats
+  document.getElementById('stats-bar').innerHTML =
+    '<span>📖 已读 <strong>' + (stats.articlesRead || 0) + '</strong> 篇</span>' +
+    '<span>📝 已学 <strong>' + (stats.wordsLearned || 0) + '</strong> 个词</span>' +
+    '<span>🔥 连续 <strong>' + (stats.streak || 0) + '</strong> 天</span>';
+
+  // Today's article
+  var readIds = new Set((readLog || []).map(function(e) { return e.article_id; }));
+  var today = allArticles.find(function(a) { return !readIds.has(a.id); });
+  if (!today) today = allArticles[0]; // fallback if all read
+
+  document.getElementById('today-title').textContent = today.title;
+  document.getElementById('today-meta').innerHTML =
+    escHtml(today.source || '') + ' · ' + escHtml(today.date || '') +
+    ' · ' + (today.wordCount || 0) + '词';
+  document.getElementById('today-link').href = '/?article_id=' + today.id;
+
+  // Article grid
+  document.getElementById('article-count').textContent = '共 ' + allArticles.length + ' 篇';
+  var grid = document.getElementById('article-grid');
+  grid.innerHTML = allArticles.map(function(a) {
+    var read = readIds.has(a.id);
+    var badge = read
+      ? '<span class="article-badge badge-read">已读</span>'
+      : '<span class="article-badge badge-new">新</span>';
+    var mins = Math.max(1, Math.round((a.wordCount || 200) / 100));
+    return '<a href="/?article_id=' + a.id + '" class="article-card">' +
+      '<div class="card-badges">' +
+        (a.topic ? '<span class="topic-tag topic-' + escAttr(a.topic) + '">' + escHtml(a.topic) + '</span>' : '') +
+        badge +
+      '</div>' +
+      '<h4 class="card-title">' + escHtml(a.title) + '</h4>' +
+      '<div class="card-meta">' + escHtml(a.source || '') + ' · ' + (a.wordCount || 0) + '词 · ~' + mins + '分钟</div>' +
+    '</a>';
+  }).join('');
+}
+
+function showUserInfo(name) {
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-name').textContent = '👤 ' + name;
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/home';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    .replace(/"/g,'\\"').replace(/\n/g,'\\n');
+}
+</script>
+</body>
+</html>
