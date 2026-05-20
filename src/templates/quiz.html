@@ -16,6 +16,10 @@
       <a href="/words">单词本</a>
       <a href="/quiz" class="active">测试</a>
     </nav>
+    <div class="user-info hidden" id="user-info">
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
   </div>
 </header>
 
@@ -75,7 +79,7 @@ var userAnswers = {};
   try {
     var r = await fetch('/api/session');
     var d = await r.json();
-    if (d.user) { currentUser = d.user; loadQuiz(); }
+    if (d.user) { currentUser = d.user; showUserInfo(d.user); loadQuiz(); }
     else { document.getElementById('login-section').classList.remove('hidden'); }
   } catch (_) {}
 })();
@@ -90,6 +94,7 @@ async function doLogin() {
     body: JSON.stringify({username: name})
   });
   currentUser = name;
+  showUserInfo(name);
   document.getElementById('login-section').classList.add('hidden');
   loadQuiz();
 }
@@ -246,6 +251,16 @@ function submitQuiz() {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showUserInfo(name) {
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-name').textContent = '👤 ' + name;
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/';
 }
 </script>
 </body>

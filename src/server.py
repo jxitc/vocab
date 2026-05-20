@@ -335,7 +335,10 @@ def api_words():
     if not user:
         return jsonify(None)
     wb = _load_wordbank(user)
-    return jsonify(wb)
+    return jsonify({
+        "learned": [{"word": w, **info} for w, info in wb.get("learned", {}).items()],
+        "known": [{"word": w, **info} for w, info in wb.get("known", {}).items()],
+    })
 
 
 @app.route("/api/words/learn", methods=["POST"])
@@ -444,14 +447,15 @@ def api_words_remove():
 # API — Quiz  (per user, per article)
 # ═══════════════════════════════════════════════════════════════════════
 
-def _build_quiz(article: dict) -> list:
+def _build_quiz(article: dict) -> dict:
     """Generate quiz questions for a single article.
 
-    Returns a list of question dicts:
-      - vocabulary choice questions (up to 5)
-      - comprehension T/F questions (up to 5, from article data)
+    Returns a dict with two keys:
+      - choice_questions (vocabulary choice, up to 5)
+      - tf_questions (comprehension T/F, up to 5)
     """
-    questions = []
+    choice_questions = []
+    tf_questions = []
 
     # ── Vocabulary choice questions ────────────────────────────────
     full_text = " ".join(p["text"] for p in article.get("paragraphs", []))
@@ -471,45 +475,56 @@ def _build_quiz(article: dict) -> list:
         wrongs = random.sample(others, 3)
         options = wrongs + [correct_def]
         random.shuffle(options)
-        correct_idx = options.index(correct_def)
 
-        questions.append({
+        choice_questions.append({
             "type": "choice",
             "question": f"What does \"{correct_word}\" mean?",
             "word": correct_word,
             "options": options,
-            "correct": correct_idx,
+            "correct": correct_def,
         })
 
     # ── Comprehension T/F questions ────────────────────────────────
     comp = article.get("comprehension", [])
     for item in comp[:5]:  # up to 5 comprehension questions
-        questions.append({
+        tf_questions.append({
             "type": "tf",
             "question": item.get("question", ""),
-            "correct": item.get("answer", False),
+            "answer": item.get("answer", False),
         })
 
-    return questions
+    return {
+        "choice_questions": choice_questions,
+        "tf_questions": tf_questions,
+    }
 
 
 @app.route("/api/quiz")
 def api_quiz():
     """Generate quiz for an article.
 
-    Query:  ?article_id=N
-    Returns:  {article_id, questions: [...]}
+    Query:  ?article_id=N  (defaults to today's article when omitted or 0)
+    Returns:  {article_id, choice_questions: [...], tf_questions: [...]}
     """
     article_id = request.args.get("article_id", 0, type=int)
+
+    # Default to today's article when article_id is 0 or not provided
+    if not article_id:
+        articles = load_articles()
+        if articles:
+            day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
+            article_id = day_of_year % len(articles)
+
     article = get_article_by_id(article_id)
     if not article:
         return jsonify({"error": "Article not found"}), 404
 
-    questions = _build_quiz(article)
+    quiz = _build_quiz(article)
 
     return jsonify({
         "article_id": article.get("id", article_id),
-        "questions": questions,
+        "choice_questions": quiz["choice_questions"],
+        "tf_questions": quiz["tf_questions"],
     })
 
 
@@ -544,6 +559,52 @@ def api_quiz_result():
         _save_json(user, "quiz_results.json", results)
 
     return jsonify({"ok": True, "record": record})
+
+
+@app.route("/api/read/done", methods=["POST"])
+def api_read_done():
+    """Mark an article as read (\"我读完了\" button).
+
+    Body:  {"article_id": N}
+    Saves to read_log.json.
+    """
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    article_id = body.get("article_id", 0)
+
+    record = {
+        "article_id": article_id,
+        "finished_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    lock = _get_user_lock(user)
+    with lock:
+        log = _load_json(user, "read_log.json", [])
+        log.append(record)
+        _save_json(user, "read_log.json", log)
+
+    return jsonify({"ok": True, "record": record})
+
+
+@app.route("/api/articles")
+def api_articles():
+    """Return summaries for all articles (title, source, date, id, wordCount, topic)."""
+    articles = load_articles()
+    summaries = []
+    for a in articles:
+        word_count = sum(len(p["text"].split()) for p in a.get("paragraphs", []))
+        summaries.append({
+            "id": a.get("id", 0),
+            "title": a.get("title", ""),
+            "source": a.get("source", ""),
+            "date": a.get("date", ""),
+            "wordCount": word_count,
+            "topic": a.get("topic", ""),
+        })
+    return jsonify(summaries)
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -16,6 +16,10 @@
       <a href="/words" class="active">单词本</a>
       <a href="/quiz">测试</a>
     </nav>
+    <div class="user-info hidden" id="user-info">
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
   </div>
 </header>
 
@@ -65,11 +69,13 @@
     <div class="popup-pos" id="popup-pos"></div>
     <div class="popup-definition" id="popup-definition"></div>
     <div class="popup-loading hidden" id="popup-loading">查询中...</div>
+    <button class="btn btn-small btn-outline popup-known-btn hidden" id="popup-known-btn" onclick="markKnown()">我认识这个词</button>
   </div>
 </div>
 
 <script>
 var currentUser = null;
+var currentLookupWord = null;
 var wordData = { learned: [], known: [] };
 
 /* ── Init ── */
@@ -77,7 +83,7 @@ var wordData = { learned: [], known: [] };
   try {
     var r = await fetch('/api/session');
     var d = await r.json();
-    if (d.user) { currentUser = d.user; loadWords(); }
+    if (d.user) { currentUser = d.user; showUserInfo(d.user); loadWords(); }
     else { document.getElementById('login-section').classList.remove('hidden'); }
   } catch (_) {}
 })();
@@ -92,6 +98,7 @@ async function doLogin() {
     body: JSON.stringify({username: name})
   });
   currentUser = name;
+  showUserInfo(name);
   document.getElementById('login-section').classList.add('hidden');
   loadWords();
 }
@@ -104,8 +111,8 @@ async function loadWords() {
   try {
     var r = await fetch('/api/words');
     wordData = await r.json();
-    wordData.learned = wordData.learned || [];
-    wordData.known   = wordData.known   || [];
+    wordData.learned = Array.isArray(wordData.learned) ? wordData.learned : [];
+    wordData.known   = Array.isArray(wordData.known)   ? wordData.known   : [];
     renderList('learned');
     renderList('known');
     document.getElementById('loading-section').classList.add('hidden');
@@ -118,7 +125,8 @@ async function loadWords() {
 
 /* ── Render word list ── */
 function renderList(type) {
-  var list = wordData[type] || [];
+  var raw = wordData[type];
+  var list = Array.isArray(raw) ? raw : [];
   var el = document.getElementById('list-' + type);
 
   if (!list.length) {
@@ -165,11 +173,13 @@ async function removeWord(word, list) {
 
 /* ── Word lookup popup ── */
 async function lookupWord(word) {
+  currentLookupWord = word;
   var ov = document.getElementById('word-popup-overlay');
   ov.classList.remove('hidden');
   document.getElementById('popup-word').textContent = word;
   document.getElementById('popup-pos').textContent = '';
   document.getElementById('popup-definition').textContent = '';
+  document.getElementById('popup-known-btn').classList.remove('hidden');
   var ld = document.getElementById('popup-loading');
   ld.classList.remove('hidden');
 
@@ -181,7 +191,7 @@ async function lookupWord(word) {
       document.getElementById('popup-pos').textContent = d.pos || '';
       document.getElementById('popup-definition').textContent = d.definition || '';
     } else {
-      document.getElementById('popup-definition').textContent = '未找到该词的定义';
+      document.getElementById('popup-definition').textContent = '该词暂未收录，试试在词典中查询';
     }
   } catch (_) {
     ld.classList.add('hidden');
@@ -191,6 +201,26 @@ async function lookupWord(word) {
 
 function closePopup() {
   document.getElementById('word-popup-overlay').classList.add('hidden');
+}
+
+async function markKnown() {
+  if (!currentLookupWord) return;
+  await fetch('/api/words/known', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({word: currentLookupWord})
+  });
+  closePopup();
+}
+
+function showUserInfo(name) {
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-name').textContent = '👤 ' + name;
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/';
 }
 
 /* ── Helpers ── */

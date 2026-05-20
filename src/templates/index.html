@@ -16,6 +16,10 @@
       <a href="/words">单词本</a>
       <a href="/quiz">测试</a>
     </nav>
+    <div class="user-info hidden" id="user-info">
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
   </div>
 </header>
 
@@ -70,6 +74,7 @@
     <div class="popup-pos" id="popup-pos"></div>
     <div class="popup-definition" id="popup-definition"></div>
     <div class="popup-loading hidden" id="popup-loading">查询中...</div>
+    <button class="btn btn-small btn-outline popup-known-btn hidden" id="popup-known-btn" onclick="markKnown()">我认识这个词</button>
   </div>
 </div>
 
@@ -77,13 +82,15 @@
 /* ── Global state ── */
 var currentUser = null;
 var currentArticle = null;
+var currentLookupWord = null;
+var justLearned = new Set();
 
 /* ── Init: check session ── */
 (async function init() {
   try {
     var r = await fetch('/api/session');
     var d = await r.json();
-    if (d.user) { currentUser = d.user; loadArticle(); }
+    if (d.user) { currentUser = d.user; showUserInfo(d.user); loadArticle(); }
   } catch (_) {}
 })();
 
@@ -97,6 +104,7 @@ async function doLogin() {
     body: JSON.stringify({username: name})
   });
   currentUser = name;
+  showUserInfo(name);
   document.getElementById('login-section').classList.add('hidden');
   loadArticle();
 }
@@ -140,19 +148,23 @@ function renderArticle(art) {
     var wrap = document.createElement('div');
     wrap.className = 'paragraph';
 
-    // Build token spans
+    // Build token spans: only word tokens become clickable spans
     var line = document.createElement('span');
-    (p.tokens || []).forEach(function(t) {
-      var cls = t.is_difficult ? 'word difficult' : 'word normal';
-      var sp = document.createElement('span');
-      sp.className = cls;
-      sp.textContent = t.word;
-      sp.onclick = function() { lookupWord(t.word); };
-      line.appendChild(sp);
-      line.appendChild(document.createTextNode(' '));
-    });
-    // Fallback: raw text if no tokens
-    if (!p.tokens || !p.tokens.length) {
+    if (p.tokens && p.tokens.length) {
+      (p.tokens).forEach(function(t) {
+        if (t.is_word === false) {
+          line.appendChild(document.createTextNode(t.text));
+        } else {
+          var cls = t.is_difficult ? 'word difficult' : 'word normal';
+          var sp = document.createElement('span');
+          sp.className = cls;
+          sp.textContent = t.word;
+          sp.onclick = function() { lookupWord(t.word); };
+          line.appendChild(sp);
+          line.appendChild(document.createTextNode(' '));
+        }
+      });
+    } else {
       line.textContent = p.text;
     }
     wrap.appendChild(line);
@@ -186,17 +198,24 @@ function renderArticle(art) {
       '本课生词 (' + words.length + '个)';
     document.getElementById('word-panel-list').innerHTML =
       words.map(function(w) {
+        var learned = justLearned.has(w.word);
         return '<div class="word-panel-item">' +
           '<span class="word-panel-word" onclick="lookupWord(\'' +
             escAttr(w.word) + '\')">' + escHtml(w.word) + '</span>' +
           '<span class="word-panel-def">' + escHtml(w.definition || '') + '</span>' +
-          '<button class="btn btn-small btn-outline" onclick="markLearned(\'' +
-            escAttr(w.word) + '\',\'' + escAttr(w.definition||'') + '\',\'' +
-            escAttr(w.pos||'') + '\',' + (w.level||0) +
-            ')">已学</button></div>';
+          (learned
+            ? '<button class="btn btn-small btn-learned" disabled>已学会 ✓</button>'
+            : '<button class="btn btn-small btn-outline" onclick="markLearned(\'' +
+              escAttr(w.word) + '\',\'' + escAttr(w.definition||'') + '\',\'' +
+              escAttr(w.pos||'') + '\',' + (w.level||0) +
+              ')">已学</button>')
+          + '</div>';
       }).join('');
   } else {
-    panel.classList.add('hidden');
+    panel.classList.remove('hidden');
+    panel.innerHTML =
+      '<div class="word-panel-title">本课生词</div>' +
+      '<div class="word-panel-complete">太棒了！本课生词已全部掌握 🎉</div>';
   }
 }
 
@@ -214,11 +233,13 @@ function collectDifficultWords(art) {
 
 /* ── Word lookup ── */
 async function lookupWord(word) {
+  currentLookupWord = word;
   var ov = document.getElementById('word-popup-overlay');
   ov.classList.remove('hidden');
   document.getElementById('popup-word').textContent = word;
   document.getElementById('popup-pos').textContent = '';
   document.getElementById('popup-definition').textContent = '';
+  document.getElementById('popup-known-btn').classList.remove('hidden');
   var ld = document.getElementById('popup-loading');
   ld.classList.remove('hidden');
 
@@ -230,12 +251,32 @@ async function lookupWord(word) {
       document.getElementById('popup-pos').textContent = d.pos || '';
       document.getElementById('popup-definition').textContent = d.definition || '';
     } else {
-      document.getElementById('popup-definition').textContent = '未找到该词的定义';
+      document.getElementById('popup-definition').textContent = '该词暂未收录，试试在词典中查询';
     }
   } catch (_) {
     ld.classList.add('hidden');
     document.getElementById('popup-definition').textContent = '查询失败，请重试';
   }
+}
+
+async function markKnown() {
+  if (!currentLookupWord) return;
+  await fetch('/api/words/known', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({word: currentLookupWord})
+  });
+  closePopup();
+}
+
+function showUserInfo(name) {
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-name').textContent = '👤 ' + name;
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/';
 }
 
 function closePopup() {
@@ -244,20 +285,28 @@ function closePopup() {
 
 /* ── Learn / Finish ── */
 function markLearned(word, definition, pos, level) {
+  justLearned.add(word);
   fetch('/api/words/learn', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({word: word, definition: definition, pos: pos, level: level})
   }).then(function() {
-    if (currentArticle) renderArticle(currentArticle);
+    return fetch('/api/today');
+  }).then(function(r) {
+    return r.json();
+  }).then(function(art) {
+    if (art && art.paragraphs) {
+      currentArticle = art;
+      renderArticle(art);
+    }
   });
 }
 
 function markFinished() {
-  fetch('/api/quiz/result', {
+  fetch('/api/read/done', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({article_id: currentArticle ? currentArticle.id : 0, score: 0, total: 0})
+    body: JSON.stringify({article_id: currentArticle ? currentArticle.id : 0})
   }).then(function() {
     alert('太棒了！你已经完成了今天的阅读。');
   });
