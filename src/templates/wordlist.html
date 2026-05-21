@@ -165,8 +165,14 @@ function showActiveInfo(wl, progress) {
 }
 
 function setActive(filename) {
-  activeList = filename;
-  loadWordlists();
+  fetch('/api/wordlist/active', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({filename: filename})
+  }).then(function() {
+    activeList = filename;
+    loadWordlists();
+  });
 }
 
 function showUserInfo(name) {

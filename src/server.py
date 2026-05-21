@@ -33,6 +33,7 @@ from wordlist import (
     get_pending_words,
     pick_words_to_inject,
     mark_words_injected,
+    mark_words_learned,
     load_progress as wl_load_progress,
 )
 
@@ -103,6 +104,19 @@ def _require_user():
     return user
 
 
+def _get_active_wordlist(username: str) -> str:
+    """Return the active wordlist filename for a user, or ''."""
+    s = _load_json(username, "settings.json", {})
+    return s.get("active_wordlist", "")
+
+
+def _set_active_wordlist(username: str, filename: str) -> None:
+    """Persist the active wordlist for a user."""
+    s = _load_json(username, "settings.json", {})
+    s["active_wordlist"] = filename
+    _save_json(username, "settings.json", s)
+
+
 # ── Article helpers (kept from previous iteration) ─────────────────────
 
 def load_articles() -> list:
@@ -164,6 +178,36 @@ def build_paragraphs_with_tokens(article: dict,
             "translation": para["translation"],
             "tokens": tokens,
             "difficult_words": difficult_words,
+        })
+    return enriched
+
+
+def build_paragraphs_with_wordlist(rewritten_paragraphs: list,
+                                   injected_words: list,
+                                   original_article: dict) -> list:
+    """Tokenize rewritten paragraphs and mark wordlist-injected words.
+
+    Each rewritten paragraph gets tokens with `is_wordlist` flag set on
+    words that match an injected target word (case-insensitive).
+    """
+    injected_lowers = set(w.lower() for w in injected_words)
+
+    enriched = []
+    for i, text in enumerate(rewritten_paragraphs):
+        tokens = tokenize(text, MVP_USER_LEVEL)
+        for t in tokens:
+            if t.get("is_word") and t.get("word", "").lower() in injected_lowers:
+                t["is_wordlist"] = True
+
+        # Carry over translation from original if paragraph count matches
+        orig_paras = original_article.get("paragraphs", [])
+        translation = orig_paras[i]["translation"] if i < len(orig_paras) else ""
+
+        enriched.append({
+            "text": text,
+            "translation": translation,
+            "tokens": tokens,
+            "difficult_words": [],  # rewritten articles use wordlist words instead
         })
     return enriched
 
@@ -273,8 +317,8 @@ def api_today():
     """Return a single article.  Defaults to day-of-year mod N.
 
     Query: ?article_id=N  to request a specific article.
-    Hardcodes user_level=2.  If a user is logged in, known words are
-    loaded from their word bank and excluded from highlights.
+    Hardcodes user_level=2.  When the user has an active word list,
+    the article is rewritten with target vocabulary injected.
     """
     articles = load_articles()
     if not articles:
@@ -292,10 +336,51 @@ def api_today():
     # Load known words for logged-in user
     known_words: set = set()
     user = _get_username()
+    wl_filename = ""
+    wl_name = ""
+    injected_words: list = []
+
     if user:
         wb = _load_json(user, "words.json", {"learned": {}, "known": {}})
         known_words = set(wb.get("learned", {}).keys()) | set(wb.get("known", {}).keys())
 
+        # Check for active word list → rewrite article with target vocabulary
+        wl_filename = _get_active_wordlist(user)
+        if wl_filename:
+            try:
+                from article_rewriter import rewrite_article_for_wordlist
+                result = rewrite_article_for_wordlist(
+                    article, wl_filename, user, max_words=8
+                )
+                if result:
+                    wl = load_wordlist(wl_filename)
+                    wl_name = wl["name"] if wl else ""
+                    injected_words = result.get("injected_words", [])
+                    paragraphs = build_paragraphs_with_wordlist(
+                        result["rewritten_paragraphs"], injected_words, article
+                    )
+                    return jsonify({
+                        "id": article.get("id", article_id),
+                        "title": article["title"],
+                        "source": article["source"],
+                        "url": article.get("url", ""),
+                        "date": article["date"],
+                        "level": MVP_USER_LEVEL,
+                        "levelName": LEVEL_NAMES.get(MVP_USER_LEVEL, "初中"),
+                        "maxHighlights": get_max_highlights(MVP_USER_LEVEL),
+                        "paragraphs": paragraphs,
+                        "comprehension": article.get("comprehension", []),
+                        "topic": article.get("topic", ""),
+                        "wordlist": {
+                            "name": wl_name,
+                            "filename": wl_filename,
+                            "injected_words": injected_words,
+                        },
+                    })
+            except Exception as e:
+                print(f"[server] Rewrite failed for user={user} article={article_id}: {e}")
+
+    # Fall through to normal (non-wordlist) article
     paragraphs = build_paragraphs_with_tokens(article, known_words)
 
     return jsonify({
@@ -321,26 +406,57 @@ def api_today():
 def api_lookup():
     """Look up *any* English word.  Returns {definition, pos, level} or null.
 
-    Uses the vocab database with stemming fallback, so inflectional
-    forms (e.g. "discoveries") match their base entries.
+    Uses the vocab database with stemming fallback, then falls back to
+    the Free Dictionary API for words not in our database.
     """
     word = (request.args.get("word") or "").strip().lower()
     if not word or not word.isascii():
         return jsonify(None)
 
     entry = _lookup(word)
-    if entry is None:
-        return jsonify({"found": False})
+    if entry is not None:
+        definition, pos, level = entry
+        return jsonify({
+            "found": True,
+            "word": word,
+            "definition": definition,
+            "pos": pos,
+            "level": level,
+            "levelName": LEVEL_NAMES.get(level, ""),
+        })
 
-    definition, pos, level = entry
-    return jsonify({
-        "found": True,
-        "word": word,
-        "definition": definition,
-        "pos": pos,
-        "level": level,
-        "levelName": LEVEL_NAMES.get(level, ""),
-    })
+    # Fallback: Free Dictionary API
+    try:
+        import urllib.request
+        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+        req = urllib.request.Request(url, headers={"User-Agent": "VocabInNews/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if isinstance(data, list) and len(data) > 0:
+            meaning = data[0]
+            first_def = ""
+            pos = ""
+            for m in meaning.get("meanings", []):
+                pos = m.get("partOfSpeech", "")
+                for d in m.get("definitions", []):
+                    first_def = d.get("definition", "")
+                    if first_def:
+                        break
+                if first_def:
+                    break
+            if first_def:
+                return jsonify({
+                    "found": True,
+                    "word": word,
+                    "definition": first_def,
+                    "pos": pos,
+                    "level": None,
+                    "levelName": "",
+                })
+    except Exception:
+        pass
+
+    return jsonify({"found": False})
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -403,6 +519,15 @@ def api_words_learn():
         wb["known"].pop(word, None)
 
         _save_json(user, "words.json", wb)
+
+        # If the word is from the active wordlist, mark it learned there too
+        wl_filename = _get_active_wordlist(user)
+        if wl_filename:
+            wl = load_wordlist(wl_filename)
+            if wl:
+                wl_words = {e["word"].lower() for e in wl.get("words", [])}
+                if word.lower() in wl_words:
+                    mark_words_learned(user, wl["name"], [word])
 
     return jsonify({"ok": True, "word": word, "bank": wb})
 
@@ -744,6 +869,44 @@ def api_wordlist_detail(filename):
         "description": wl.get("description", ""),
         "words": words,
         "filename": filename,
+    })
+
+
+@app.route("/api/wordlist/active", methods=["POST"])
+def api_wordlist_active():
+    """Set the active word list for the current user."""
+    user = _require_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    body = request.get_json(silent=True) or {}
+    filename = (body.get("filename") or "").strip()
+    if not filename:
+        return jsonify({"error": "filename is required"}), 400
+
+    wl = load_wordlist(filename)
+    if not wl:
+        return jsonify({"error": "Word list not found"}), 404
+
+    _set_active_wordlist(user, filename)
+    return jsonify({"ok": True, "active_wordlist": filename, "name": wl["name"]})
+
+
+@app.route("/api/wordlist/active", methods=["GET"])
+def api_wordlist_get_active():
+    """Get the active word list for the current user."""
+    user = _get_username()
+    if not user:
+        return jsonify({"active_wordlist": "", "name": ""})
+
+    filename = _get_active_wordlist(user)
+    if not filename:
+        return jsonify({"active_wordlist": "", "name": ""})
+
+    wl = load_wordlist(filename)
+    return jsonify({
+        "active_wordlist": filename,
+        "name": wl["name"] if wl else "",
     })
 
 

@@ -53,6 +53,12 @@
       </div>
     </div>
 
+    <!-- Word list info bar -->
+    <div class="wl-info-bar hidden" id="wl-info-bar">
+      <span class="wl-info-icon">📚</span>
+      <span id="wl-info-text"></span>
+    </div>
+
     <div id="paragraphs-container"></div>
 
     <!-- Word panel: 本课生词 -->
@@ -76,7 +82,10 @@
     <div class="popup-pos" id="popup-pos"></div>
     <div class="popup-definition" id="popup-definition"></div>
     <div class="popup-loading hidden" id="popup-loading">查询中...</div>
-    <button class="btn btn-small btn-outline popup-known-btn hidden" id="popup-known-btn" onclick="markKnown()">我认识这个词</button>
+    <div class="popup-actions">
+      <button class="btn btn-small btn-outline popup-known-btn hidden" id="popup-known-btn" onclick="markKnown()">我认识这个词</button>
+      <button class="btn btn-small btn-outline hidden" id="popup-unknown-btn" onclick="markUnknown()">我不认识这个词</button>
+    </div>
   </div>
 </div>
 
@@ -160,7 +169,14 @@ function renderArticle(art) {
         if (t.is_word === false) {
           line.appendChild(document.createTextNode(t.text));
         } else {
-          var cls = t.is_difficult ? 'word difficult' : 'word normal';
+          var cls = 'word';
+          if (t.is_wordlist) {
+            cls += ' wordlist-word';
+          } else if (t.is_difficult) {
+            cls += ' difficult';
+          } else {
+            cls += ' normal';
+          }
           var sp = document.createElement('span');
           sp.className = cls;
           sp.textContent = t.word;
@@ -194,28 +210,64 @@ function renderArticle(art) {
     container.appendChild(wrap);
   });
 
+  // Word list info bar
+  var wlBar = document.getElementById('wl-info-bar');
+  var wlData = art.wordlist;
+  if (wlData && wlData.injected_words && wlData.injected_words.length) {
+    wlBar.classList.remove('hidden');
+    document.getElementById('wl-info-text').textContent =
+      '词表「' + wlData.name + '」已融入 ' + wlData.injected_words.length + ' 个目标词汇（' +
+      wlData.injected_words.join('、') + '）';
+  } else {
+    wlBar.classList.add('hidden');
+  }
+
   // Word panel
   var words = collectDifficultWords(art);
+  var wlWords = collectWordlistWords(art);
   var panel = document.getElementById('word-panel');
-  if (words.length) {
+
+  if (words.length || wlWords.length) {
     panel.classList.remove('hidden');
-    document.getElementById('word-panel-title').textContent =
-      '本课生词 (' + words.length + '个)';
-    document.getElementById('word-panel-list').innerHTML =
-      words.map(function(w) {
-        var learned = justLearned.has(w.word);
-        return '<div class="word-panel-item">' +
-          '<span class="word-panel-word" onclick="lookupWord(\'' +
-            escAttr(w.word) + '\')">' + escHtml(w.word) + '</span>' +
-          '<span class="word-panel-def">' + escHtml(w.definition || '') + '</span>' +
-          (learned
-            ? '<button class="btn btn-small btn-learned" disabled>已学会 ✓</button>'
-            : '<button class="btn btn-small btn-outline" onclick="markLearned(\'' +
-              escAttr(w.word) + '\',\'' + escAttr(w.definition||'') + '\',\'' +
-              escAttr(w.pos||'') + '\',' + (w.level||0) +
-              ')">已学</button>')
-          + '</div>';
-      }).join('');
+    var title = '本课生词';
+    if (wlWords.length) title += ' (' + wlWords.length + '个词表词汇';
+    if (words.length) title += (wlWords.length ? ' + ' : '(') + words.length + '个难点词';
+    title += ')';
+    document.getElementById('word-panel-title').textContent = title;
+
+    var html = '';
+    // Wordlist words first
+    wlWords.forEach(function(w) {
+      var learned = justLearned.has(w.word);
+      html += '<div class="word-panel-item wl-item">' +
+        '<span class="wl-item-badge">词表</span>' +
+        '<span class="word-panel-word" onclick="lookupWord(\'' +
+          escAttr(w.word) + '\')">' + escHtml(w.word) + '</span>' +
+        '<span class="word-panel-def">' + escHtml(w.definition || '') + '</span>' +
+        (learned
+          ? '<button class="btn btn-small btn-learned" disabled>已学会 ✓</button>'
+          : '<button class="btn btn-small btn-outline" onclick="markLearned(\'' +
+            escAttr(w.word) + '\',\'' + escAttr(w.definition||'') + '\',\'' +
+            escAttr(w.pos||'') + '\',' + (w.level||0) +
+            ')">已学</button>')
+        + '</div>';
+    });
+    // Then regular difficult words
+    words.forEach(function(w) {
+      var learned = justLearned.has(w.word);
+      html += '<div class="word-panel-item">' +
+        '<span class="word-panel-word" onclick="lookupWord(\'' +
+          escAttr(w.word) + '\')">' + escHtml(w.word) + '</span>' +
+        '<span class="word-panel-def">' + escHtml(w.definition || '') + '</span>' +
+        (learned
+          ? '<button class="btn btn-small btn-learned" disabled>已学会 ✓</button>'
+          : '<button class="btn btn-small btn-outline" onclick="markLearned(\'' +
+            escAttr(w.word) + '\',\'' + escAttr(w.definition||'') + '\',\'' +
+            escAttr(w.pos||'') + '\',' + (w.level||0) +
+            ')">已学</button>')
+        + '</div>';
+    });
+    document.getElementById('word-panel-list').innerHTML = html;
   } else {
     panel.classList.remove('hidden');
     panel.innerHTML =
@@ -236,6 +288,29 @@ function collectDifficultWords(art) {
   return words;
 }
 
+function collectWordlistWords(art) {
+  var seen = {};
+  var words = [];
+  var wlInjected = (art.wordlist && art.wordlist.injected_words) ? art.wordlist.injected_words : [];
+  var injectedLowers = {};
+  wlInjected.forEach(function(w) { injectedLowers[w.toLowerCase()] = true; });
+
+  (art.paragraphs || []).forEach(function(p) {
+    (p.tokens || []).forEach(function(t) {
+      if (t.is_wordlist && t.word) {
+        var key = t.word.toLowerCase();
+        if (!seen[key]) {
+          seen[key] = true;
+          // Use the wordlist injected_words for exact casing
+          var original = wlInjected.find(function(w) { return w.toLowerCase() === key; });
+          words.push({word: original || t.word, definition: '', pos: '', level: 0});
+        }
+      }
+    });
+  });
+  return words;
+}
+
 /* ── Word lookup ── */
 async function lookupWord(word) {
   currentLookupWord = word;
@@ -244,7 +319,8 @@ async function lookupWord(word) {
   document.getElementById('popup-word').textContent = word;
   document.getElementById('popup-pos').textContent = '';
   document.getElementById('popup-definition').textContent = '';
-  document.getElementById('popup-known-btn').classList.remove('hidden');
+  document.getElementById('popup-known-btn').classList.add('hidden');
+  document.getElementById('popup-unknown-btn').classList.add('hidden');
   var ld = document.getElementById('popup-loading');
   ld.classList.remove('hidden');
 
@@ -256,11 +332,15 @@ async function lookupWord(word) {
       document.getElementById('popup-pos').textContent = d.pos || '';
       document.getElementById('popup-definition').textContent = d.definition || '';
     } else {
-      document.getElementById('popup-definition').textContent = '该词暂未收录，试试在词典中查询';
+      document.getElementById('popup-definition').textContent = d.definition || '该词暂未收录';
     }
+    // Always show both buttons so user can mark known or unknown
+    document.getElementById('popup-known-btn').classList.remove('hidden');
+    document.getElementById('popup-unknown-btn').classList.remove('hidden');
   } catch (_) {
     ld.classList.add('hidden');
     document.getElementById('popup-definition').textContent = '查询失败，请重试';
+    document.getElementById('popup-unknown-btn').classList.remove('hidden');
   }
 }
 
@@ -270,6 +350,21 @@ async function markKnown() {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({word: currentLookupWord})
+  });
+  closePopup();
+}
+
+async function markUnknown() {
+  if (!currentLookupWord) return;
+  // Look up definition from popup content as fallback
+  var defEl = document.getElementById('popup-definition');
+  var def = defEl.textContent || '';
+  if (def === '该词暂未收录' || def === '查询失败，请重试') def = '';
+  justLearned.add(currentLookupWord);
+  await fetch('/api/words/learn', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({word: currentLookupWord, definition: def, pos: '', level: 0})
   });
   closePopup();
 }
