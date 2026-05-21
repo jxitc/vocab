@@ -296,7 +296,9 @@ function markLearned(word, definition, pos, level) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({word: word, definition: definition, pos: pos, level: level})
   }).then(function() {
-    return fetch('/api/today');
+    var params = new URLSearchParams(window.location.search);
+    var aid = params.get('article_id');
+    return fetch('/api/today' + (aid ? '?article_id=' + aid : ''));
   }).then(function(r) {
     return r.json();
   }).then(function(art) {
