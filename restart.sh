@@ -10,6 +10,8 @@ sleep 1
 echo "→ Starting server..."
 source venv/bin/activate
 pip install -r requirements.txt -q
+# Load env vars (DEEPSEEK_API_KEY, etc.)
+if [ -f .env ]; then source .env; fi
 cd src
 nohup python server.py > /tmp/vocab-server.log 2>&1 &
 
