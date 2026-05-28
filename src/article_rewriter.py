@@ -16,8 +16,8 @@ import time
 from pathlib import Path
 from typing import Optional
 
-# DeepSeek API configuration
-DEEPSEEK_API_KEY = "REDACTED"
+# DeepSeek API configuration — key from DEEPSEEK_API_KEY env var
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL = "deepseek-chat"
 
